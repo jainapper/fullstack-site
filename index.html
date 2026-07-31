@@ -31,7 +31,7 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 ::selection{background:var(--accent);color:#0d0c0a}
 
-#view-quote,#view-calc,#view-ob{display:none}
+#view-quote,#view-calc,#view-ob,#view-terms,#view-privacy{display:none}
 body.on-quote #view-home{display:none}
 body.on-quote #view-quote{display:block}
 body.on-calc #view-home{display:none}
@@ -39,6 +39,10 @@ body.on-calc #view-calc{display:block}
 body.on-ob #view-home{display:none}
 body.on-ob #view-ob{display:block}
 body.on-ob footer{display:none}
+body.on-terms #view-home{display:none}
+body.on-terms #view-terms{display:block}
+body.on-privacy #view-home{display:none}
+body.on-privacy #view-privacy{display:block}
 
 /* ————— nav ————— */
 nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 18px;background:rgba(21,19,16,.72);backdrop-filter:blur(18px);border:1px solid var(--stroke);border-radius:100px;width:min(1060px,calc(100% - 32px))}
@@ -193,11 +197,33 @@ section{padding:110px 24px;position:relative}
 .cta-reassure{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);position:relative}
 
 /* footer */
-footer{background:#0a0908;border-top:1px solid var(--stroke);padding:44px 24px}
-.foot-inner{max-width:1160px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+footer{background:#0a0908;border-top:1px solid var(--stroke);padding:52px 24px 0}
+.foot-grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:40px;padding-bottom:40px}
 footer img{height:42px;width:auto}
 .foot-tag{font-size:12.5px;color:var(--faint);margin-top:12px}
-.foot-right{font-size:12.5px;color:var(--faint);text-align:right;line-height:1.7}
+.foot-h{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:9px}
+.foot-col a,.foot-col span{font-size:13px;color:var(--dim);text-decoration:none;line-height:1.6}
+.foot-col a:hover{color:var(--text)}
+.foot-entity{color:var(--text)!important;font-weight:600}
+.foot-bottom{max-width:1160px;margin:0 auto;border-top:1px solid var(--stroke);padding:20px 0 26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--faint)}
+.foot-bottom a{color:var(--faint);text-decoration:none}
+.foot-bottom a:hover{color:var(--text)}
+
+/* legal pages */
+.legal-hero{padding:150px 24px 8px}
+.legal-shell{max-width:800px;margin:0 auto}
+.legal-hero h1{font-size:clamp(34px,4.6vw,54px);font-weight:800;letter-spacing:-.04em;line-height:1;margin:14px 0 10px}
+.legal-date{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.legal-body{max-width:800px;margin:0 auto;padding:28px 24px 100px}
+.legal-body h2{font-size:19px;font-weight:800;letter-spacing:-.02em;color:var(--text);margin:34px 0 12px}
+.legal-body h3{font-size:14.5px;font-weight:700;color:var(--text);margin:20px 0 8px}
+.legal-body p{font-size:14px;line-height:1.75;color:var(--dim);margin-bottom:12px}
+.legal-body ul{margin:0 0 14px 20px;display:flex;flex-direction:column;gap:7px}
+.legal-body li{font-size:14px;line-height:1.65;color:var(--dim)}
+.legal-body li b,.legal-body p b{color:var(--text)}
+.legal-body a{color:var(--accent);text-decoration:none}
+.legal-body a:hover{text-decoration:underline}
 
 /* ————— quote ————— */
 .qp-hero{padding:160px 24px 64px;position:relative;overflow:hidden}
@@ -1001,14 +1027,150 @@ footer img{height:42px;width:auto}
   </div>
 </div><!-- /view-ob -->
 
+<div id="view-terms">
+  <header class="legal-hero">
+    <div class="legal-shell">
+      <div class="eyebrow">Legal</div>
+      <h1>Terms &amp; Conditions</h1>
+      <div class="legal-date">Effective date: 31 July 2026</div>
+    </div>
+  </header>
+  <div class="legal-body">
+    <h2>1. Introduction and acceptance</h2>
+    <p>Welcome to Fullstack Fulfillment ("Fullstack", "we", "us", or "our"). These Terms and Conditions ("Terms") govern your use of our third-party logistics services, our website (fullstackfs.com.au), and all related services provided by <b>Fullstack Fulfilment Australia Pty Ltd</b>, operating from Stapylton, Queensland, Australia.</p>
+    <p>By engaging our services, accessing our website, or entering into any service agreement with us, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, please do not use our services.</p>
+    <h2>2. Services provided</h2>
+    <p>Fullstack provides third-party logistics (3PL) solutions for sports nutrition, wellness, and eCommerce brands, including but not limited to:</p>
+    <ul>
+      <li><b>Warehousing &amp; receiving:</b> secure inventory storage with accurate inbound receiving, batch-organised storage, and real-time inventory visibility</li>
+      <li><b>Pick, pack &amp; dispatch:</b> order fulfillment with same-day dispatch for orders received before 9am AEST, custom packaging, and kitting &amp; bundling</li>
+      <li><b>Returns management:</b> end-to-end returns receiving, condition-grading, and stock reintegration</li>
+      <li><b>Shipping &amp; distribution:</b> domestic and international delivery through our carrier partnerships, including DHL, Australia Post, NZ Post, SEKO Logistics, and Parcel Right</li>
+      <li><b>Technology integrations:</b> store and platform connections powered by Extensiv and Starshipit</li>
+    </ul>
+    <p>All services are provided subject to availability, operational capacity, and mutual agreement on service specifications outlined in your Service Agreement.</p>
+    <h2>3. Service agreements and quotations</h2>
+    <h3>3.1 Service agreements</h3>
+    <p>All services commence upon execution of a Service Agreement, which incorporates these Terms by reference. The Service Agreement will specify the scope of services required, pricing structure and payment terms, service level agreements, and specific operational requirements.</p>
+    <h3>3.2 Quotations and estimates</h3>
+    <p>Quotations are valid for thirty (30) days unless otherwise specified. All quotations are subject to final confirmation based on actual inventory volumes, service requirements, and operational assessments. Figures produced by the pricing calculator on our website are indicative estimates only, are exclusive of GST, and do not constitute a quotation or offer.</p>
+    <h2>4. Client responsibilities</h2>
+    <p>As our client, you agree to:</p>
+    <ul>
+      <li>Provide accurate and complete information about your products, including any special handling requirements, dangerous goods declarations, and regulatory compliance needs</li>
+      <li>Ensure all products delivered to our facility comply with Australian laws and regulations, including applicable food and therapeutic goods standards</li>
+      <li>Maintain adequate insurance coverage for your inventory</li>
+      <li>Provide reasonable forecasts of inventory volumes and shipping requirements</li>
+      <li>Promptly communicate any changes to your business that may affect our services</li>
+      <li>Ensure timely payment of all invoices according to agreed terms</li>
+    </ul>
+    <h2>5. Fees and payment terms</h2>
+    <h3>5.1 Pricing structure</h3>
+    <p>Service fees are calculated based on the pricing structure outlined in your Service Agreement, which may include pick and pack charges, handling and processing fees, shipping and freight costs, and additional service charges as specified. All fees are exclusive of GST unless stated otherwise.</p>
+    <h3>5.2 Payment terms</h3>
+    <p>Unless otherwise agreed in writing: invoices are issued monthly for services rendered; payment is due within thirty (30) days of invoice date; late payments incur interest at 1.5% per month or the maximum rate permitted by law; and we reserve the right to suspend services for overdue accounts exceeding sixty (60) days.</p>
+    <h3>5.3 Fee adjustments</h3>
+    <p>We may adjust fees annually or as specified in your Service Agreement, with thirty (30) days written notice.</p>
+    <h2>6. Liability and limitations</h2>
+    <h3>6.1 General liability</h3>
+    <p>While we maintain high standards of care and security, Fullstack's liability for loss or damage to goods is limited to direct physical loss or damage to goods while in our custody, with a maximum liability of $500 per item or actual value (whichever is lower) unless additional coverage is arranged.</p>
+    <h3>6.2 Exclusions</h3>
+    <p>We are not liable for indirect, consequential, or economic losses; loss due to inherent product defects or inadequate packaging; damage from circumstances beyond our reasonable control (force majeure); or loss arising from inaccurate information provided by the client.</p>
+    <h3>6.3 Claims process</h3>
+    <p>All claims must be submitted in writing within seven (7) days of delivery or discovery of loss, with supporting documentation as reasonably requested.</p>
+    <h2>7. Intellectual property</h2>
+    <p>You retain all rights to your intellectual property, including trademarks, logos, and product designs, and grant us a limited licence to use such property solely for the purpose of providing our services. All Fullstack intellectual property, including our systems, processes, and operational methodologies, remains our exclusive property.</p>
+    <h2>8. Confidentiality</h2>
+    <p>Both parties agree to maintain the confidentiality of all proprietary information shared during the course of our business relationship. This obligation survives termination of services for a period of three (3) years.</p>
+    <h2>9. Data protection and privacy</h2>
+    <p>We handle all data in accordance with our <a href="#/privacy">Privacy Policy</a> and Australian privacy laws. We implement industry-standard security measures to protect your business and customer data processed through our systems.</p>
+    <h2>10. Termination</h2>
+    <p>Either party may terminate services with ninety (90) days written notice, unless otherwise specified in your Service Agreement. We reserve the right to terminate services immediately for non-payment exceeding ninety (90) days, breach of these Terms or your Service Agreement, illegal or prohibited products, or actions that endanger our staff, facility, or other clients' goods. Upon termination, you must remove all inventory within thirty (30) days; uncollected goods may be subject to disposal or sale to recover outstanding fees.</p>
+    <h2>11. Dispute resolution</h2>
+    <p>Any disputes arising from these Terms or our services will first be addressed through good-faith negotiations; if unresolved, submitted to mediation in Brisbane, Queensland; and finally resolved through binding arbitration under Australian commercial arbitration rules.</p>
+    <h2>12. Governing law</h2>
+    <p>These Terms are governed by the laws of Queensland, Australia. Both parties submit to the non-exclusive jurisdiction of the courts of Queensland.</p>
+    <h2>13. General provisions</h2>
+    <p>These Terms, together with your Service Agreement, constitute the entire agreement between the parties. We may update these Terms with thirty (30) days notice, and continued use of our services constitutes acceptance of modified Terms. If any provision is deemed invalid, the remaining Terms continue in full effect. You may not assign your rights without our written consent; we may assign our rights in connection with business reorganisation.</p>
+    <h2>14. Contact</h2>
+    <p>For questions about these Terms or our services:<br><b>Fullstack Fulfilment Australia Pty Ltd</b><br>Unit 6, 83 Burnside Rd, Stapylton QLD 4207, Australia<br>Phone: <a href="tel:0721116366">07 2111 6366</a><br>Email: <a href="mailto:info@fullstackfs.com.au">info@fullstackfs.com.au</a></p>
+  </div>
+</div><!-- /view-terms -->
+
+<div id="view-privacy">
+  <header class="legal-hero">
+    <div class="legal-shell">
+      <div class="eyebrow">Legal</div>
+      <h1>Privacy Policy</h1>
+      <div class="legal-date">Effective date: 31 July 2026</div>
+    </div>
+  </header>
+  <div class="legal-body">
+    <h2>1. Our commitment to privacy</h2>
+    <p>At Fullstack Fulfillment, we understand that trust is fundamental to successful logistics partnerships. This Privacy Policy explains how <b>Fullstack Fulfilment Australia Pty Ltd</b> collects, uses, protects, and shares information when you use our services or visit fullstackfs.com.au. We are committed to protecting your privacy in accordance with the Australian Privacy Principles under the Privacy Act 1988 (Cth).</p>
+    <h2>2. Information we collect</h2>
+    <h3>2.1 Business information</h3>
+    <p>When you engage our services — including through our quote and onboarding forms — we collect company details (ABN/ACN, business name, trading names), contact information (names, email addresses, phone numbers), billing and shipping addresses, financial information for payment processing, and product information including SKU and inventory details.</p>
+    <h3>2.2 Operational data</h3>
+    <p>Through our systems and service delivery, we collect order and shipment data, inventory levels and movements, performance metrics and service analytics, and communication records and support tickets.</p>
+    <h3>2.3 Website information</h3>
+    <p>When you visit our website, we may automatically collect IP addresses and browser information, pages visited and interaction data, and cookies and similar technologies (with your consent where required).</p>
+    <h2>3. How we use your information</h2>
+    <ul>
+      <li><b>Providing services:</b> processing orders, managing inventory, coordinating shipments, and delivering our 3PL solutions</li>
+      <li><b>Improving operations:</b> enhancing our systems, optimising warehouse efficiency, and developing better service offerings</li>
+      <li><b>Communications:</b> sending service updates, responding to enquiries, and providing customer support</li>
+      <li><b>Compliance:</b> meeting legal obligations, maintaining records, and ensuring regulatory compliance</li>
+      <li><b>Business development:</b> analysing service performance to better serve your needs</li>
+    </ul>
+    <h2>4. Information sharing and disclosure</h2>
+    <h3>4.1 Service partners</h3>
+    <p>We share necessary information with shipping carriers and freight partners to facilitate deliveries (including DHL, Australia Post, NZ Post, SEKO Logistics, and Parcel Right), technology partners for system integrations (including Extensiv and Starshipit), and professional service providers (legal, accounting, insurance).</p>
+    <h3>4.2 Overseas disclosure</h3>
+    <p>Where you use international delivery services, shipment information is necessarily disclosed to overseas carriers and their agents in the destination country (for example, New Zealand for NZ Post deliveries). Some technology partners may store data on servers located outside Australia.</p>
+    <h3>4.3 Legal requirements</h3>
+    <p>We may disclose information when required by law, court order, or to protect our rights and safety. In the event of a merger, acquisition, or sale of assets, information may be transferred to the successor entity.</p>
+    <h3>4.4 No sale of information</h3>
+    <p>We never sell your personal or business information to third parties for marketing purposes.</p>
+    <h2>5. Data security</h2>
+    <p>We implement security measures including encrypted data transmission and storage, secure facility access controls, regular security reviews, staff training on data protection, and incident response procedures. While we maintain robust security practices, no system is completely impenetrable; we continuously work to protect your information against unauthorised access.</p>
+    <h2>6. Your rights and choices</h2>
+    <p>You have the right to access information we hold about you, request corrections to inaccurate data, opt out of marketing communications, request deletion of information (subject to legal retention requirements), and lodge a complaint with the Office of the Australian Information Commissioner (OAIC).</p>
+    <h2>7. Data retention</h2>
+    <p>We retain information for as long as necessary to provide services, comply with legal obligations, and resolve disputes. Typically this includes active client data for the duration of the service agreement plus seven years, financial records for seven years as required by law, and operational data as specified in your Service Agreement.</p>
+    <h2>8. Updates to this policy</h2>
+    <p>We may update this Privacy Policy to reflect changes in our practices or legal requirements. We will notify you of material changes via email or website notice.</p>
+    <h2>9. Contact us</h2>
+    <p>For privacy-related questions or to exercise your rights:<br><b>Privacy Officer</b><br>Fullstack Fulfilment Australia Pty Ltd<br>Unit 6, 83 Burnside Rd, Stapylton QLD 4207, Australia<br>Email: <a href="mailto:info@fullstackfs.com.au">info@fullstackfs.com.au</a><br>Phone: <a href="tel:0721116366">07 2111 6366</a></p>
+    <p>We aim to respond to all privacy enquiries within 30 days.</p>
+  </div>
+</div><!-- /view-privacy -->
+
 <footer>
-  <div class="foot-inner">
-    <div>
+  <div class="foot-grid">
+    <div class="foot-col">
       <img src="assets/logo-white.png" alt="Fullstack Fulfillment">
       <div class="foot-tag">Fuel Your Brand. Fulfill Every Order.</div>
       <a class="foot-ob" href="#/onboarding">New client? Start your onboarding →</a>
     </div>
-    <div class="foot-right">© 2026 Fullstack Fulfillment Australia<br>All rights reserved.</div>
+    <div class="foot-col">
+      <div class="foot-h">Contact</div>
+      <a href="tel:0721116366">07 2111 6366</a>
+      <a href="mailto:info@fullstackfs.com.au">info@fullstackfs.com.au</a>
+      <span>Unit 6, 83 Burnside Rd,<br>Stapylton QLD 4207, Australia</span>
+    </div>
+    <div class="foot-col">
+      <div class="foot-h">Company</div>
+      <span class="foot-entity">Fullstack Fulfilment Australia Pty Ltd</span>
+      <a href="#/quote">Get a Quote</a>
+      <a href="#/calculator">Pricing Calculator</a>
+      <a href="#/terms">Terms &amp; Conditions</a>
+      <a href="#/privacy">Privacy Policy</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Fullstack Fulfilment Australia Pty Ltd. All rights reserved.</span>
+    <span><a href="#/terms">Terms &amp; Conditions</a> · <a href="#/privacy">Privacy Policy</a></span>
   </div>
 </footer>
 
@@ -1018,10 +1180,12 @@ var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function route(){
   var h = location.hash;
-  var view = h === '#/quote' ? 'quote' : (h === '#/calculator' ? 'calc' : (h.indexOf('#/onboarding') === 0 ? 'ob' : 'home'));
+  var view = h === '#/quote' ? 'quote' : (h === '#/calculator' ? 'calc' : (h.indexOf('#/onboarding') === 0 ? 'ob' : (h === '#/terms' ? 'terms' : (h === '#/privacy' ? 'privacy' : 'home'))));
   document.body.classList.toggle('on-quote', view === 'quote');
   document.body.classList.toggle('on-calc', view === 'calc');
   document.body.classList.toggle('on-ob', view === 'ob');
+  document.body.classList.toggle('on-terms', view === 'terms');
+  document.body.classList.toggle('on-privacy', view === 'privacy');
   if(view !== 'ob' && typeof ovStop === 'function') ovStop();
   closeMenu();
   if(view !== 'home'){ window.scrollTo(0,0); return; }
