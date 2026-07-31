@@ -942,7 +942,7 @@ footer img{height:42px;width:auto}
             <button type="button" id="itemsPlus" aria-label="More items">+</button>
           </span>
         </div>
-        <p class="c-hint">Every item after the first adds $0.60 to the pick &amp; pack rate.</p>
+        <p class="c-hint">Up to 5 items per order are included in the pick &amp; pack rate. Each item after that adds $0.40 per unit.</p>
       </div>
 
       <div class="calc-group">
@@ -1236,7 +1236,7 @@ if(counter){
 /* ————— pricing calculator ————— */
 var PICK_TIERS = [[5000, 4.00], [10000, 3.50], [Infinity, 3.00]];
 var SHIP_RATES = [9.00, 10.50, 12.50, 15.00];
-var EXTRA_ITEM = 0.60;
+var EXTRA_ITEM = 0.40, ITEMS_INCLUDED = 5;
 var cs = { orders: 750, items: 1, pallets: 6, skus: 15, band: 0 };
 
 function money(n){ return '$' + Math.round(n).toLocaleString('en-AU'); }
@@ -1246,7 +1246,7 @@ function fillRange(input){
 }
 function recalc(){
   var tier = PICK_TIERS.find(function(t){ return cs.orders <= t[0]; });
-  var rate = tier[1] + EXTRA_ITEM * (cs.items - 1);
+  var rate = tier[1] + EXTRA_ITEM * Math.max(0, cs.items - ITEMS_INCLUDED);
   var fulfil = rate * cs.orders;
   var storage = 0;
   var ship = SHIP_RATES[cs.band] * cs.orders;
@@ -1491,7 +1491,7 @@ function ovPlay(){
   var stage = document.getElementById('ovStage');
   var cap = obVideo.querySelector('.ov-cap');
   var bar = obVideo.querySelector('.ov-progress i');
-  var hasSpeech = 'speechSynthesis' in window;
+  if(!ovAudio){ ovAudio = new Audio(); }
   var i = -1;
   function next(){
     if(!ovPlaying) return;
@@ -1504,25 +1504,16 @@ function ovPlay(){
     bar.style.width = Math.round((i + 1) / scenes.length * 100) + '%';
     var advanced = false;
     function adv(){ if(advanced || !ovPlaying) return; advanced = true; setTimeout(next, 300); }
+    /* no synthetic-speech fallback: if audio can't play, captions carry the scene on a timer */
     var est = Math.max(2600, s.say.split(' ').length * 380);
-    function speakFallback(){
-      if(hasSpeech && !speechSynthesis.speaking){
-        var u = new SpeechSynthesisUtterance(s.say);
-        if(ovVoice) u.voice = ovVoice;
-        u.onend = adv; u.onerror = adv;
-        speechSynthesis.speak(u);
-      }
-      setTimeout(adv, est + 2000);
-    }
     if(OV_TTS[i] && OV_TTS[i].indexOf('__') !== 0){
-      var a = new Audio(OV_TTS[i]);
-      ovAudio = a;
-      a.onended = adv;
-      a.onerror = speakFallback;
-      a.play().catch(speakFallback);
+      ovAudio.onended = adv;
+      ovAudio.onerror = function(){ setTimeout(adv, est); };
+      ovAudio.src = OV_TTS[i];
+      ovAudio.play().catch(function(){ setTimeout(adv, est); });
       setTimeout(adv, est + 8000);
     } else {
-      speakFallback();
+      setTimeout(adv, est);
     }
   }
   next();
@@ -1536,7 +1527,7 @@ function ovEnd(){
 function ovStop(){
   if(!ovPlaying){ return; }
   ovPlaying = false;
-  if(ovAudio){ ovAudio.pause(); ovAudio = null; }
+  if(ovAudio){ ovAudio.pause(); }
   if('speechSynthesis' in window) speechSynthesis.cancel();
   obVideo.classList.remove('playing');
   document.getElementById('ovStage').innerHTML = '';
