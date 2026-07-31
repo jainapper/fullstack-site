@@ -37,7 +37,7 @@ body.on-quote #view-quote{display:block}
 body.on-calc #view-home{display:none}
 body.on-calc #view-calc{display:block}
 body.on-ob #view-home{display:none}
-body.on-ob #view-ob{display:block}
+body.on-ob #view-ob{display:flex}
 body.on-ob footer{display:none}
 body.on-terms #view-home{display:none}
 body.on-terms #view-terms{display:block}
@@ -361,7 +361,7 @@ footer img{height:42px;width:auto}
 .foot-ob:hover{text-decoration:underline}
 
 /* ————— onboarding ————— */
-#view-ob{min-height:100vh;display:flex;flex-direction:column}
+#view-ob{min-height:100vh;flex-direction:column}
 .ob-progress{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:200}
 .ob-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#ff9a70);box-shadow:0 0 12px rgba(245,93,47,.6);transition:width .4s ease}
 .ob-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:130px 24px 80px;position:relative;overflow:hidden}
