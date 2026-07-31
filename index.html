@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Fullstack Fulfillment - Australia's 3PL for sports nutrition and wellness brands.">
+</head>
+<body>
+<title>Fullstack Fulfillment — Night Freight</title>
+<style>
+/* ————— CONCEPT 2 · NIGHT FREIGHT ————— warm-dark premium, sodium glow, ops-dashboard depth */
+:root{
+  --ground:#0d0c0a;
+  --raise:#151310;
+  --raise2:#1c1915;
+  --stroke:rgba(255,255,255,.07);
+  --stroke-hi:rgba(245,93,47,.28);
+  --text:#f4f2ee;
+  --dim:#a8a49b;
+  --faint:#6a6a64;
+  --accent:#f55d2f;
+  --accent-dim:#c44825;
+  --cool:#c5d3e2;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--ground);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::selection{background:var(--accent);color:#0d0c0a}
+
+#view-quote,#view-calc,#view-ob{display:none}
+body.on-quote #view-home{display:none}
+body.on-quote #view-quote{display:block}
+body.on-calc #view-home{display:none}
+body.on-calc #view-calc{display:block}
+body.on-ob #view-home{display:none}
+body.on-ob #view-ob{display:block}
+body.on-ob footer{display:none}
+
+/* ————— nav ————— */
+nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 18px;background:rgba(21,19,16,.72);backdrop-filter:blur(18px);border:1px solid var(--stroke);border-radius:100px;width:min(1060px,calc(100% - 32px))}
+.nav-logo{margin-right:auto;display:flex;align-items:center}
+.nav-logo img{height:34px;width:auto}
+.nav-links{display:flex;list-style:none;gap:2px}
+.nav-links a{display:block;padding:9px 14px;font-size:13px;color:var(--dim);text-decoration:none;border-radius:100px;transition:color .15s,background .15s}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.nav-cta{background:var(--accent);color:#0d0c0a;font-size:13px;font-weight:700;padding:10px 20px;border-radius:100px;text-decoration:none;transition:background .15s,transform .15s;white-space:nowrap}
+.nav-cta:hover{background:#ff7245;transform:translateY(-1px)}
+.nav-burger{display:none;background:none;border:0;padding:8px 12px;cursor:pointer}
+.nav-burger span{display:block;width:20px;height:2px;background:var(--text);margin:4px 0;border-radius:2px}
+.nav-mobile{display:none}
+
+/* ————— hero ————— */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:140px 24px 60px;position:relative}
+.hero-glow{position:absolute;width:900px;height:900px;top:-260px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(245,93,47,.16) 0%,rgba(245,93,47,.05) 38%,transparent 68%);pointer-events:none;animation:breathe 7s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.9}50%{opacity:.55}}
+.hero-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 75% 62% at 50% 42%,black 30%,transparent 100%);pointer-events:none}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);background:rgba(245,93,47,.09);border:1px solid rgba(245,93,47,.22);padding:8px 18px;border-radius:100px;margin-bottom:30px;position:relative}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.hero h1{font-size:clamp(50px,7.6vw,102px);font-weight:800;letter-spacing:-.045em;line-height:.96;position:relative;text-wrap:balance}
+.hero h1 .line2{display:block;background:linear-gradient(100deg,var(--accent) 20%,#ffa07e 60%,var(--accent) 90%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{max-width:560px;margin:28px auto 0;font-size:16.5px;color:var(--dim);position:relative}
+.hero-actions{display:flex;gap:14px;margin-top:40px;justify-content:center;flex-wrap:wrap;position:relative}
+.btn-primary{display:inline-block;background:var(--accent);color:#0d0c0a;font-size:14px;font-weight:800;padding:16px 34px;border-radius:100px;text-decoration:none;transition:background .2s,transform .2s,box-shadow .2s;box-shadow:0 0 0 rgba(245,93,47,0)}
+.btn-primary:hover{background:#ff7245;transform:translateY(-2px);box-shadow:0 12px 40px -8px rgba(245,93,47,.45)}
+.btn-ghost{display:inline-block;background:rgba(255,255,255,.04);color:var(--text);font-size:14px;font-weight:500;padding:16px 34px;border-radius:100px;border:1px solid var(--stroke);text-decoration:none;transition:border-color .2s,background .2s}
+.btn-ghost:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.07)}
+
+/* dashboard cluster */
+.dash{position:relative;margin:72px auto 0;width:min(880px,100%);display:grid;grid-template-columns:1.15fr .85fr;gap:18px;text-align:left}
+.dash-card{background:linear-gradient(180deg,rgba(28,25,21,.9),rgba(18,16,13,.94));border:1px solid var(--stroke);border-radius:20px;padding:22px 24px;backdrop-filter:blur(8px);animation:float 8s ease-in-out infinite}
+.dash-card.second{animation-delay:-4s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.dash-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.dash-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.dash-chip{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7ee2a8;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);padding:4px 10px;border-radius:100px}
+.t-line{display:flex;align-items:center;gap:0;margin:6px 0 16px}
+.t-node{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;position:relative}
+.t-dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px rgba(245,93,47,.7);position:relative;z-index:1}
+.t-node.pending .t-dot{background:var(--raise2);border:1px solid var(--stroke);box-shadow:none}
+.t-node:not(:last-child)::after{content:'';position:absolute;top:5px;left:calc(50% + 10px);width:calc(100% - 20px);height:2px;background:linear-gradient(90deg,var(--accent),rgba(245,93,47,.25))}
+.t-node.pending:not(:last-child)::after{background:var(--stroke)}
+.t-label{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.t-node.pending .t-label{color:var(--faint)}
+.dash-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--faint);border-top:1px solid var(--stroke);padding-top:14px}
+.dash-meta b{color:var(--cool);font-weight:600}
+.spark-wrap{display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+.spark-nums{display:flex;flex-direction:column;gap:2px}
+.spark-big{font-size:38px;font-weight:200;letter-spacing:-.03em;color:var(--text);line-height:1;font-variant-numeric:tabular-nums}
+.spark-big b{font-weight:800;color:var(--accent)}
+.spark-cap{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:8px}
+.spark-svg{flex:1;max-width:210px}
+
+/* ————— marquee ————— */
+.marquee{border-top:1px solid var(--stroke);border-bottom:1px solid var(--stroke);background:rgba(255,255,255,.015);overflow:hidden;padding:16px 0}
+.marquee-track{display:flex;width:max-content;animation:mq 26s linear infinite}
+.mq-item{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:0 34px;white-space:nowrap}
+.mq-item::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent)}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ————— sections ————— */
+section{padding:110px 24px;position:relative}
+.shell{max-width:1160px;margin:0 auto}
+.sec-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.sec-label::before{content:'';width:22px;height:1px;background:var(--accent)}
+.sec-h2{font-size:clamp(34px,4.8vw,58px);font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:18px;text-wrap:balance}
+.sec-intro{font-size:15.5px;color:var(--dim);max-width:580px}
+.sec-head{margin-bottom:56px}
+
+/* services */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.svc{background:linear-gradient(180deg,var(--raise) 0%,#110f0c 100%);border:1px solid var(--stroke);border-radius:22px;padding:36px 32px;position:relative;overflow:hidden;transition:border-color .3s,transform .3s}
+.svc::before{content:'';position:absolute;top:0;left:24px;right:24px;height:1px;background:linear-gradient(90deg,transparent,rgba(245,93,47,.5),transparent);opacity:0;transition:opacity .3s}
+.svc:hover{border-color:var(--stroke-hi);transform:translateY(-4px)}
+.svc:hover::before{opacity:1}
+.svc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
+.svc-icon{width:46px;height:46px;border-radius:13px;background:rgba(245,93,47,.09);border:1px solid rgba(245,93,47,.2);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.svc-num{font-size:44px;font-weight:100;letter-spacing:-.03em;color:rgba(255,255,255,.14);line-height:1;font-variant-numeric:tabular-nums}
+.svc h3{font-size:21px;font-weight:800;letter-spacing:-.025em;margin-bottom:12px}
+.svc p{font-size:13.5px;color:var(--dim);margin-bottom:24px}
+.svc-tags{display:flex;flex-wrap:wrap;gap:7px}
+.tag{font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--dim);background:rgba(255,255,255,.04);border:1px solid var(--stroke);padding:5px 12px;border-radius:100px}
+
+/* how — timeline */
+.timeline{position:relative;max-width:860px;margin:0 auto}
+.timeline::before{content:'';position:absolute;left:31px;top:10px;bottom:10px;width:2px;background:linear-gradient(180deg,var(--accent) 0%,rgba(245,93,47,.35) 55%,transparent 100%)}
+.t-step{display:grid;grid-template-columns:64px 1fr;gap:28px;padding:0 0 56px;position:relative}
+.t-step:last-child{padding-bottom:0}
+.t-num{width:64px;height:64px;border-radius:50%;background:var(--ground);border:1px solid var(--stroke-hi);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:200;color:var(--accent);position:relative;z-index:1;box-shadow:0 0 24px rgba(245,93,47,.18);font-variant-numeric:tabular-nums}
+.t-body{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:20px;padding:32px 34px;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;transition:border-color .3s}
+.t-body:hover{border-color:var(--stroke-hi)}
+.t-body h3{font-size:23px;font-weight:800;letter-spacing:-.025em;margin-bottom:10px}
+.t-body p{font-size:13.5px;color:var(--dim)}
+.t-feats{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--dim);align-self:center}
+.t-feats li{display:flex;gap:10px;align-items:baseline}
+.t-feats li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+
+/* tech */
+.tech-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.tech-card{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:22px;padding:40px 36px;transition:border-color .3s}
+.tech-card:hover{border-color:var(--stroke-hi)}
+.tech-badge{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(245,93,47,.09);border:1px solid rgba(245,93,47,.22);padding:6px 14px;border-radius:100px;margin-bottom:22px}
+.tech-badge.cool{color:var(--cool);background:rgba(197,211,226,.07);border-color:rgba(197,211,226,.22)}
+.tech-card h3{font-size:26px;font-weight:800;letter-spacing:-.03em;margin-bottom:10px}
+.tech-card>p{font-size:13.5px;color:var(--dim);margin-bottom:26px}
+.tech-feats{list-style:none;display:flex;flex-direction:column;gap:11px;font-size:13px;color:var(--dim)}
+.tech-feats li{display:flex;gap:12px;align-items:baseline;line-height:1.5}
+.tech-feats li::before{content:'→';color:var(--accent);font-weight:700;flex-shrink:0}
+.integrations{margin-top:18px;background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:18px;padding:22px 30px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.int-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);white-space:nowrap}
+.int-pills{display:flex;flex-wrap:wrap;gap:8px}
+.pill{font-size:12px;font-weight:600;color:var(--dim);background:rgba(255,255,255,.04);border:1px solid var(--stroke);padding:7px 16px;border-radius:100px}
+
+/* shipping */
+.ship-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.carrier{border-radius:22px;padding:40px 36px;border:1px solid var(--stroke);position:relative;overflow:hidden;transition:border-color .3s,transform .3s;background:linear-gradient(145deg,#1d1a16 0%,#100e0b 70%)}
+.carrier.alt{background:linear-gradient(215deg,#1d1a16 0%,#100e0b 70%)}
+.carrier::after{content:'';position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(245,93,47,.1),transparent 70%);top:-140px;right:-120px;pointer-events:none}
+.carrier.alt::after{background:radial-gradient(circle,rgba(197,211,226,.09),transparent 70%)}
+.carrier:hover{border-color:var(--stroke-hi);transform:translateY(-3px)}
+.carrier-icon{width:52px;height:52px;border-radius:14px;background:rgba(245,93,47,.09);border:1px solid rgba(245,93,47,.2);display:flex;align-items:center;justify-content:center;margin-bottom:24px;color:var(--accent)}
+.carrier.alt .carrier-icon{background:rgba(197,211,226,.07);border-color:rgba(197,211,226,.2);color:var(--cool)}
+.carrier h3{font-size:25px;font-weight:800;letter-spacing:-.03em}
+.carrier-sub{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:6px 0 14px}
+.carrier.alt .carrier-sub{color:var(--cool)}
+.carrier>p{font-size:13.5px;color:var(--dim);margin-bottom:24px;position:relative}
+.carrier-feats{list-style:none;display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--dim);position:relative}
+.carrier-feats li{display:flex;gap:10px;align-items:baseline}
+.carrier-feats li::before{content:'✓';color:var(--accent);font-weight:700}
+.carrier.alt .carrier-feats li::before{color:var(--cool)}
+.more-carriers{margin-top:18px;background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:18px;padding:26px 30px;transition:border-color .3s}
+.more-carriers:hover{border-color:var(--stroke-hi)}
+.more-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:18px}
+.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.carrier-mini{display:flex;align-items:center;gap:14px}
+.mini-plate{display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:10px;height:46px;min-width:96px;padding:0 14px;flex-shrink:0}
+.mini-plate img{height:17px;width:auto;display:block}
+.mini-plate.nzp img{height:24px}
+.carrier-mini p{font-size:12px;color:var(--dim);line-height:1.5}
+.carrier-mini b{display:block;font-size:13px;color:var(--text);margin-bottom:2px}
+
+/* cta */
+.cta{padding:120px 24px;text-align:center;position:relative;overflow:hidden}
+.cta-glow{position:absolute;width:800px;height:800px;left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(245,93,47,.2) 0%,transparent 62%);pointer-events:none}
+.cta h2{font-size:clamp(42px,6vw,80px);font-weight:800;letter-spacing:-.045em;line-height:.96;position:relative;text-wrap:balance}
+.cta h2 em{font-style:normal;color:var(--accent)}
+.cta p{font-size:16px;color:var(--dim);max-width:520px;margin:22px auto 42px;position:relative}
+.cta-buttons{display:flex;gap:14px;justify-content:center;position:relative;flex-wrap:wrap}
+.cta-reassure{margin-top:26px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);position:relative}
+
+/* footer */
+footer{background:#0a0908;border-top:1px solid var(--stroke);padding:44px 24px}
+.foot-inner{max-width:1160px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+footer img{height:42px;width:auto}
+.foot-tag{font-size:12.5px;color:var(--faint);margin-top:12px}
+.foot-right{font-size:12.5px;color:var(--faint);text-align:right;line-height:1.7}
+
+/* ————— quote ————— */
+.qp-hero{padding:160px 24px 64px;position:relative;overflow:hidden}
+.qp-glow{position:absolute;width:700px;height:700px;top:-260px;left:-180px;background:radial-gradient(circle,rgba(245,93,47,.13),transparent 68%);pointer-events:none}
+.qp-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;position:relative}
+.qp-hero h1{font-size:clamp(44px,5.6vw,78px);font-weight:800;letter-spacing:-.045em;line-height:.96;margin-bottom:20px}
+.qp-hero h1 span{display:block;color:var(--accent)}
+.qp-sub{font-size:15.5px;color:var(--dim);max-width:440px}
+.qp-stats{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.qp-stat{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:18px;padding:24px;transition:border-color .3s}
+.qp-stat:hover{border-color:var(--stroke-hi)}
+.qp-num{font-size:36px;font-weight:200;letter-spacing:-.03em;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.qp-num b{font-weight:800}
+.qp-lab{font-size:12px;color:var(--faint);margin-top:8px;line-height:1.45}
+.qp-body{max-width:1160px;margin:0 auto;padding:56px 24px 110px;display:grid;grid-template-columns:1fr 360px;gap:32px;align-items:start}
+.q-card{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:24px;overflow:hidden}
+.q-head{background:linear-gradient(120deg,var(--accent) 0%,var(--accent-dim) 100%);padding:30px 38px;position:relative}
+.q-head::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(0,0,0,.14) 1px,transparent 1px);background-size:18px 18px}
+.q-head h2{position:relative;font-size:24px;font-weight:800;letter-spacing:-.025em;color:#fff}
+.q-head p{position:relative;font-size:13px;color:rgba(255,255,255,.78);margin-top:6px}
+.q-body{padding:38px}
+.f-section{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border-top:1px solid var(--stroke);padding-top:20px;margin:26px 0 16px}
+.f-section:first-child{border-top:0;padding-top:0;margin-top:0}
+.f-row{display:grid;gap:16px;margin-bottom:16px}
+.f-row.c2{grid-template-columns:1fr 1fr}
+.f-field{display:flex;flex-direction:column;gap:8px}
+.f-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.f-label span{color:var(--accent)}
+.f-input,.f-select{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);font-size:14px;font-family:var(--sans);padding:13px 16px;width:100%;transition:border-color .2s,background .2s;outline:none;-webkit-appearance:none;appearance:none}
+.f-input::placeholder{color:var(--faint)}
+.f-input:focus,.f-select:focus{border-color:rgba(245,93,47,.55);background:rgba(245,93,47,.05)}
+.f-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a8a49b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center;padding-right:38px}
+.f-select option{background:#1c1915;color:var(--text)}
+.f-group{display:flex}
+.f-prefix{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-right:0;border-radius:12px 0 0 12px;padding:13px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;color:var(--text)}
+.f-group .f-input{border-radius:0 12px 12px 0}
+.check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:8px}
+.chk{display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px 13px;background:rgba(255,255,255,.03);transition:border-color .15s,background .15s;user-select:none}
+.chk:hover{border-color:rgba(255,255,255,.25)}
+.chk input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.chk span{font-size:12.5px;color:var(--dim)}
+.chk:has(input:checked){border-color:rgba(245,93,47,.5);background:rgba(245,93,47,.07)}
+.chk:has(input:checked) span{color:var(--text)}
+.group-err{display:none;font-size:12px;color:#fca38a;margin:4px 0 8px}
+.group-err.show{display:block}
+.ack{display:flex;align-items:flex-start;gap:12px;padding:16px;background:rgba(245,93,47,.06);border:1px solid rgba(245,93,47,.18);border-radius:12px;margin:24px 0;cursor:pointer}
+.ack input{width:16px;height:16px;accent-color:var(--accent);margin-top:2px;flex-shrink:0}
+.ack span{font-size:12.5px;color:var(--dim)}
+.ack b{color:var(--accent)}
+.f-submit{width:100%;background:var(--accent);color:#0d0c0a;font-size:15px;font-weight:800;font-family:var(--sans);padding:17px;border-radius:100px;border:0;cursor:pointer;letter-spacing:.01em;transition:background .2s,transform .2s,box-shadow .2s}
+.f-submit:hover{background:#ff7245;transform:translateY(-1px);box-shadow:0 12px 36px -10px rgba(245,93,47,.5)}
+.q-success{display:none;padding:56px 38px;text-align:center}
+.q-success.show{display:block}
+.q-ok{width:64px;height:64px;border-radius:50%;background:rgba(245,93,47,.1);border:1px solid rgba(245,93,47,.35);color:var(--accent);font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 0 32px rgba(245,93,47,.25)}
+.q-success h3{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:10px}
+.q-success p{font-size:13.5px;color:var(--dim);max-width:380px;margin:0 auto}
+.q-note{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:24px}
+.side{display:flex;flex-direction:column;gap:16px;position:sticky;top:100px}
+.rate-card{background:linear-gradient(120deg,var(--accent) 0%,var(--accent-dim) 100%);border-radius:20px;padding:28px;text-align:center;position:relative;overflow:hidden}
+.rate-card::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(0,0,0,.14) 1px,transparent 1px);background-size:16px 16px}
+.rate-from{position:relative;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.rate-num{position:relative;font-size:54px;font-weight:900;letter-spacing:-.04em;color:#fff;line-height:1;margin:8px 0 4px}
+.rate-num sup{font-size:22px}
+.rate-unit{position:relative;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.7)}
+.side-card{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:20px;padding:26px;transition:border-color .3s}
+.side-card:hover{border-color:var(--stroke-hi)}
+.side-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:18px}
+.c-item{display:flex;gap:13px;align-items:flex-start;margin-bottom:16px;text-decoration:none}
+.c-item:last-child{margin-bottom:0}
+.c-icon{width:36px;height:36px;border-radius:11px;background:rgba(245,93,47,.09);border:1px solid rgba(245,93,47,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent)}
+.c-type{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.c-val{font-size:13px;font-weight:600;color:var(--text);margin-top:3px;line-height:1.45}
+.why-list{list-style:none;display:flex;flex-direction:column;gap:11px;font-size:12.5px;color:var(--dim)}
+.why-list li{display:flex;gap:10px;align-items:baseline;line-height:1.5}
+.why-list li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+
+/* ————— partner logos ————— */
+.tech-logo{height:32px;width:auto;display:block;margin-bottom:24px}
+.tech-logo.ext{height:38px}
+.brand-plate{display:inline-flex;align-items:center;justify-content:center;height:56px;padding:0 18px;border-radius:14px;margin-bottom:24px}
+.brand-plate.dhl{background:#FFCC00}
+.brand-plate.ap{background:#ffffff}
+.brand-plate img{height:22px;width:auto;display:block}
+.brand-plate.ap img{height:26px}
+
+/* ————— calculator ————— */
+.calc-hero{padding:160px 24px 56px;position:relative;overflow:hidden}
+.calc-glow{position:absolute;width:700px;height:700px;top:-280px;right:-160px;background:radial-gradient(circle,rgba(245,93,47,.12),transparent 68%);pointer-events:none}
+.calc-hero-inner{max-width:1160px;margin:0 auto;position:relative}
+.calc-hero h1{font-size:clamp(42px,5.4vw,74px);font-weight:800;letter-spacing:-.045em;line-height:.96;margin-bottom:20px}
+.calc-hero h1 span{display:block;color:var(--accent)}
+.calc-sub{font-size:15.5px;color:var(--dim);max-width:520px}
+.calc-body{max-width:1160px;margin:0 auto;padding:8px 24px 110px;display:grid;grid-template-columns:1fr 380px;gap:32px;align-items:start}
+.calc-group{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:22px;padding:30px 32px;margin-bottom:18px;transition:border-color .3s}
+.calc-group:hover{border-color:var(--stroke-hi)}
+.calc-group-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+.c-hint{font-size:12px;color:var(--faint);margin-top:10px}
+.c-slider{margin-bottom:26px}
+.c-slider:last-child{margin-bottom:0}
+.c-slider-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;gap:16px}
+.c-slider-head label{font-size:13.5px;font-weight:600;color:var(--text)}
+.c-slider-head output{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.c-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:100px;background:rgba(255,255,255,.08);outline:none;cursor:pointer}
+.c-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #0d0c0a;box-shadow:0 0 14px rgba(245,93,47,.55);cursor:grab}
+.c-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid #0d0c0a;box-shadow:0 0 14px rgba(245,93,47,.55);cursor:grab}
+.c-range:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.c-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:8px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.seg button{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:var(--dim);font-family:var(--sans);font-size:12.5px;font-weight:600;padding:12px 8px;cursor:pointer;transition:all .15s}
+.seg button:hover{border-color:rgba(255,255,255,.25)}
+.seg button.active{background:rgba(245,93,47,.1);border-color:var(--accent);color:var(--text)}
+.stepper-row{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+.stepper-row label{font-size:13.5px;font-weight:600;color:var(--text)}
+.stepper{display:inline-flex;align-items:center;gap:0;border:1px solid rgba(255,255,255,.1);border-radius:100px;overflow:hidden}
+.stepper button{background:rgba(255,255,255,.05);border:0;color:var(--text);width:40px;height:38px;font-size:17px;cursor:pointer;transition:background .15s;line-height:1}
+.stepper button:hover{background:rgba(245,93,47,.18)}
+.stepper output{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.calc-summary{position:sticky;top:100px;background:linear-gradient(180deg,#1d1a16,#121009);border:1px solid var(--stroke-hi);border-radius:24px;padding:30px;box-shadow:0 24px 60px -24px rgba(245,93,47,.18)}
+.calc-summary-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+.sum-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:13px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+.sum-k{font-size:13.5px;font-weight:600;color:var(--text)}
+.sum-sub{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:4px}
+.sum-v{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sum-v.free{color:#7ee2a8;letter-spacing:.08em}
+.sum-total{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:20px 0 6px}
+.sum-total .sum-k{font-size:14px;font-weight:700}
+.sum-total-v{font-size:38px;font-weight:800;letter-spacing:-.03em;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap}
+.sum-total-v small{font-size:13px;font-weight:600;color:var(--dim);letter-spacing:0}
+.sum-note{font-size:11.5px;color:var(--faint);line-height:1.55;margin:14px 0 20px}
+.calc-cta{display:block;text-align:center;background:var(--accent);color:#0d0c0a;font-size:14.5px;font-weight:800;padding:15px;border-radius:100px;text-decoration:none;transition:background .2s,transform .2s,box-shadow .2s}
+.calc-cta:hover{background:#ff7245;transform:translateY(-1px);box-shadow:0 12px 36px -10px rgba(245,93,47,.5)}
+.rate-link{display:block;position:relative;margin-top:12px;font-size:12px;font-weight:700;color:rgba(255,255,255,.85);text-decoration:none}
+.rate-link:hover{color:#fff;text-decoration:underline}
+.foot-ob{display:inline-block;margin-top:12px;font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:none}
+.foot-ob:hover{text-decoration:underline}
+
+/* ————— onboarding ————— */
+#view-ob{min-height:100vh;display:flex;flex-direction:column}
+.ob-progress{position:fixed;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.06);z-index:200}
+.ob-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#ff9a70);box-shadow:0 0 12px rgba(245,93,47,.6);transition:width .4s ease}
+.ob-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:130px 24px 80px;position:relative;overflow:hidden}
+.ob-glow{position:absolute;width:800px;height:800px;top:-300px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(245,93,47,.1),transparent 65%);pointer-events:none}
+.ob-intro{max-width:1060px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;position:relative}
+.ob-video{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:16/10;background:linear-gradient(150deg,#241f19 0%,#141210 70%);border:1px solid var(--stroke);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .3s}
+.ob-video:hover{border-color:var(--stroke-hi)}
+.ob-video-dots{position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:22px 22px}
+.ob-video-logo{position:absolute;top:18px;left:18px;height:30px;width:auto}
+.ob-play{position:relative;width:74px;height:74px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px rgba(245,93,47,.15),0 0 40px rgba(245,93,47,.4);transition:transform .2s}
+.ob-video:hover .ob-play{transform:scale(1.08)}
+.ob-play::after{content:'';border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #0d0c0a;margin-left:5px}
+.ob-video-cap{position:absolute;bottom:16px;left:18px;right:18px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.ob-video-note{display:none;position:absolute;inset:0;background:rgba(13,12,10,.92);align-items:center;justify-content:center;text-align:center;padding:24px;font-size:13px;color:var(--dim);line-height:1.6}
+.ob-video.show-note .ob-video-note{display:flex}
+.ob-intro h1{font-size:clamp(34px,4.2vw,52px);font-weight:800;letter-spacing:-.04em;line-height:1.04;margin-bottom:16px;text-wrap:balance}
+.ob-intro h1 em{font-style:normal;color:var(--accent)}
+.ob-intro-sub{font-size:15.5px;color:var(--dim);margin-bottom:32px;max-width:420px}
+.ob-start{display:inline-flex;align-items:center;gap:12px;background:var(--accent);color:#0d0c0a;font-size:15px;font-weight:800;padding:16px 32px;border-radius:100px;border:0;cursor:pointer;font-family:var(--sans);transition:background .2s,transform .2s,box-shadow .2s}
+.ob-start:hover{background:#ff7245;transform:translateY(-2px);box-shadow:0 12px 40px -8px rgba(245,93,47,.45)}
+.ob-start-meta{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);margin-top:16px}
+.ob-step{max-width:660px;width:100%;position:relative;animation:obIn .45s ease both}
+@keyframes obIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+.ob-sec{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.ob-sec::before{content:'';width:22px;height:1px;background:var(--accent)}
+.ob-q{font-size:clamp(24px,3vw,34px);font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;text-wrap:balance}
+.ob-q .req{color:var(--accent)}
+.ob-desc{font-size:14.5px;color:var(--dim);margin-bottom:26px;max-width:540px}
+.ob-input,.ob-textarea{width:100%;background:transparent;border:0;border-bottom:2px solid rgba(255,255,255,.15);color:var(--text);font-family:var(--sans);font-size:22px;font-weight:500;padding:10px 2px 12px;outline:none;transition:border-color .2s;border-radius:0}
+.ob-textarea{resize:none;min-height:64px;line-height:1.5}
+.ob-input::placeholder,.ob-textarea::placeholder{color:rgba(255,255,255,.22)}
+.ob-input:focus,.ob-textarea:focus{border-color:var(--accent)}
+.ob-input[type="date"]{color-scheme:dark}
+.ob-yn{display:flex;gap:12px;margin-top:6px}
+.ob-yn button{display:inline-flex;align-items:center;gap:12px;background:rgba(245,93,47,.06);border:1px solid rgba(245,93,47,.3);border-radius:12px;color:var(--text);font-family:var(--sans);font-size:16px;font-weight:600;padding:14px 26px;cursor:pointer;transition:all .15s}
+.ob-yn button:hover{background:rgba(245,93,47,.14)}
+.ob-yn button.sel{background:var(--accent);color:#0d0c0a}
+.ob-yn .key{font-family:var(--mono);font-size:10px;font-weight:700;border:1px solid currentColor;border-radius:4px;padding:2px 6px;opacity:.65}
+.ob-file{display:flex;align-items:center;gap:14px;margin-top:6px}
+.ob-file label{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.25);border-radius:12px;color:var(--dim);font-size:14px;font-weight:600;padding:16px 26px;cursor:pointer;transition:border-color .15s,color .15s}
+.ob-file label:hover{border-color:var(--accent);color:var(--text)}
+.ob-file input{display:none}
+.ob-file-name{font-family:var(--mono);font-size:12px;color:#7ee2a8}
+.ob-err{display:none;font-size:13px;font-weight:600;color:#fca38a;margin-top:12px}
+.ob-err.show{display:block}
+.ob-actions{display:flex;align-items:center;gap:16px;margin-top:30px}
+.ob-ok{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#0d0c0a;font-size:15px;font-weight:800;padding:13px 28px;border-radius:100px;border:0;cursor:pointer;font-family:var(--sans);transition:background .2s,transform .2s}
+.ob-ok:hover{background:#ff7245;transform:translateY(-1px)}
+.ob-enter{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.ob-skip{background:none;border:0;color:var(--faint);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);text-decoration:underline;text-underline-offset:3px}
+.ob-skip:hover{color:var(--dim)}
+.ob-nav{position:fixed;bottom:22px;right:22px;display:flex;gap:6px;z-index:150}
+.ob-nav button{width:42px;height:42px;border-radius:12px;background:var(--raise2);border:1px solid var(--stroke);color:var(--text);font-size:16px;cursor:pointer;transition:border-color .15s,background .15s}
+.ob-nav button:hover{border-color:var(--stroke-hi)}
+.ob-nav button:disabled{opacity:.35;cursor:default}
+.ob-count{position:fixed;bottom:32px;left:24px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);z-index:150}
+.ob-done{text-align:center;max-width:560px}
+.ob-done-ok{width:72px;height:72px;border-radius:50%;background:rgba(245,93,47,.1);border:1px solid rgba(245,93,47,.35);color:var(--accent);font-size:30px;display:flex;align-items:center;justify-content:center;margin:0 auto 26px;box-shadow:0 0 36px rgba(245,93,47,.3)}
+.ob-done h2{font-size:clamp(28px,3.6vw,42px);font-weight:800;letter-spacing:-.035em;margin-bottom:14px;text-wrap:balance}
+.ob-done p{font-size:15px;color:var(--dim);margin-bottom:32px}
+.ob-done .q-note{margin-top:26px}
+/* AI presenter sequence */
+.ob-video.playing .ob-play,.ob-video.playing .ob-video-cap,.ob-video.playing .ob-video-logo{display:none}
+.ov-progress{position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.08);opacity:0;transition:opacity .3s;z-index:5}
+.ob-video.playing .ov-progress{opacity:1}
+.ov-progress i{display:block;height:100%;width:0%;background:var(--accent);box-shadow:0 0 10px rgba(245,93,47,.6);transition:width .3s linear}
+.ov-scene{position:absolute;inset:0 0 52px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;opacity:0;transform:translateY(14px) scale(.98);transition:opacity .55s ease,transform .55s ease;pointer-events:none}
+.ov-scene.on{opacity:1;transform:none}
+.ov-logo{height:46px;width:auto}
+.ov-roo{height:72px;width:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.5));animation:hop2 2.6s ease-in-out infinite}
+@keyframes hop2{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ov-chip{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(245,93,47,.1);border:1px solid rgba(245,93,47,.3);padding:6px 14px;border-radius:100px}
+.ov-chip.cool{color:var(--cool);background:rgba(197,211,226,.08);border-color:rgba(197,211,226,.3)}
+.ov-big{font-size:clamp(18px,2vw,24px);font-weight:800;letter-spacing:-.02em;text-align:center;line-height:1.2;text-wrap:balance}
+.ov-big em{font-style:normal;color:var(--accent)}
+.ov-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+.ov-row img{height:26px;width:auto}
+.ov-plate{display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:10px}
+.ov-plate.dhl{background:#FFCC00}
+.ov-plate.ap{background:#fff}
+.ov-plate img{height:15px}
+.ov-plate.ap img{height:18px}
+.ov-list{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600;color:var(--dim)}
+.ov-list span{display:flex;gap:9px;align-items:center}
+.ov-list span::before{content:'✓';color:var(--accent);font-weight:800}
+.ov-cap{position:absolute;left:14px;right:14px;bottom:12px;text-align:center;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.85);background:rgba(10,9,7,.72);border-radius:10px;padding:8px 12px;opacity:0;transition:opacity .3s;z-index:5}
+.ob-video.playing .ov-cap{opacity:1}
+.ov-replay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(13,12,10,.86);z-index:6;cursor:pointer}
+.ov-replay.show{display:flex}
+.ov-replay .ob-play{width:56px;height:56px}
+.ov-replay span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.ov-mutenote{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);z-index:5;display:none}
+.ob-video.playing .ov-mutenote{display:block}
+
+@media (max-width:900px){
+  .ob-intro{grid-template-columns:1fr;gap:32px}
+  .ob-stage{padding:110px 20px 90px}
+  .ob-count{bottom:34px}
+}
+
+/* reveal */
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal.visible{opacity:1;transform:translateY(0)}
+.js .reveal.d1{transition-delay:.1s}
+.js .reveal.d2{transition-delay:.2s}
+
+/* responsive */
+@media (max-width:1000px){
+  .nav-links{display:none}
+  .nav-burger{display:block}
+  .nav-mobile{display:none;position:fixed;top:76px;left:16px;right:16px;z-index:99;background:rgba(21,19,16,.97);border:1px solid var(--stroke);border-radius:20px;overflow:hidden;backdrop-filter:blur(18px)}
+  .nav-mobile.open{display:block}
+  .nav-mobile a{display:block;padding:15px 24px;font-size:14px;color:var(--text);text-decoration:none;border-bottom:1px solid var(--stroke)}
+  .nav-mobile a:last-child{border-bottom:0}
+  .dash{grid-template-columns:1fr}
+  .svc-grid{grid-template-columns:1fr}
+  .t-body{grid-template-columns:1fr}
+  .tech-grid,.ship-grid{grid-template-columns:1fr}
+  .qp-inner{grid-template-columns:1fr}
+  .qp-body{grid-template-columns:1fr}
+  .side{position:static}
+  .calc-body{grid-template-columns:1fr}
+  .calc-summary{position:static}
+  .mini-grid{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  section{padding:70px 18px}
+  .hero{min-height:auto;padding-top:120px;justify-content:flex-start}
+  .f-row.c2,.check-grid{grid-template-columns:1fr}
+  .timeline::before{left:23px}
+  .t-step{grid-template-columns:48px 1fr;gap:16px}
+  .t-num{width:48px;height:48px;font-size:17px}
+  .foot-inner{flex-direction:column;align-items:flex-start}
+  .foot-right{text-align:left}
+  .seg{grid-template-columns:1fr 1fr}
+  .calc-group{padding:24px 20px}
+  .stepper-row{flex-direction:column;align-items:flex-start;gap:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+  .js .reveal{opacity:1;transform:none}
+}
+</style>
+
+<nav>
+  <a class="nav-logo" href="#hero" aria-label="Fullstack Fulfillment — home"><img src="assets/logo-white.png" alt="Fullstack Fulfillment"></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#tech">Technology</a></li>
+    <li><a href="#shipping">Shipping</a></li>
+    <li><a href="#/calculator">Pricing</a></li>
+    <li><a href="#/onboarding">Onboarding</a></li>
+  </ul>
+  <a class="nav-cta" href="#/quote">Get a Quote</a>
+  <button class="nav-burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="nav-mobile" id="navMobile">
+  <a href="#services">Services</a>
+  <a href="#how">How It Works</a>
+  <a href="#tech">Technology</a>
+  <a href="#shipping">Shipping</a>
+  <a href="#/calculator">Pricing</a>
+  <a href="#/onboarding">Onboarding</a>
+  <a href="#/quote" style="color:var(--accent);font-weight:700">Get a Quote</a>
+</div>
+
+<div id="view-home">
+
+  <header class="hero" id="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-dots"></div>
+    <div class="eyebrow">Australia's 3PL for Sports Nutrition &amp; Wellness</div>
+    <h1>Fuel Your Brand.<span class="line2">Fulfill Every Order.</span></h1>
+    <p class="hero-sub">Fast-growing brands can't afford fulfillment that holds them back. We handle the warehouse, shipping, and logistics — so you can focus on building the brand your customers live and breathe.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#/quote">Get a Free Quote</a>
+      <a class="btn-ghost" href="#how">See How It Works</a>
+    </div>
+    <div class="dash" aria-label="Live operations preview">
+      <div class="dash-card">
+        <div class="dash-head"><span class="dash-title">Order FS-284117 · Melbourne VIC</span><span class="dash-chip">On schedule</span></div>
+        <div class="t-line">
+          <div class="t-node"><span class="t-dot"></span><span class="t-label">Received</span></div>
+          <div class="t-node"><span class="t-dot"></span><span class="t-label">Picked</span></div>
+          <div class="t-node"><span class="t-dot"></span><span class="t-label">Packed</span></div>
+          <div class="t-node pending"><span class="t-dot"></span><span class="t-label">Dispatched</span></div>
+        </div>
+        <div class="dash-meta"><span>Carrier <b>Australia Post eParcel</b></span><span>Cut-off <b>09:00 AEST</b></span></div>
+      </div>
+      <div class="dash-card second">
+        <div class="dash-head"><span class="dash-title">Orders dispatched today</span></div>
+        <div class="spark-wrap">
+          <div class="spark-nums">
+            <div class="spark-big"><b data-count="1284">0</b></div>
+            <div class="spark-cap">99%+ accuracy · same-day</div>
+          </div>
+          <svg class="spark-svg" viewBox="0 0 210 64" fill="none" aria-hidden="true">
+            <polyline points="0,50 26,44 52,46 78,34 104,38 130,24 156,27 182,14 210,8" stroke="#c5d3e2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="210" cy="8" r="4" fill="#f55d2f"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="mq-item">Warehousing &amp; Receiving</span><span class="mq-item">Pick, Pack &amp; Dispatch</span><span class="mq-item">Returns Management</span><span class="mq-item">Same-Day Dispatch</span><span class="mq-item">99%+ Order Accuracy</span><span class="mq-item">Real-Time Inventory</span><span class="mq-item">DHL &amp; Australia Post</span><span class="mq-item">NZ Post · SEKO · Parcel Right</span><span class="mq-item">Starshipit &amp; Extensiv</span><span class="mq-item">Warehousing &amp; Receiving</span><span class="mq-item">Pick, Pack &amp; Dispatch</span><span class="mq-item">Returns Management</span><span class="mq-item">Same-Day Dispatch</span><span class="mq-item">99%+ Order Accuracy</span><span class="mq-item">Real-Time Inventory</span><span class="mq-item">DHL &amp; Australia Post</span><span class="mq-item">NZ Post · SEKO · Parcel Right</span><span class="mq-item">Starshipit &amp; Extensiv</span>
+    </div>
+  </div>
+
+  <section id="services">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <div class="sec-label">Services</div>
+        <h2 class="sec-h2">Everything you need.<br>Nothing you don't.</h2>
+        <p class="sec-intro">End-to-end fulfillment designed for the pace, precision, and complexity of sports nutrition and wellness eCommerce.</p>
+      </div>
+      <div class="svc-grid">
+        <article class="svc reveal">
+          <div class="svc-top">
+            <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-8h6v8"/><path d="M3 21h18"/></svg></div>
+            <div class="svc-num">01</div>
+          </div>
+          <h3>Warehousing &amp; Receiving</h3>
+          <p>Purpose-built facilities for sports nutrition and wellness products. Accurate inbound receiving with discrepancy reporting, batch-organised storage, and real-time inventory visibility at all times.</p>
+          <div class="svc-tags"><span class="tag">Inbound receiving</span><span class="tag">Batch tracking</span><span class="tag">Live inventory</span><span class="tag">Discrepancy reporting</span></div>
+        </article>
+        <article class="svc reveal d1">
+          <div class="svc-top">
+            <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></div>
+            <div class="svc-num">02</div>
+          </div>
+          <h3>Pick, Pack &amp; Dispatch</h3>
+          <p>Speed and accuracy aren't optional — they're our standard. Orders received before 9am AEST ship the same day, with 99%+ order accuracy and the flexibility to present your brand exactly how you want it.</p>
+          <div class="svc-tags"><span class="tag">9am AEST cut-off</span><span class="tag">Custom packaging</span><span class="tag">Kitting &amp; bundles</span><span class="tag">99%+ accuracy</span></div>
+        </article>
+        <article class="svc reveal d2">
+          <div class="svc-top">
+            <div class="svc-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></div>
+            <div class="svc-num">03</div>
+          </div>
+          <h3>Returns Management</h3>
+          <p>We manage your returns end-to-end — receiving, condition-grading, and restocking inventory so you stay in control without lifting a finger. Your customers stay happy. Your stock stays accurate.</p>
+          <div class="svc-tags"><span class="tag">Fast processing</span><span class="tag">Returns portal</span><span class="tag">Condition grading</span><span class="tag">Stock reintegration</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <div class="sec-label">How It Works</div>
+        <h2 class="sec-h2">Up and running<br>in three steps.</h2>
+        <p class="sec-intro">Getting started with Fullstack is simple. We do the heavy lifting from day one — so you're shipping faster than you think.</p>
+      </div>
+      <div class="timeline">
+        <div class="t-step reveal">
+          <div class="t-num">01</div>
+          <div class="t-body">
+            <div><h3>Onboard</h3><p>We get to know your brand, products, and fulfillment needs. Our team sets up your account, connects your store, and configures everything in Extensiv and Starshipit — ready to receive stock.</p></div>
+            <ul class="t-feats"><li>Dedicated onboarding specialist</li><li>Store &amp; platform integration</li><li>Custom packing &amp; branding setup</li><li>Go-live checklist &amp; testing</li></ul>
+          </div>
+        </div>
+        <div class="t-step reveal">
+          <div class="t-num">02</div>
+          <div class="t-body">
+            <div><h3>Inbound Stock</h3><p>Send your inventory to our warehouse. We receive, check, and organise every SKU — reconciling against your purchase orders and flagging any discrepancies before they become problems.</p></div>
+            <ul class="t-feats"><li>Accurate inbound receiving</li><li>SKU &amp; batch organisation</li><li>Real-time stock visibility</li><li>Discrepancy reporting</li></ul>
+          </div>
+        </div>
+        <div class="t-step reveal">
+          <div class="t-num">03</div>
+          <div class="t-body">
+            <div><h3>Fulfil Orders</h3><p>Orders flow in automatically from your store. We pick, pack, and dispatch — same day for orders before 9am AEST. Your customers receive fast, tracked delivery and branded unboxing experiences.</p></div>
+            <ul class="t-feats"><li>Automated order routing</li><li>Same-day dispatch before 9am AEST</li><li>DHL &amp; Australia Post delivery</li><li>Branded tracking notifications</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tech">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <div class="sec-label">Technology</div>
+        <h2 class="sec-h2">Logistics intelligence,<br>built in.</h2>
+        <p class="sec-intro">We don't just move boxes — we move data. Real-time visibility, seamless store integrations, and automation your brand needs to scale.</p>
+      </div>
+      <div class="tech-grid">
+        <article class="tech-card reveal">
+          <img class="tech-logo" src="assets/starshipit.svg" alt="Starshipit">
+          <h3>Shipping Software</h3>
+          <p>Automated carrier selection, branded tracking pages, and instant customer notifications — your customers always know exactly where their order is, in your brand's voice.</p>
+          <ul class="tech-feats">
+            <li>Automated shipping rules &amp; carrier allocation</li>
+            <li>Branded tracking pages keeping your brand front and centre</li>
+            <li>Real-time delivery notifications to your customers</li>
+            <li>Returns portal setup &amp; management</li>
+          </ul>
+        </article>
+        <article class="tech-card reveal d1">
+          <img class="tech-logo ext" src="assets/extensiv.svg" alt="Extensiv">
+          <h3>Warehouse Management</h3>
+          <p>Enterprise-grade inventory management, order routing, and reporting — built for the demands of fast-moving eCommerce brands that need accuracy and scale.</p>
+          <ul class="tech-feats">
+            <li>Live inventory tracking across all SKUs</li>
+            <li>Multi-channel order routing &amp; automation</li>
+            <li>Advanced reporting &amp; analytics dashboards</li>
+            <li>EDI capabilities for retail &amp; wholesale orders</li>
+          </ul>
+        </article>
+      </div>
+      <div class="integrations reveal">
+        <span class="int-label">Integrates with</span>
+        <div class="int-pills"><span class="pill">Shopify</span><span class="pill">WooCommerce</span><span class="pill">Amazon</span><span class="pill">BigCommerce</span><span class="pill">Maropost / Neto</span><span class="pill">+ more</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="shipping">
+    <div class="shell">
+      <div class="sec-head reveal">
+        <div class="sec-label">Shipping</div>
+        <h2 class="sec-h2">Delivered by Australia's best.<br>On time, every time.</h2>
+        <p class="sec-intro">We've partnered with Australia's most trusted carrier networks — optimised for delivery speed, cost, and customer experience.</p>
+      </div>
+      <div class="ship-grid">
+        <article class="carrier reveal">
+          <span class="brand-plate dhl"><img src="assets/dhl.svg" alt="DHL"></span>
+          <h3>DHL</h3>
+          <div class="carrier-sub">Global Reach. Local Speed.</div>
+          <p>For brands shipping internationally or requiring premium express services, DHL delivers with the speed and reliability your customers expect — every time.</p>
+          <ul class="carrier-feats">
+            <li>Domestic &amp; international express delivery</li>
+            <li>End-to-end shipment tracking &amp; visibility</li>
+            <li>Ideal for time-sensitive and high-value orders</li>
+            <li>Seamless Starshipit integration</li>
+          </ul>
+        </article>
+        <article class="carrier alt reveal d1">
+          <span class="brand-plate ap"><img src="assets/auspost.svg" alt="Australia Post"></span>
+          <h3>Australia Post</h3>
+          <div class="carrier-sub">Nationwide Coverage You Can Count On.</div>
+          <p>Australia's most extensive delivery network reaches every corner of the country — from metro hubs to remote communities, PO Boxes and parcel lockers included.</p>
+          <ul class="carrier-feats">
+            <li>Full domestic coverage including rural &amp; regional</li>
+            <li>eParcel integration with live tracking</li>
+            <li>PO Boxes &amp; parcel lockers supported</li>
+            <li>Flexible standard &amp; express options</li>
+          </ul>
+        </article>
+      </div>
+      <div class="more-carriers reveal">
+        <div class="more-label">Plus our extended carrier network</div>
+        <div class="mini-grid">
+          <div class="carrier-mini">
+            <span class="mini-plate nzp"><img src="assets/nzpost.png" alt="NZ Post"></span>
+            <p><b>NZ Post</b>Trans-Tasman delivery — reach New Zealand customers with trusted local delivery.</p>
+          </div>
+          <div class="carrier-mini">
+            <span class="mini-plate"><img src="assets/seko.png" alt="SEKO Logistics"></span>
+            <p><b>SEKO Logistics</b>Global eCommerce logistics for brands scaling into international markets.</p>
+          </div>
+          <div class="carrier-mini">
+            <span class="mini-plate"><img src="assets/parcelright.svg" alt="Parcel Right"></span>
+            <p><b>Parcel Right</b>eCommerce-dedicated parcel delivery across Australia with full tracking.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" id="pricing">
+    <div class="cta-glow"></div>
+    <h2 class="reveal">Ready to fulfil<br><em>your potential?</em></h2>
+    <p class="reveal">Whether you're launching your first product or scaling an established brand, Fullstack Fulfillment has the infrastructure, technology, and team to grow with you.</p>
+    <div class="cta-buttons reveal">
+      <a class="btn-primary" href="#/quote">Get a Free Quote</a>
+      <a class="btn-ghost" href="#/quote">Book a Discovery Call</a>
+    </div>
+    <div class="cta-reassure reveal">Fulfillment from $4.00 per order · Transparent pricing · A team that gets your industry</div>
+  </section>
+
+</div><!-- /view-home -->
+
+<div id="view-quote">
+  <header class="qp-hero">
+    <div class="qp-glow"></div>
+    <div class="qp-inner">
+      <div>
+        <div class="eyebrow">Get Started Today</div>
+        <h1>Get a Free<span>Quote.</span></h1>
+        <p class="qp-sub">Tell us about your brand and fulfillment needs. We'll come back with transparent pricing and a plan built around your volume, SKUs, and growth goals.</p>
+      </div>
+      <div class="qp-stats">
+        <div class="qp-stat"><div class="qp-num"><b>$4</b></div><div class="qp-lab">Fulfillment from per order</div></div>
+        <div class="qp-stat"><div class="qp-num"><b>99%+</b></div><div class="qp-lab">Order accuracy guaranteed</div></div>
+        <div class="qp-stat"><div class="qp-num"><b>9am</b></div><div class="qp-lab">Same-day dispatch cutoff AEST</div></div>
+        <div class="qp-stat"><div class="qp-num"><b>2+</b></div><div class="qp-lab">Carrier networks, DHL &amp; AusPost</div></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="qp-body">
+    <div class="q-card">
+      <div class="q-head">
+        <h2>Tell us about your business</h2>
+        <p>Fill in the details below and we'll get back to you with a tailored quote within 1 business day.</p>
+      </div>
+      <form class="q-body" id="quoteForm" novalidate>
+        <div class="f-section">Your Details</div>
+        <div class="f-row c2">
+          <div class="f-field"><label class="f-label" for="fn">First Name <span>*</span></label><input class="f-input" id="fn" name="first_name" type="text" maxlength="255" required></div>
+          <div class="f-field"><label class="f-label" for="ln">Last Name <span>*</span></label><input class="f-input" id="ln" name="last_name" type="text" maxlength="255" required></div>
+        </div>
+        <div class="f-row c2">
+          <div class="f-field"><label class="f-label" for="em">Email <span>*</span></label><input class="f-input" id="em" name="email" type="email" maxlength="255" required></div>
+          <div class="f-field"><label class="f-label" for="ph">Phone <span>*</span></label>
+            <div class="f-group"><span class="f-prefix">+61</span><input class="f-input" id="ph" name="phone" type="tel" maxlength="50" required></div>
+          </div>
+        </div>
+        <div class="f-section">Business Details</div>
+        <div class="f-row c2">
+          <div class="f-field"><label class="f-label" for="co">Company Name <span>*</span></label><input class="f-input" id="co" name="company_name" type="text" maxlength="255" required></div>
+          <div class="f-field"><label class="f-label" for="abn">ABN / ACN <span>*</span></label><input class="f-input" id="abn" name="abn_account_number" type="text" maxlength="100" required></div>
+        </div>
+        <div class="f-row">
+          <div class="f-field"><label class="f-label" for="web">Website</label><input class="f-input" id="web" name="website" type="text" placeholder="https://" maxlength="255"></div>
+        </div>
+        <div class="f-section">Current / Preferred Integrations <span>*</span></div>
+        <div class="check-grid" id="intGroup">
+          <label class="chk"><input type="checkbox" name="integrations[]" value="shopify"><span>Shopify</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="woocommerce"><span>WooCommerce</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="bigcommerce"><span>BigCommerce</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="squarespace"><span>Squarespace</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="wix"><span>Wix</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="wix_studio"><span>Wix Studio</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="netsuite"><span>NetSuite</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="cin7"><span>Cin7</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="dear"><span>DEAR</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="zapier"><span>Zapier</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="starshipit"><span>Starshipit</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="australia_post"><span>Australia Post</span></label>
+          <label class="chk"><input type="checkbox" name="integrations[]" value="other"><span>Other</span></label>
+        </div>
+        <div class="group-err" id="intErr">Select at least one integration.</div>
+        <div class="f-section">Volume &amp; Scale</div>
+        <div class="f-row c2">
+          <div class="f-field"><label class="f-label" for="vol">Monthly Order Volume <span>*</span></label>
+            <select class="f-select" id="vol" name="monthly_volume" required>
+              <option value="" disabled selected>Select…</option>
+              <option value="under_100">Under 100</option>
+              <option value="100_500">100 – 500</option>
+              <option value="500_2000">500 – 2,000</option>
+              <option value="2000_10000">2,000 – 10,000</option>
+              <option value="10000_plus">10,000+</option>
+            </select>
+          </div>
+          <div class="f-field"><label class="f-label" for="sku">Active SKUs (approx) <span>*</span></label>
+            <select class="f-select" id="sku" name="active_sku" required>
+              <option value="" disabled selected>Select…</option>
+              <option value="under_50">Under 50</option>
+              <option value="50_200">50 – 200</option>
+              <option value="200_1000">200 – 1,000</option>
+              <option value="1000_plus">1,000+</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-field"><label class="f-label" for="dims">Item Dimensions / Weights</label><input class="f-input" id="dims" name="item_dimensions_weight" type="text" placeholder="Optional — e.g. 500g tubs, 30×20×15cm"></div>
+        </div>
+        <div class="f-section">Additional Needs <span>*</span></div>
+        <div class="check-grid" id="needGroup">
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="satchels"><span>Satchels</span></label>
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="cartons"><span>Cartons</span></label>
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="branded_inserts"><span>Branded Inserts</span></label>
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="gift_boxes"><span>Gift Boxes</span></label>
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="seasonal_promo"><span>Seasonal/Promo Packs</span></label>
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="returns"><span>Returns Processing</span></label>
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="fragile"><span>Fragile Handling</span></label>
+          <label class="chk"><input type="checkbox" name="additional_needs[]" value="kitting"><span>Kitting/Assembly</span></label>
+        </div>
+        <div class="group-err" id="needErr">Select at least one option.</div>
+        <div class="f-section">Start Timeline</div>
+        <div class="f-row">
+          <div class="f-field"><label class="f-label" for="tl">When are you looking to start? <span>*</span></label>
+            <select class="f-select" id="tl" name="start_timeline" required>
+              <option value="" disabled selected>Select…</option>
+              <option value="asap">ASAP</option>
+              <option value="1_3_months">1–3 months</option>
+              <option value="3_6_months">3–6 months</option>
+              <option value="6_plus_months">6+ months</option>
+              <option value="exploring">Just exploring</option>
+            </select>
+          </div>
+        </div>
+        <label class="ack"><input type="checkbox" id="ackBox" required><span>I understand pricing is ex GST and subject to eligibility. <b>*</b></span></label>
+        <button class="f-submit" type="submit">Submit Quote Request →</button>
+      </form>
+      <div class="q-success" id="qSuccess">
+        <div class="q-ok">✓</div>
+        <h3>Quote request received</h3>
+        <p>Thanks — we've logged your details and we'll get back to you with a tailored quote within 1 business day.</p>
+        <div class="q-note">Design prototype — no data was sent</div>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="rate-card">
+        <div class="rate-from">Fulfillment from</div>
+        <div class="rate-num">$4<sup>.00</sup></div>
+        <div class="rate-unit">per order · ex GST</div>
+        <a class="rate-link" href="#/calculator">Estimate your monthly costs →</a>
+      </div>
+      <div class="side-card">
+        <div class="side-title">Get in touch directly</div>
+        <a class="c-item" href="tel:0721116366">
+          <span class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.5 2.8.7a2 2 0 0 1 1.7 2z"/></svg></span>
+          <span><span class="c-type">Call us</span><div class="c-val">07 2111 6366</div></span>
+        </a>
+        <a class="c-item" href="mailto:info@fullstackfs.com.au">
+          <span class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></span>
+          <span><span class="c-type">Email us</span><div class="c-val">info@fullstackfs.com.au</div></span>
+        </a>
+        <div class="c-item">
+          <span class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+          <span><span class="c-type">Our warehouse</span><div class="c-val">Unit 6, 83 Burnside Rd, Stapylton QLD 4207, Australia</div></span>
+        </div>
+      </div>
+      <div class="side-card">
+        <div class="side-title">Why Fullstack?</div>
+        <ul class="why-list">
+          <li>Same-day dispatch for orders before 9am AEST</li>
+          <li>99%+ order accuracy — precision is our standard</li>
+          <li>DHL, Australia Post, NZ Post, SEKO &amp; Parcel Right network</li>
+          <li>Powered by Starshipit &amp; Extensiv</li>
+          <li>Transparent pricing — no hidden fees</li>
+          <li>Built for sports nutrition &amp; wellness brands</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div><!-- /view-quote -->
+
+<div id="view-calc">
+  <header class="calc-hero">
+    <div class="calc-glow"></div>
+    <div class="calc-hero-inner">
+      <div class="eyebrow">Pricing Calculator</div>
+      <h1>Know your numbers.<span>Before you ship.</span></h1>
+      <p class="calc-sub">Model your monthly fulfillment costs on our standard rates — pick &amp; pack, storage, and delivery. It's a guide only: your tailored quote is built on your exact products and volumes.</p>
+    </div>
+  </header>
+
+  <div class="calc-body">
+    <div class="calc-inputs">
+
+      <div class="calc-group">
+        <div class="calc-group-title">Your Parcels</div>
+        <div class="c-slider" style="margin-bottom:0">
+          <div class="c-slider-head"><label id="wLabel">Average parcel weight</label></div>
+          <div class="seg" role="group" aria-labelledby="wLabel">
+            <button type="button" class="active" data-band="0">Up to 500 g</button>
+            <button type="button" data-band="1">500 g – 1 kg</button>
+            <button type="button" data-band="2">1 – 3 kg</button>
+            <button type="button" data-band="3">3 – 5 kg</button>
+          </div>
+        </div>
+        <div class="stepper-row">
+          <label for="itemsMinus">Items in a typical order</label>
+          <span class="stepper">
+            <button type="button" id="itemsMinus" aria-label="Fewer items">−</button>
+            <output id="itemsOut">1</output>
+            <button type="button" id="itemsPlus" aria-label="More items">+</button>
+          </span>
+        </div>
+        <p class="c-hint">Every item after the first adds $0.60 to the pick &amp; pack rate.</p>
+      </div>
+
+      <div class="calc-group">
+        <div class="calc-group-title">Your Storage</div>
+        <div class="c-slider">
+          <div class="c-slider-head"><label for="palletsRange">Pallet spaces stored</label><output id="palletsOut">6 pallets</output></div>
+          <input class="c-range" type="range" id="palletsRange" min="0" max="150" step="1" value="6">
+          <div class="c-scale"><span>0</span><span>150</span></div>
+        </div>
+        <div class="c-slider" style="margin-bottom:0">
+          <div class="c-slider-head"><label for="skusRange">Active SKUs</label><output id="skusOut">15 SKUs</output></div>
+          <input class="c-range" type="range" id="skusRange" min="0" max="50" step="1" value="15">
+          <div class="c-scale"><span>0</span><span>50</span></div>
+        </div>
+        <p class="c-hint">Storage is on us — pallet spaces and pick-bins are free while we fulfil your orders. We support up to 50 active SKUs.</p>
+      </div>
+
+      <div class="calc-group">
+        <div class="calc-group-title">Your Volume</div>
+        <div class="c-slider" style="margin-bottom:0">
+          <div class="c-slider-head"><label for="ordersRange">Orders per month</label><output id="ordersOut">750 orders</output></div>
+          <input class="c-range" type="range" id="ordersRange" min="100" max="12000" step="50" value="750">
+          <div class="c-scale"><span>100</span><span>12,000</span></div>
+        </div>
+        <p class="c-hint">Higher volume unlocks better pick &amp; pack rates — $4.00 per order up to 5,000 orders a month, $3.50 to 10,000, and $3.00 beyond that.</p>
+      </div>
+
+    </div>
+
+    <aside class="calc-summary" aria-live="polite">
+      <div class="calc-summary-title">Your Monthly Estimate</div>
+      <div class="sum-row">
+        <div><div class="sum-k">Pick &amp; pack</div><div class="sum-sub" id="pickSub">$4.00 per order</div></div>
+        <div class="sum-v" id="pickVal">$3,000</div>
+      </div>
+      <div class="sum-row">
+        <div><div class="sum-k">Storage</div><div class="sum-sub" id="storeSub">6 pallets · 15 SKUs — on us</div></div>
+        <div class="sum-v free" id="storeVal">FREE</div>
+      </div>
+      <div class="sum-row" style="border-bottom:1px solid rgba(255,255,255,.12)">
+        <div><div class="sum-k">Delivery (AU-wide)</div><div class="sum-sub" id="shipSub">750 × $9.00</div></div>
+        <div class="sum-v" id="shipVal">$6,750</div>
+      </div>
+      <div class="sum-total">
+        <div class="sum-k">Estimated total</div>
+        <div class="sum-total-v" id="totalVal">$9,750<small> /mo</small></div>
+      </div>
+      <p class="sum-note">Ex GST. An estimate only — final pricing depends on your products, packaging, and delivery mix. Most tailored quotes land at or below these rates.</p>
+      <a class="calc-cta" href="#/quote">Lock in your actual rates</a>
+    </aside>
+  </div>
+</div><!-- /view-calc -->
+
+<div id="view-ob">
+  <div class="ob-progress" aria-hidden="true"><div class="ob-progress-bar" id="obBar"></div></div>
+  <div class="ob-stage">
+    <div class="ob-glow"></div>
+    <div id="obStage" class="ob-intro">
+      <div class="ob-video" id="obVideo" role="button" tabindex="0" aria-label="Play welcome video">
+        <div class="ob-video-dots"></div>
+        <img class="ob-video-logo" src="assets/logo-white.png" alt="">
+        <div class="ob-play"></div>
+        <div class="ob-video-cap"><span>Welcome to Fullstack</span><span>60 sec</span></div>
+        <div class="ov-progress"><i></i></div>
+        <div id="ovStage" style="position:absolute;inset:0"></div>
+        <div class="ov-cap"></div>
+        <div class="ov-mutenote">AI voice · captions on</div>
+        <div class="ov-replay"><div class="ob-play"></div><span>Replay</span></div>
+      </div>
+      <div>
+        <h1 id="obHello">G'day! <em>Welcome to Fullstack Fulfillment.</em></h1>
+        <p class="ob-intro-sub">Complete this form to begin your onboarding. It takes approximately 5–7 minutes, and everything you enter goes straight to your onboarding specialist.</p>
+        <button class="ob-start" id="obStart">Start Onboarding →</button>
+        <div class="ob-start-meta">28 quick questions · Save the heavy lifting for us</div>
+      </div>
+    </div>
+  </div>
+  <div class="ob-count" id="obCount" style="display:none"></div>
+  <div class="ob-nav" id="obNav" style="display:none">
+    <button id="obPrev" aria-label="Previous question">↑</button>
+    <button id="obNext" aria-label="Next question">↓</button>
+  </div>
+</div><!-- /view-ob -->
+
+<footer>
+  <div class="foot-inner">
+    <div>
+      <img src="assets/logo-white.png" alt="Fullstack Fulfillment">
+      <div class="foot-tag">Fuel Your Brand. Fulfill Every Order.</div>
+      <a class="foot-ob" href="#/onboarding">New client? Start your onboarding →</a>
+    </div>
+    <div class="foot-right">© 2026 Fullstack Fulfillment Australia<br>All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+document.documentElement.classList.add('js');
+var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function route(){
+  var h = location.hash;
+  var view = h === '#/quote' ? 'quote' : (h === '#/calculator' ? 'calc' : (h.indexOf('#/onboarding') === 0 ? 'ob' : 'home'));
+  document.body.classList.toggle('on-quote', view === 'quote');
+  document.body.classList.toggle('on-calc', view === 'calc');
+  document.body.classList.toggle('on-ob', view === 'ob');
+  if(view !== 'ob' && typeof ovStop === 'function') ovStop();
+  closeMenu();
+  if(view !== 'home'){ window.scrollTo(0,0); return; }
+  if(h && h.length > 1 && h.charAt(1) !== '/'){
+    var el = document.querySelector(h);
+    if(el){ requestAnimationFrame(function(){ el.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block:'start'}); }); return; }
+  }
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', route);
+
+var burger = document.querySelector('.nav-burger');
+var mobile = document.getElementById('navMobile');
+function closeMenu(){ mobile.classList.remove('open'); burger.setAttribute('aria-expanded','false'); }
+burger.addEventListener('click', function(){
+  var open = mobile.classList.toggle('open');
+  burger.setAttribute('aria-expanded', open);
+});
+mobile.addEventListener('click', function(e){ if(e.target.tagName === 'A') closeMenu(); });
+
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+},{threshold:.12, rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
+
+/* count-up */
+var counter = document.querySelector('[data-count]');
+if(counter){
+  var target = parseInt(counter.getAttribute('data-count'), 10);
+  if(reduced){ counter.textContent = target.toLocaleString(); }
+  else{
+    var cObs = new IntersectionObserver(function(entries){
+      if(!entries[0].isIntersecting) return;
+      cObs.disconnect();
+      var t0 = null;
+      function tickFn(ts){
+        if(!t0) t0 = ts;
+        var p = Math.min((ts - t0) / 1400, 1);
+        counter.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))).toLocaleString();
+        if(p < 1) requestAnimationFrame(tickFn);
+      }
+      requestAnimationFrame(tickFn);
+    },{threshold:.4});
+    cObs.observe(counter);
+  }
+}
+
+/* ————— pricing calculator ————— */
+var PICK_TIERS = [[5000, 4.00], [10000, 3.50], [Infinity, 3.00]];
+var SHIP_RATES = [9.00, 10.50, 12.50, 15.00];
+var EXTRA_ITEM = 0.60;
+var cs = { orders: 750, items: 1, pallets: 6, skus: 15, band: 0 };
+
+function money(n){ return '$' + Math.round(n).toLocaleString('en-AU'); }
+function fillRange(input){
+  var p = (input.value - input.min) / (input.max - input.min) * 100;
+  input.style.background = 'linear-gradient(90deg, var(--accent) ' + p + '%, rgba(255,255,255,.08) ' + p + '%)';
+}
+function recalc(){
+  var tier = PICK_TIERS.find(function(t){ return cs.orders <= t[0]; });
+  var rate = tier[1] + EXTRA_ITEM * (cs.items - 1);
+  var fulfil = rate * cs.orders;
+  var storage = 0;
+  var ship = SHIP_RATES[cs.band] * cs.orders;
+  document.getElementById('pickSub').textContent = '$' + rate.toFixed(2) + ' per order';
+  document.getElementById('pickVal').textContent = money(fulfil);
+  document.getElementById('storeSub').textContent = cs.pallets + ' pallets · ' + cs.skus + ' SKUs — on us';
+  document.getElementById('storeVal').textContent = 'FREE';
+  document.getElementById('shipSub').textContent = cs.orders.toLocaleString('en-AU') + ' × $' + SHIP_RATES[cs.band].toFixed(2);
+  document.getElementById('shipVal').textContent = money(ship);
+  document.getElementById('totalVal').innerHTML = money(fulfil + storage + ship) + '<small> /mo</small>';
+  document.getElementById('ordersOut').textContent = cs.orders.toLocaleString('en-AU') + ' orders';
+  document.getElementById('palletsOut').textContent = cs.pallets + (cs.pallets === 1 ? ' pallet' : ' pallets');
+  document.getElementById('skusOut').textContent = cs.skus + ' SKUs';
+  document.getElementById('itemsOut').textContent = cs.items;
+}
+[['ordersRange','orders'], ['palletsRange','pallets'], ['skusRange','skus']].forEach(function(pair){
+  var input = document.getElementById(pair[0]);
+  fillRange(input);
+  input.addEventListener('input', function(){ cs[pair[1]] = +input.value; fillRange(input); recalc(); });
+});
+document.querySelectorAll('.seg button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.seg button').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    cs.band = +btn.getAttribute('data-band');
+    recalc();
+  });
+});
+document.getElementById('itemsMinus').addEventListener('click', function(){ cs.items = Math.max(1, cs.items - 1); recalc(); });
+document.getElementById('itemsPlus').addEventListener('click', function(){ cs.items = Math.min(10, cs.items + 1); recalc(); });
+recalc();
+
+var form = document.getElementById('quoteForm');
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  var ok = true;
+  var intOk = document.querySelectorAll('#intGroup input:checked').length > 0;
+  var needOk = document.querySelectorAll('#needGroup input:checked').length > 0;
+  document.getElementById('intErr').classList.toggle('show', !intOk);
+  document.getElementById('needErr').classList.toggle('show', !needOk);
+  if(!form.checkValidity()){ form.reportValidity(); ok = false; }
+  if(!intOk || !needOk) ok = false;
+  if(!ok) return;
+  form.style.display = 'none';
+  document.getElementById('qSuccess').classList.add('show');
+  window.scrollTo(0,0);
+});
+
+/* ————— onboarding flow ————— */
+var VIDEO_URL = ''; /* drop the produced welcome video URL (mp4 or YouTube embed) here */
+var OB_STEPS = [
+  {sec:'Company Information', type:'statement', q:'First, we need your company information', d:'The basics — who you are and where you\'re based. This is how we set up your account in Extensiv and keep everything organised on our end.'},
+  {sec:'Company Information', type:'text', q:'What is your company name?', req:true},
+  {sec:'Company Information', type:'longtext', q:'What is your company address?', req:true},
+  {sec:'Company Information', type:'text', q:'City, state and postcode', req:true},
+  {sec:'Company Information', type:'phone', q:'Company phone number', req:true},
+  {sec:'Company Information', type:'email', q:'Company email address', req:true},
+  {sec:'Company Contacts', type:'statement', q:'Now, your best company contacts', d:'Different updates need to reach different people. This makes sure stock reports, address issues, and returns info go straight to whoever needs them on your team.'},
+  {sec:'Company Contacts', type:'text', q:'Name of the primary point of contact', req:true},
+  {sec:'Company Contacts', type:'email', q:'Primary contact\'s email address', req:true},
+  {sec:'Company Contacts', type:'longtext', q:'Email(s) to receive invalid address notifications'},
+  {sec:'Company Contacts', type:'longtext', q:'Email(s) to receive stock report updates'},
+  {sec:'Company Contacts', type:'longtext', q:'Email(s) to receive returns spreadsheets'},
+  {sec:'Billing', type:'statement', q:'Let\'s collect your billing information', d:'Only fill this out if invoices need to go somewhere different from your main company details. If it\'s all the same, skip ahead.'},
+  {sec:'Billing', type:'text', q:'Billing company name'},
+  {sec:'Billing', type:'longtext', q:'Billing address'},
+  {sec:'Billing', type:'email', q:'Billing contact email'},
+  {sec:'Your Products', type:'statement', q:'This section is all about your products', d:'Understanding what you\'re shipping — and how much — helps us prepare the right storage, handling, and resources before you go live.'},
+  {sec:'Your Products', type:'longtext', q:'What products are you shipping?', d:'e.g. protein powders, RTD drinks, supplements, apparel', req:true},
+  {sec:'Your Products', type:'number', q:'How many active SKUs do you have?', d:'We support up to 50 active SKUs.', req:true},
+  {sec:'Your Products', type:'yesno', q:'Do any of your products contain dangerous goods?', d:'Aerosols, flammables, lithium batteries and the like.', req:true},
+  {sec:'Your Products', type:'yesno', q:'Can you supply a SKU list with descriptions, weights and dimensions?', req:true},
+  {sec:'Your Products', type:'file', q:'Upload your SKU list', d:'Please make sure the file name includes your business name.'},
+  {sec:'Your Products', type:'number', q:'Average weekly orders under 500 g', req:true},
+  {sec:'Your Products', type:'number', q:'Average weekly orders between 500 g and 1 kg', req:true},
+  {sec:'Your Products', type:'number', q:'Average weekly orders over 1 kg', req:true},
+  {sec:'Your Products', type:'date', q:'Expected go-live date', req:true},
+  {sec:'Shipping', type:'statement', q:'Let\'s clarify your shipping preferences', d:'How you pack and where you ship matters. This helps us match you with the right carriers and delivery options for your customers.'},
+  {sec:'Shipping', type:'text', q:'What type of product packaging do you use?', d:'e.g. satchels, cartons, custom mailers', req:true},
+  {sec:'Shipping', type:'yesno', q:'Do you ship internationally?', req:true},
+  {sec:'Tech Setup', type:'statement', q:'Now, let\'s work out your tech setup', d:'A quick check that your store connects cleanly with Starshipit and Extensiv — so orders flow and labels print correctly from day one.'},
+  {sec:'Tech Setup', type:'text', q:'Which eCommerce platform do you sell on?', d:'Shopify, WooCommerce, BigCommerce, Amazon…', req:true},
+  {sec:'Tech Setup', type:'text', q:'IT contact person\'s name', req:true},
+  {sec:'Tech Setup', type:'email', q:'IT contact person\'s email address', req:true},
+  {sec:'Tech Setup', type:'text', q:'Do you use a WMS or ERP? Which one?', d:'Type "not applicable" if none.'}
+];
+var obAnswers = {}, obIdx = -1, obFirstName = '';
+var obQTotal = OB_STEPS.filter(function(s){ return s.type !== 'statement'; }).length;
+(function(){
+  var m = (location.href.match(/[?&#]first_name=([^&#]+)/) || [])[1];
+  if(m){ obFirstName = decodeURIComponent(m).replace(/[^a-zA-ZÀ-ɏ' -]/g, '').slice(0, 30); }
+  if(obFirstName){ document.getElementById('obHello').innerHTML = 'G\'day ' + obFirstName + '! <em>Welcome to Fullstack Fulfillment.</em>'; }
+})();
+var obStage = document.getElementById('obStage');
+function obEsc(s){ var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function obProgress(){
+  var answered = OB_STEPS.slice(0, obIdx + 1).filter(function(s){ return s.type !== 'statement'; }).length;
+  document.getElementById('obBar').style.width = (obIdx < 0 ? 0 : Math.round(answered / obQTotal * 100)) + '%';
+  var qNum = OB_STEPS.slice(0, obIdx + 1).filter(function(s){ return s.type !== 'statement'; }).length;
+  var cur = OB_STEPS[obIdx];
+  var cnt = document.getElementById('obCount');
+  if(cur && cur.type !== 'statement'){ cnt.style.display = 'block'; cnt.textContent = qNum + ' / ' + obQTotal + ' · ' + cur.sec; }
+  else { cnt.style.display = 'none'; }
+}
+function obRender(){
+  var s = OB_STEPS[obIdx];
+  var nav = document.getElementById('obNav');
+  nav.style.display = 'flex';
+  document.getElementById('obPrev').disabled = obIdx <= 0;
+  var h = '<div class="ob-step"><div class="ob-sec">' + obEsc(s.sec) + '</div>';
+  h += '<div class="ob-q">' + obEsc(s.q) + (s.req ? ' <span class="req">*</span>' : '') + '</div>';
+  if(s.d) h += '<div class="ob-desc">' + obEsc(s.d) + '</div>';
+  var saved = obAnswers[obIdx];
+  if(s.type === 'statement'){}
+  else if(s.type === 'yesno'){
+    h += '<div class="ob-yn"><button type="button" data-yn="Yes"><span class="key">Y</span> Yes</button><button type="button" data-yn="No"><span class="key">N</span> No</button></div>';
+  } else if(s.type === 'file'){
+    h += '<div class="ob-file"><label>Choose a file<input type="file" id="obFileIn"></label><span class="ob-file-name" id="obFileName">' + (saved ? obEsc(saved) : '') + '</span></div>';
+  } else if(s.type === 'longtext'){
+    h += '<textarea class="ob-textarea" id="obIn" rows="2" placeholder="Type your answer here...">' + (saved ? obEsc(saved) : '') + '</textarea>';
+  } else {
+    var t = s.type === 'email' ? 'email' : s.type === 'phone' ? 'tel' : s.type === 'number' ? 'number' : s.type === 'date' ? 'date' : 'text';
+    h += '<input class="ob-input" id="obIn" type="' + t + '" ' + (t === 'number' ? 'min="0" ' : '') + 'placeholder="' + (t === 'date' ? '' : 'Type your answer here...') + '" value="' + (saved ? obEsc(saved) : '') + '">';
+  }
+  h += '<div class="ob-err" id="obErr"></div>';
+  h += '<div class="ob-actions"><button class="ob-ok" id="obOk">' + (s.type === 'statement' ? 'Continue' : 'OK') + '</button>';
+  if(s.type !== 'statement' && s.type !== 'yesno') h += '<span class="ob-enter">press Enter ↵</span>';
+  if(!s.req && s.type !== 'statement') h += '<button class="ob-skip" id="obSkip">Skip</button>';
+  h += '</div></div>';
+  obStage.className = '';
+  obStage.innerHTML = h;
+  obProgress();
+  var inp = document.getElementById('obIn');
+  if(inp){
+    inp.focus();
+    inp.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && !(s.type === 'longtext' && e.shiftKey)){ e.preventDefault(); obAdvance(); }
+    });
+  }
+  document.getElementById('obOk').addEventListener('click', obAdvance);
+  var skip = document.getElementById('obSkip');
+  if(skip) skip.addEventListener('click', function(){ obAnswers[obIdx] = obAnswers[obIdx] || ''; obGo(1); });
+  document.querySelectorAll('[data-yn]').forEach(function(b){
+    if(saved === b.getAttribute('data-yn')) b.classList.add('sel');
+    b.addEventListener('click', function(){
+      obAnswers[obIdx] = b.getAttribute('data-yn');
+      document.querySelectorAll('[data-yn]').forEach(function(x){ x.classList.toggle('sel', x === b); });
+      setTimeout(function(){ obGo(1); }, 260);
+    });
+  });
+  var fileIn = document.getElementById('obFileIn');
+  if(fileIn) fileIn.addEventListener('change', function(){
+    obAnswers[obIdx] = fileIn.files.length ? fileIn.files[0].name : '';
+    document.getElementById('obFileName').textContent = obAnswers[obIdx];
+  });
+}
+function obAdvance(){
+  var s = OB_STEPS[obIdx];
+  if(s.type !== 'statement' && s.type !== 'yesno' && s.type !== 'file'){
+    var inp = document.getElementById('obIn');
+    var v = inp.value.trim();
+    var err = document.getElementById('obErr');
+    if(s.req && !v){ err.textContent = 'Please fill this in.'; err.classList.add('show'); return; }
+    if(v && s.type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ err.textContent = 'Hmm, that email doesn\'t look right.'; err.classList.add('show'); return; }
+    obAnswers[obIdx] = v;
+  }
+  if(s.type === 'yesno' && s.req && !obAnswers[obIdx]){
+    var e2 = document.getElementById('obErr'); e2.textContent = 'Please select one.'; e2.classList.add('show'); return;
+  }
+  obGo(1);
+}
+function obGo(dir){
+  obIdx += dir;
+  if(obIdx >= OB_STEPS.length){ obDone(); return; }
+  if(obIdx < 0) obIdx = 0;
+  obRender();
+}
+function obDone(){
+  document.getElementById('obBar').style.width = '100%';
+  document.getElementById('obNav').style.display = 'none';
+  document.getElementById('obCount').style.display = 'none';
+  obStage.className = '';
+  obStage.innerHTML = '<div class="ob-step ob-done"><div class="ob-done-ok">✓</div>' +
+    '<h2>Thank you' + (obFirstName ? ', ' + obEsc(obFirstName) : '') + '.</h2>' +
+    '<p>Our team will review your details and be in touch <b>ASAP</b> to confirm your next steps.</p>' +
+    '<a class="ob-start" href="#hero" style="text-decoration:none">Visit Website</a>' +
+    '<div class="q-note ob-done-note" style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)">Design prototype — no data was sent</div></div>';
+}
+document.getElementById('obStart').addEventListener('click', function(){ obIdx = -1; obGo(1); });
+document.getElementById('obPrev').addEventListener('click', function(){ obGo(-1); });
+document.getElementById('obNext').addEventListener('click', function(){ obAdvance(); });
+/* ————— AI presenter video ————— */
+var obVideo = document.getElementById('obVideo');
+var OV_ROO = 'assets/roo-white.png', OV_LOGO = 'assets/logo-white.png';
+var OV_TTS = ['assets/tts0.mp3', 'assets/tts1.mp3', 'assets/tts2.mp3', 'assets/tts3.mp3', 'assets/tts4.mp3', 'assets/tts5.mp3', 'assets/tts6.mp3'];
+var ovPlaying = false, ovVoice = null, ovAudio = null;
+function ovScenes(){
+  var name = obFirstName;
+  var tl = document.querySelectorAll('.tech-logo');
+  var dhl = document.querySelector('.brand-plate.dhl img');
+  var ap = document.querySelector('.brand-plate.ap img');
+  return [
+    {say: "G'day" + (name ? ' ' + name : '') + " — and welcome to Fullstack Fulfillment.",
+     html: '<img class="ov-logo" src="' + OV_LOGO + '" alt="">'},
+    {say: "From today, our warehouse in Stapylton, Queensland, is where your brand ships from.",
+     html: '<img class="ov-roo" src="' + OV_ROO + '" alt=""><span class="ov-chip">Stapylton QLD 4207</span>'},
+    {say: "You're about to fill in a short onboarding form. It takes five to seven minutes, and tells us everything we need to set you up properly.",
+     html: '<div class="ov-big">5–7 minutes.<br><em>28 quick questions.</em></div><div class="ov-list"><span>Company &amp; contacts</span><span>Products &amp; SKUs</span><span>Store connection</span></div>'},
+    {say: "While you do that, we set up your account in Extensiv, and connect your store through Starshipit.",
+     html: tl.length > 1 ? '<div class="ov-row"><img src="' + tl[0].src + '" alt="Starshipit"><img src="' + tl[1].src + '" style="height:32px" alt="Extensiv"></div><span class="ov-chip cool">Connected from day one</span>' : '<div class="ov-big">Extensiv + Starshipit</div>'},
+    {say: "So from your very first order, everything is picked, packed, and dispatched same day before 9 AM — delivered by DHL, Australia Post, and our wider carrier network.",
+     html: (function(){
+       var row = '<div class="ov-row">';
+       if(dhl) row += '<span class="ov-plate dhl"><img src="' + dhl.src + '" alt="DHL"></span>';
+       if(ap) row += '<span class="ov-plate ap"><img src="' + ap.src + '" alt="Australia Post"></span>';
+       var minis = document.querySelectorAll('.mini-plate img');
+       for(var m = 0; m < minis.length; m++){ row += '<span class="ov-plate ap" style="height:32px"><img src="' + minis[m].src + '" style="height:12px"></span>'; }
+       return row + '</div><span class="ov-chip">Same-day · before 9am AEST</span>';
+     })()},
+    {say: "Quick tip — have your SKU list handy, with descriptions, weights, and dimensions. If a question doesn't apply, just skip it.",
+     html: '<div class="ov-big">Have your <em>SKU list</em> handy.</div><div class="ov-list"><span>Descriptions</span><span>Weights</span><span>Dimensions</span></div>'},
+    {say: "That's it — fill in the form below, and let's get you shipping. Fuel your brand. We'll fulfil every order.",
+     html: '<img class="ov-logo" src="' + OV_LOGO + '" alt=""><div class="ov-big">Fuel Your Brand.<br><em>Fulfill Every Order.</em></div>'}
+  ];
+}
+function ovPickVoice(){
+  var vs = speechSynthesis.getVoices();
+  return vs.filter(function(v){ return /en[-_]AU/i.test(v.lang); })[0]
+      || vs.filter(function(v){ return /^en/i.test(v.lang) && /karen|catherine|matilda|serena|samantha|female/i.test(v.name); })[0]
+      || vs.filter(function(v){ return /^en/i.test(v.lang); })[0] || null;
+}
+if('speechSynthesis' in window){
+  ovVoice = ovPickVoice();
+  speechSynthesis.onvoiceschanged = function(){ ovVoice = ovPickVoice(); };
+}
+function ovPlay(){
+  if(ovPlaying) return;
+  ovPlaying = true;
+  var scenes = ovScenes();
+  obVideo.classList.add('playing');
+  obVideo.querySelector('.ov-replay').classList.remove('show');
+  var stage = document.getElementById('ovStage');
+  var cap = obVideo.querySelector('.ov-cap');
+  var bar = obVideo.querySelector('.ov-progress i');
+  var hasSpeech = 'speechSynthesis' in window;
+  var i = -1;
+  function next(){
+    if(!ovPlaying) return;
+    i++;
+    if(i >= scenes.length){ ovEnd(); return; }
+    var s = scenes[i];
+    stage.innerHTML = '<div class="ov-scene">' + s.html + '</div>';
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ if(stage.firstChild) stage.firstChild.classList.add('on'); }); });
+    cap.textContent = s.say;
+    bar.style.width = Math.round((i + 1) / scenes.length * 100) + '%';
+    var advanced = false;
+    function adv(){ if(advanced || !ovPlaying) return; advanced = true; setTimeout(next, 300); }
+    var est = Math.max(2600, s.say.split(' ').length * 380);
+    function speakFallback(){
+      if(hasSpeech && !speechSynthesis.speaking){
+        var u = new SpeechSynthesisUtterance(s.say);
+        if(ovVoice) u.voice = ovVoice;
+        u.onend = adv; u.onerror = adv;
+        speechSynthesis.speak(u);
+      }
+      setTimeout(adv, est + 2000);
+    }
+    if(OV_TTS[i] && OV_TTS[i].indexOf('__') !== 0){
+      var a = new Audio(OV_TTS[i]);
+      ovAudio = a;
+      a.onended = adv;
+      a.onerror = speakFallback;
+      a.play().catch(speakFallback);
+      setTimeout(adv, est + 8000);
+    } else {
+      speakFallback();
+    }
+  }
+  next();
+}
+function ovEnd(){
+  ovPlaying = false;
+  obVideo.classList.remove('playing');
+  document.getElementById('ovStage').innerHTML = '';
+  obVideo.querySelector('.ov-replay').classList.add('show');
+}
+function ovStop(){
+  if(!ovPlaying){ return; }
+  ovPlaying = false;
+  if(ovAudio){ ovAudio.pause(); ovAudio = null; }
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  obVideo.classList.remove('playing');
+  document.getElementById('ovStage').innerHTML = '';
+}
+function obVideoClick(){
+  if(VIDEO_URL){
+    obVideo.classList.add('playing');
+    document.getElementById('ovStage').innerHTML = '<video src="' + VIDEO_URL + '" controls autoplay playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000"></video>';
+    return;
+  }
+  if(ovPlaying){ ovStop(); return; }
+  ovPlay();
+}
+obVideo.addEventListener('click', obVideoClick);
+obVideo.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); obVideoClick(); } });
+
+if(location.hash) route();
+</script>
+
+</body>
+</html>
