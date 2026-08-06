@@ -31,7 +31,7 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 ::selection{background:var(--accent);color:#0d0c0a}
 
-#view-quote,#view-calc,#view-ob,#view-terms,#view-privacy{display:none}
+#view-quote,#view-calc,#view-ob,#view-terms,#view-privacy,#view-login,#view-dash{display:none}
 body.on-quote #view-home{display:none}
 body.on-quote #view-quote{display:block}
 body.on-calc #view-home{display:none}
@@ -43,6 +43,10 @@ body.on-terms #view-home{display:none}
 body.on-terms #view-terms{display:block}
 body.on-privacy #view-home{display:none}
 body.on-privacy #view-privacy{display:block}
+body.on-login #view-home{display:none}
+body.on-login #view-login{display:block}
+body.on-dash #view-home{display:none}
+body.on-dash #view-dash{display:block}
 
 /* ————— nav ————— */
 nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 18px;background:rgba(21,19,16,.72);backdrop-filter:blur(18px);border:1px solid var(--stroke);border-radius:100px;width:min(1060px,calc(100% - 32px))}
@@ -462,6 +466,79 @@ footer img{height:42px;width:auto}
   .ob-count{bottom:34px}
 }
 
+/* ————— client login ————— */
+.nav-login{display:block;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;border:1px solid rgba(255,255,255,.18);border-radius:100px;transition:border-color .15s,background .15s;white-space:nowrap}
+.nav-login:hover{border-color:var(--accent);background:rgba(245,93,47,.08)}
+.login-stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:130px 24px 80px;position:relative;overflow:hidden}
+.login-glow{position:absolute;width:700px;height:700px;top:-260px;left:50%;transform:translateX(-50%);background:radial-gradient(circle,rgba(245,93,47,.1),transparent 65%);pointer-events:none}
+.login-card{width:min(430px,100%);background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:24px;padding:40px 36px;position:relative}
+.login-card .logo{height:38px;width:auto;margin:0 auto 24px;display:block}
+.login-card h1{font-size:23px;font-weight:800;letter-spacing:-.02em;text-align:center;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--dim);text-align:center;margin-bottom:26px}
+.login-card .f-field{margin-bottom:14px}
+.login-btn{width:100%;background:var(--accent);color:#0d0c0a;font-size:14.5px;font-weight:800;font-family:var(--sans);padding:15px;border-radius:100px;border:0;cursor:pointer;margin-top:8px;transition:background .2s,transform .2s}
+.login-btn:hover{background:#ff7245;transform:translateY(-1px)}
+.login-demo{display:block;text-align:center;margin-top:16px;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
+.login-demo:hover{text-decoration:underline}
+.login-note{margin-top:22px;padding-top:18px;border-top:1px dashed rgba(255,255,255,.1);font-size:11.5px;line-height:1.6;color:var(--faint);text-align:center}
+
+/* ————— client dashboard ————— */
+.dash-wrap{max-width:1160px;margin:0 auto;padding:130px 24px 100px}
+.dash-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.dash-top h1{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:-.03em}
+.dash-out{font-size:13px;font-weight:600;color:var(--dim);text-decoration:none}
+.dash-out:hover{color:var(--text)}
+.dash-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+.d-chip{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);background:rgba(255,255,255,.05);border:1px solid var(--stroke);padding:5px 12px;border-radius:100px}
+.d-chip.demo{color:var(--accent);background:rgba(245,93,47,.1);border-color:rgba(245,93,47,.35)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:18px;padding:20px 22px}
+.kpi-v{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.kpi-v small{font-size:14px;color:var(--dim);font-weight:600}
+.kpi-k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:9px}
+.dash-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:start}
+.dash-panel{background:linear-gradient(180deg,var(--raise),#110f0c);border:1px solid var(--stroke);border-radius:20px;padding:26px 28px;margin-bottom:18px}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;margin-bottom:18px}
+.panel-title{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+.panel-meta{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+table.stock{width:100%;border-collapse:collapse;font-size:13px}
+.stock th{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);text-align:left;padding:0 8px 10px 0;border-bottom:1px solid var(--stroke)}
+.stock th.num,.stock td.num{text-align:right}
+.stock td{padding:11px 8px 11px 0;border-bottom:1px dashed rgba(255,255,255,.07);color:var(--dim);vertical-align:middle}
+.stock td.num{font-family:var(--mono);font-size:12.5px;color:var(--text);font-variant-numeric:tabular-nums}
+.stock td b{display:block;color:var(--text);font-weight:600;font-size:13px}
+.stock td span.sku{font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.lvl{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px}
+.lvl.ok{color:#7ee2a8;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25)}
+.lvl.low{color:#fbbf24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3)}
+.hero-num{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.hero-num small{font-size:13px;color:var(--dim);font-weight:600}
+.bars{display:flex;align-items:flex-end;gap:5px;height:110px;margin:18px 0 8px;border-bottom:2px solid rgba(255,255,255,.14);padding-bottom:0}
+.bars i{flex:1;background:var(--accent);border-radius:4px 4px 0 0;min-height:6px;opacity:.9;transition:opacity .15s}
+.bars i:hover{opacity:1;box-shadow:0 0 12px rgba(245,93,47,.5)}
+.bars-x{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--faint)}
+.ship-item{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px dashed rgba(255,255,255,.07)}
+.ship-item:last-child{border-bottom:0}
+.ship-plate{display:inline-flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;height:34px;min-width:64px;padding:0 10px;flex-shrink:0}
+.ship-plate img{height:12px;width:auto;display:block}
+.ship-plate.nzp img{height:16px}
+.ship-info{flex:1;min-width:0}
+.ship-id{display:block;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--text)}
+.ship-dest{display:block;font-size:12px;color:var(--faint);margin-top:2px}
+.status{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:100px;white-space:nowrap}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.status.packed{color:var(--accent);background:rgba(245,93,47,.09);border:1px solid rgba(245,93,47,.3)}
+.status.transit{color:var(--cool);background:rgba(197,211,226,.07);border:1px solid rgba(197,211,226,.28)}
+.status.delivered{color:#7ee2a8;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25)}
+@media (max-width:1000px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .dash-grid{grid-template-columns:1fr}
+  .nav-login{display:none}
+}
+@media (max-width:640px){
+  .stock th:nth-child(3),.stock td:nth-child(3){display:none}
+}
+
 /* reveal */
 .js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
 .js .reveal.visible{opacity:1;transform:translateY(0)}
@@ -517,6 +594,7 @@ footer img{height:42px;width:auto}
     <li><a href="#/calculator">Pricing</a></li>
     <li><a href="#/onboarding">Onboarding</a></li>
   </ul>
+  <a class="nav-login" href="#/login">Client Login</a>
   <a class="nav-cta" href="#/quote">Get a Quote</a>
   <button class="nav-burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
@@ -527,6 +605,7 @@ footer img{height:42px;width:auto}
   <a href="#shipping">Shipping</a>
   <a href="#/calculator">Pricing</a>
   <a href="#/onboarding">Onboarding</a>
+  <a href="#/login">Client Login</a>
   <a href="#/quote" style="color:var(--accent);font-weight:700">Get a Quote</a>
 </div>
 
@@ -1146,6 +1225,102 @@ footer img{height:42px;width:auto}
   </div>
 </div><!-- /view-privacy -->
 
+<div id="view-login">
+  <div class="login-stage">
+    <div class="login-glow"></div>
+    <form class="login-card" id="loginForm" novalidate>
+      <img class="logo" src="assets/logo-white.png" alt="Fullstack Fulfillment">
+      <h1>Client login</h1>
+      <p class="login-sub">Live visibility of your stock, sales, and shipping.</p>
+      <div class="f-field"><label class="f-label" for="loginEmail">Email</label><input class="f-input" id="loginEmail" type="email" autocomplete="off" placeholder="you@yourbrand.com.au"></div>
+      <div class="f-field"><label class="f-label" for="loginPass">Password</label><input class="f-input" id="loginPass" type="password" autocomplete="off" placeholder="••••••••"></div>
+      <button class="login-btn" type="submit">Log in →</button>
+      <a class="login-demo" href="#/dashboard">View the demo dashboard →</a>
+      <p class="login-note">Design prototype — nothing you type here is stored or sent. At launch this signs you into your live client portal, powered by Extensiv, with real-time data.</p>
+    </form>
+  </div>
+</div><!-- /view-login -->
+
+<div id="view-dash">
+  <div class="dash-wrap">
+    <div class="dash-top">
+      <h1>G'day, Alpine Peak Nutrition</h1>
+      <a class="dash-out" href="#/login">Log out →</a>
+    </div>
+    <div class="dash-chips">
+      <span class="d-chip">Account FS-1042</span>
+      <span class="d-chip">Extensiv-linked</span>
+      <span class="d-chip">Updated 2 min ago</span>
+      <span class="d-chip demo">Demo data</span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-v">8,472</div><div class="kpi-k">Units in stock</div></div>
+      <div class="kpi"><div class="kpi-v">312</div><div class="kpi-k">Orders this week</div></div>
+      <div class="kpi"><div class="kpi-v">38</div><div class="kpi-k">Dispatched today</div></div>
+      <div class="kpi"><div class="kpi-v">4</div><div class="kpi-k">Returns open</div></div>
+    </div>
+    <div class="dash-grid">
+      <div>
+        <div class="dash-panel">
+          <div class="panel-head"><span class="panel-title">Stock on hand</span><span class="panel-meta">6 active SKUs</span></div>
+          <table class="stock">
+            <tr><th>Product</th><th class="num">On hand</th><th class="num">Allocated</th><th style="text-align:right;padding-right:0">Level</th></tr>
+            <tr><td><b>Whey Protein Isolate — Chocolate 1 kg</b><span class="sku">APN-WPI-CHOC-1KG</span></td><td class="num">2,140</td><td class="num">186</td><td style="text-align:right;padding-right:0"><span class="lvl ok">In stock</span></td></tr>
+            <tr><td><b>Whey Protein Isolate — Vanilla 1 kg</b><span class="sku">APN-WPI-VAN-1KG</span></td><td class="num">1,876</td><td class="num">154</td><td style="text-align:right;padding-right:0"><span class="lvl ok">In stock</span></td></tr>
+            <tr><td><b>Creatine Monohydrate 500 g</b><span class="sku">APN-CRE-MONO-500</span></td><td class="num">940</td><td class="num">88</td><td style="text-align:right;padding-right:0"><span class="lvl ok">In stock</span></td></tr>
+            <tr><td><b>Pre-Workout — Wild Berry 300 g</b><span class="sku">APN-PWO-BERRY-300</span></td><td class="num">132</td><td class="num">41</td><td style="text-align:right;padding-right:0"><span class="lvl low">Low stock</span></td></tr>
+            <tr><td><b>RTD Protein Shake — Choc 12-pack</b><span class="sku">APN-RTD-CHOC-12PK</span></td><td class="num">64</td><td class="num">22</td><td style="text-align:right;padding-right:0"><span class="lvl low">Low stock</span></td></tr>
+            <tr><td><b>Shaker 700 ml</b><span class="sku">APN-SHAKER-700</span></td><td class="num">3,320</td><td class="num">240</td><td style="text-align:right;padding-right:0"><span class="lvl ok">In stock</span></td></tr>
+          </table>
+        </div>
+        <div class="dash-panel">
+          <div class="panel-head"><span class="panel-title">Orders — last 14 days</span><span class="panel-meta">ex GST</span></div>
+          <div class="hero-num">$48,940 <small>revenue this month</small></div>
+          <div class="bars" aria-label="Orders per day, last 14 days">
+            <i style="height:46%" title="24 Jul — 24 orders"></i><i style="height:60%" title="25 Jul — 31 orders"></i><i style="height:54%" title="26 Jul — 28 orders"></i><i style="height:67%" title="27 Jul — 35 orders"></i><i style="height:42%" title="28 Jul — 22 orders"></i><i style="height:35%" title="29 Jul — 18 orders"></i><i style="height:50%" title="30 Jul — 26 orders"></i><i style="height:63%" title="31 Jul — 33 orders"></i><i style="height:79%" title="1 Aug — 41 orders"></i><i style="height:73%" title="2 Aug — 38 orders"></i><i style="height:56%" title="3 Aug — 29 orders"></i><i style="height:85%" title="4 Aug — 44 orders"></i><i style="height:100%" title="5 Aug — 52 orders"></i><i style="height:73%" title="6 Aug — 38 orders"></i>
+          </div>
+          <div class="bars-x"><span>24 Jul</span><span>6 Aug · 38 orders</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="dash-panel">
+          <div class="panel-head"><span class="panel-title">Recent shipments</span><span class="panel-meta">Live tracking</span></div>
+          <div class="ship-item">
+            <span class="ship-plate"><img src="assets/auspost.svg" alt="Australia Post"></span>
+            <span class="ship-info"><span class="ship-id">#FS-284117</span><span class="ship-dest">Melbourne VIC · AP392188473AU</span></span>
+            <span class="status packed">Packed</span>
+          </div>
+          <div class="ship-item">
+            <span class="ship-plate nzp"><img src="assets/nzpost.png" alt="NZ Post"></span>
+            <span class="ship-info"><span class="ship-id">#FS-284102</span><span class="ship-dest">Auckland NZ · NZ00442817</span></span>
+            <span class="status transit">In transit</span>
+          </div>
+          <div class="ship-item">
+            <span class="ship-plate"><img src="assets/dhl.svg" alt="DHL"></span>
+            <span class="ship-info"><span class="ship-id">#FS-284096</span><span class="ship-dest">Sydney NSW · DHL8837120</span></span>
+            <span class="status transit">In transit</span>
+          </div>
+          <div class="ship-item">
+            <span class="ship-plate"><img src="assets/auspost.svg" alt="Australia Post"></span>
+            <span class="ship-info"><span class="ship-id">#FS-284089</span><span class="ship-dest">Perth WA · AP392186221AU</span></span>
+            <span class="status delivered">Delivered</span>
+          </div>
+          <div class="ship-item">
+            <span class="ship-plate"><img src="assets/parcelright.svg" alt="Parcel Right"></span>
+            <span class="ship-info"><span class="ship-id">#FS-284071</span><span class="ship-dest">Brisbane QLD · PR1104482</span></span>
+            <span class="status delivered">Delivered</span>
+          </div>
+        </div>
+        <div class="dash-panel">
+          <div class="panel-head"><span class="panel-title">Need a hand?</span></div>
+          <p style="font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:14px">Your onboarding specialist can adjust stock alerts, reports, and carrier rules any time.</p>
+          <a class="calc-cta" href="mailto:info@fullstackfs.com.au" style="font-size:13.5px;padding:12px">Contact your specialist</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /view-dash -->
+
 <footer>
   <div class="foot-grid">
     <div class="foot-col">
@@ -1164,6 +1339,7 @@ footer img{height:42px;width:auto}
       <span class="foot-entity">Fullstack Fulfilment Australia Pty Ltd</span>
       <a href="#/quote">Get a Quote</a>
       <a href="#/calculator">Pricing Calculator</a>
+      <a href="#/login">Client Login</a>
       <a href="#/terms">Terms &amp; Conditions</a>
       <a href="#/privacy">Privacy Policy</a>
     </div>
@@ -1180,12 +1356,15 @@ var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function route(){
   var h = location.hash;
-  var view = h === '#/quote' ? 'quote' : (h === '#/calculator' ? 'calc' : (h.indexOf('#/onboarding') === 0 ? 'ob' : (h === '#/terms' ? 'terms' : (h === '#/privacy' ? 'privacy' : 'home'))));
+  var view = h === '#/quote' ? 'quote' : (h === '#/calculator' ? 'calc' : (h.indexOf('#/onboarding') === 0 ? 'ob' : (h === '#/terms' ? 'terms' : (h === '#/privacy' ? 'privacy' : (h === '#/login' ? 'login' : (h === '#/dashboard' ? 'dash' : 'home'))))));
+  if(view === 'login' && PORTAL_URL){ window.location.href = PORTAL_URL; return; }
   document.body.classList.toggle('on-quote', view === 'quote');
   document.body.classList.toggle('on-calc', view === 'calc');
   document.body.classList.toggle('on-ob', view === 'ob');
   document.body.classList.toggle('on-terms', view === 'terms');
   document.body.classList.toggle('on-privacy', view === 'privacy');
+  document.body.classList.toggle('on-login', view === 'login');
+  document.body.classList.toggle('on-dash', view === 'dash');
   if(view !== 'ob' && typeof ovStop === 'function') ovStop();
   closeMenu();
   if(view !== 'home'){ window.scrollTo(0,0); return; }
@@ -1297,6 +1476,7 @@ form.addEventListener('submit', function(e){
 
 /* ————— onboarding flow ————— */
 var VIDEO_URL = ''; /* drop the produced welcome video URL (mp4 or YouTube embed) here */
+var PORTAL_URL = ''; /* set to the live Extensiv client-portal login URL to send Client Login straight there */
 var OB_STEPS = [
   {sec:'Company Information', type:'statement', q:'First, we need your company information', d:'The basics — who you are and where you\'re based. This is how we set up your account in Extensiv and keep everything organised on our end.'},
   {sec:'Company Information', type:'text', q:'What is your company name?', req:true},
@@ -1543,6 +1723,9 @@ function obVideoClick(){
 }
 obVideo.addEventListener('click', obVideoClick);
 obVideo.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); obVideoClick(); } });
+
+var loginForm = document.getElementById('loginForm');
+if(loginForm) loginForm.addEventListener('submit', function(e){ e.preventDefault(); location.hash = '#/dashboard'; });
 
 if(location.hash) route();
 </script>
