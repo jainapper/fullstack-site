@@ -31,7 +31,7 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 ::selection{background:var(--accent);color:#0d0c0a}
 
-#view-quote,#view-calc,#view-ob,#view-terms,#view-privacy,#view-login,#view-dash{display:none}
+#view-quote,#view-calc,#view-ob,#view-terms,#view-privacy,#view-login,#view-dash,#view-team{display:none}
 body.on-quote #view-home{display:none}
 body.on-quote #view-quote{display:block}
 body.on-calc #view-home{display:none}
@@ -47,6 +47,8 @@ body.on-login #view-home{display:none}
 body.on-login #view-login{display:block}
 body.on-dash #view-home{display:none}
 body.on-dash #view-dash{display:block}
+body.on-team #view-home{display:none}
+body.on-team #view-team{display:block}
 
 /* ————— nav ————— */
 nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 18px;background:rgba(21,19,16,.72);backdrop-filter:blur(18px);border:1px solid var(--stroke);border-radius:100px;width:min(1060px,calc(100% - 32px))}
@@ -213,6 +215,8 @@ footer img{height:42px;width:auto}
 .foot-bottom{max-width:1160px;margin:0 auto;border-top:1px solid var(--stroke);padding:20px 0 26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--faint)}
 .foot-bottom a{color:var(--faint);text-decoration:none}
 .foot-bottom a:hover{color:var(--text)}
+.foot-bottom a.foot-team{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);border:1px solid var(--stroke);border-radius:100px;padding:6px 14px;margin-left:12px;transition:border-color .15s,color .15s}
+.foot-bottom a.foot-team:hover{border-color:var(--stroke-hi);color:var(--text)}
 
 /* legal pages */
 .legal-hero{padding:150px 24px 8px}
@@ -481,6 +485,8 @@ footer img{height:42px;width:auto}
 .login-demo{display:block;text-align:center;margin-top:16px;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
 .login-demo:hover{text-decoration:underline}
 .login-note{margin-top:22px;padding-top:18px;border-top:1px dashed rgba(255,255,255,.1);font-size:11.5px;line-height:1.6;color:var(--faint);text-align:center}
+.team-msg{display:none;margin-top:14px;font-size:12.5px;line-height:1.5;text-align:center;color:var(--accent)}
+.team-msg.show{display:block}
 
 /* ————— client dashboard ————— */
 .dash-wrap{max-width:1160px;margin:0 auto;padding:130px 24px 100px}
@@ -1242,6 +1248,22 @@ table.stock{width:100%;border-collapse:collapse;font-size:13px}
   </div>
 </div><!-- /view-login -->
 
+<div id="view-team">
+  <div class="login-stage">
+    <div class="login-glow"></div>
+    <form class="login-card" id="teamForm" novalidate>
+      <img class="logo" src="assets/logo-white.png" alt="Fullstack Fulfillment">
+      <h1>Team access</h1>
+      <p class="login-sub">Internal portal — onboarding management.</p>
+      <div class="f-field"><label class="f-label" for="teamEmail">Work email</label><input class="f-input" id="teamEmail" type="email" autocomplete="off" placeholder="you@fullstackfs.com.au"></div>
+      <div class="f-field"><label class="f-label" for="teamPass">Password</label><input class="f-input" id="teamPass" type="password" autocomplete="off" placeholder="••••••••"></div>
+      <button class="login-btn" type="submit">Sign in →</button>
+      <p class="team-msg" id="teamMsg" role="status" aria-live="polite"></p>
+      <p class="login-note">Staff only. This will connect to the internal onboarding database — new-client pipeline, questionnaire responses and progress tracking. Not connected yet; nothing you type here is stored or sent.</p>
+    </form>
+  </div>
+</div><!-- /view-team -->
+
 <div id="view-dash">
   <div class="dash-wrap">
     <div class="dash-top">
@@ -1347,7 +1369,7 @@ table.stock{width:100%;border-collapse:collapse;font-size:13px}
   </div>
   <div class="foot-bottom">
     <span>© 2026 Fullstack Fulfilment Australia Pty Ltd. All rights reserved.</span>
-    <span><a href="#/terms">Terms &amp; Conditions</a> · <a href="#/privacy">Privacy Policy</a></span>
+    <span><a href="#/terms">Terms &amp; Conditions</a> · <a href="#/privacy">Privacy Policy</a><a class="foot-team" href="#/team">Team Access</a></span>
   </div>
 </footer>
 
@@ -1357,8 +1379,9 @@ var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function route(){
   var h = location.hash;
-  var view = h === '#/quote' ? 'quote' : (h === '#/calculator' ? 'calc' : (h.indexOf('#/onboarding') === 0 ? 'ob' : (h === '#/terms' ? 'terms' : (h === '#/privacy' ? 'privacy' : (h === '#/login' ? 'login' : (h === '#/dashboard' ? 'dash' : 'home'))))));
+  var view = h === '#/quote' ? 'quote' : (h === '#/calculator' ? 'calc' : (h.indexOf('#/onboarding') === 0 ? 'ob' : (h === '#/terms' ? 'terms' : (h === '#/privacy' ? 'privacy' : (h === '#/login' ? 'login' : (h === '#/dashboard' ? 'dash' : (h === '#/team' ? 'team' : 'home')))))));
   if(view === 'login' && PORTAL_URL){ window.location.href = PORTAL_URL; return; }
+  if(view === 'team' && TEAM_URL){ window.location.href = TEAM_URL; return; }
   document.body.classList.toggle('on-quote', view === 'quote');
   document.body.classList.toggle('on-calc', view === 'calc');
   document.body.classList.toggle('on-ob', view === 'ob');
@@ -1366,6 +1389,7 @@ function route(){
   document.body.classList.toggle('on-privacy', view === 'privacy');
   document.body.classList.toggle('on-login', view === 'login');
   document.body.classList.toggle('on-dash', view === 'dash');
+  document.body.classList.toggle('on-team', view === 'team');
   if(view !== 'ob' && typeof ovStop === 'function') ovStop();
   closeMenu();
   if(view !== 'home'){ window.scrollTo(0,0); return; }
@@ -1478,6 +1502,7 @@ form.addEventListener('submit', function(e){
 /* ————— onboarding flow ————— */
 var VIDEO_URL = ''; /* drop the produced welcome video URL (mp4 or YouTube embed) here */
 var PORTAL_URL = ''; /* set to the live Extensiv client-portal login URL to send Client Login straight there */
+var TEAM_URL = ''; /* set to the internal onboarding-management portal URL to send Team Access straight there */
 var OB_STEPS = [
   {sec:'Company Information', type:'statement', q:'First, we need your company information', d:'The basics — who you are and where you\'re based. This is how we set up your account in Extensiv and keep everything organised on our end.'},
   {sec:'Company Information', type:'text', q:'What is your company name?', req:true},
@@ -1727,6 +1752,8 @@ obVideo.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key =
 
 var loginForm = document.getElementById('loginForm');
 if(loginForm) loginForm.addEventListener('submit', function(e){ e.preventDefault(); location.hash = '#/dashboard'; });
+var teamForm = document.getElementById('teamForm');
+if(teamForm) teamForm.addEventListener('submit', function(e){ e.preventDefault(); var m = document.getElementById('teamMsg'); if(m){ m.textContent = 'The internal portal isn\'t connected yet — check back soon.'; m.classList.add('show'); } });
 
 if(location.hash) route();
 </script>
