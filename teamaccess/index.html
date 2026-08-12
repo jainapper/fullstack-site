@@ -1255,13 +1255,20 @@ function seed(){
  *  Direct browser calls are normally blocked by CORS — a tiny proxy  *
  *  (see README) makes the live connection work. Demo data otherwise. *
  * ================================================================== */
-const SS_PROXY = 'https://fs-starshipit-proxy.vercel.app';
+const SS_PROXY = (location.protocol.indexOf('http') === 0 && !/github\.io$/.test(location.hostname)) ? (location.origin + '/api/ss?p=') : 'https://fs-starshipit-proxy.vercel.app';
 async function ssFetch(path, apiKey){
   const ss = col.settings().ss;
   /* Browsers cannot call api.starshipit.com directly (CORS), and static hosting
      has no serverless function to proxy it — so requests go through SS_PROXY
      unless a proxy of your own is set in Settings. */
-  const url = (ss.proxy ? ss.proxy.replace(/\/$/, '') : SS_PROXY) + path;
+  let url;
+  if(ss.proxy){ url = ss.proxy.replace(/\/$/, '') + path; }
+  else if(SS_PROXY.indexOf('?p=') > 0){
+    const qi = path.indexOf('?');
+    const base = qi >= 0 ? path.slice(0, qi) : path;
+    const rest = qi >= 0 ? '&' + path.slice(qi + 1) : '';
+    url = SS_PROXY + encodeURIComponent(base) + rest;
+  } else { url = SS_PROXY + path; }
   const res = await fetch(url, { headers: {
     'Content-Type': 'application/json',
     'StarShipIT-Api-Key': apiKey || '',
@@ -1314,6 +1321,28 @@ function ssIsDelivered(o){
                     (o.tracking_status && (o.tracking_status.status || o.tracking_status.name)) || '').toLowerCase();
   return st.indexOf('deliver') >= 0;
 }
+/* Freight is what the carrier charged. Starshipit names it differently by plan
+   and endpoint, so read every known shape and take the first real number. */
+function ssMoney(v){
+  if(v == null) return null;
+  const n = Number(String(v).replace(/[^0-9.\-]/g, ''));
+  return (isNaN(n) || n <= 0) ? null : n;
+}
+function ssFreight(o){
+  if(!o) return null;
+  const direct = [o.shipping_cost, o.freight_cost, o.carrier_cost, o.cost, o.price,
+                  o.shipping_price, o.total_shipping, o.shipping_total, o.freight,
+                  o.rate, o.quoted_price, o.label_cost];
+  for(const c of direct){ const n = ssMoney(c); if(n != null) return n; }
+  const nested = [].concat(Array.isArray(o.shipments) ? o.shipments : [],
+                           Array.isArray(o.packages) ? o.packages : [],
+                           Array.isArray(o.labels) ? o.labels : []);
+  for(const x of nested){
+    const n = ssMoney(x && (x.cost != null ? x.cost : (x.price != null ? x.price : x.freight_cost)));
+    if(n != null) return n;
+  }
+  return null;
+}
 function mapSsOrder(o, shipped, accountLabel, acctId){
   const items = ssItems(o);
   const skuPrefix = items[0] && String(items[0].sku).split('-')[0];
@@ -1338,7 +1367,8 @@ function mapSsOrder(o, shipped, accountLabel, acctId){
     date: o.shipped_date || o.shipped_at || o.order_date || o.date || new Date().toISOString(),
     deliveredTs,
     items,
-    value: o.declared_value || o.total_price || o.order_value || null
+    value: o.declared_value || o.total_price || o.order_value || null,
+    freight: ssFreight(o)
   };
 }
 function ssAcctRow(a){
@@ -1534,6 +1564,7 @@ async function ssConnect(auto){
     const p = prev[o.id];
     if(!p) return;
     if(!o.items.length && p.items && p.items.length) o.items = p.items;
+    if(o.freight == null && p.freight != null) o.freight = p.freight;
     if(!o.deliveredTs && p.deliveredTs){ o.deliveredTs = p.deliveredTs; if(o.status !== 'unshipped') o.status = 'delivered'; }
   });
 
@@ -1545,7 +1576,7 @@ async function ssConnect(auto){
                  (!o.items.length || (!o.deliveredTs && o.status === 'transit')))
     .sort((a, b) => new Date(b.date) - new Date(a.date));
   const deep = needs.slice(0, DEEP_CAP);
-  let filled = 0, deepFailed = 0, limitedHits = 0, noItemShape = '';
+  let filled = 0, deepFailed = 0, limitedHits = 0, noItemShape = '', freightFilled = 0;
   const CONC = 4;                       /* gentle on the API — bursts were being throttled */
   const DCONC = 2;                      /* the single-order endpoint throttles hardest */
   for(let i = 0; i < deep.length; i += DCONC){
@@ -1558,6 +1589,7 @@ async function ssConnect(auto){
         const items = ssItems(det);
         if(items.length){ o.items = items; if(!hadItems) filled++; }
         else if(!noItemShape) noItemShape = Object.keys(det).slice(0, 14).join(', ');
+        if(o.freight == null){ const fr = ssFreight(det); if(fr != null){ o.freight = fr; freightFilled++; } }
         const dts = ssDelivered(det);
         if(dts){ o.deliveredTs = dts; o.status = 'delivered'; }
         else if(o.status !== 'unshipped' && ssIsDelivered(det)) o.status = 'delivered';
@@ -1613,7 +1645,10 @@ async function ssConnect(auto){
       nf(withItems) + ' with products',
       nf(delivered) + ' delivered with dates'
     ];
+    const withFreight = all.filter(o => o.freight != null).length;
+    bits.push(withFreight ? nf(withFreight) + ' with freight cost' : 'no freight costs returned');
     if(filled) bits.push(nf(filled) + ' filled this sync');
+    if(freightFilled) bits.push(nf(freightFilled) + ' freight costs found');
     if(trackHits) bits.push(nf(trackHits) + ' delivery dates from tracking');
     if(trackFailed && !trackHits) bits.push('tracking lookups unavailable (' + nf(trackFailed) + ' tried)');
     if(deepFailed) bits.push(nf(deepFailed) + ' detail lookups failed');
@@ -1987,11 +2022,12 @@ function dashStats(N){
   const cur = shippedBetween(curFrom, nowMs + 1);
   const prev = shippedBetween(prevFrom, curFrom);
   const units = list => list.reduce((s, o) => s + o.items.reduce((a, i) => a + (i.qty || 1), 0), 0);
+  const freightSum = list => list.reduce((s, o) => s + (Number(o.freight) || 0), 0);
   const perDay = [];
   for(let i = N - 1; i >= 0; i--){
     const d0 = daysBack(i).getTime(), d1 = d0 + 86400e3;
     const dayOrders = cur.filter(o => { const t = new Date(o.date).getTime(); return t >= d0 && t < d1; });
-    perDay.push({ date: daysBack(i), orders: dayOrders.length, units: units(dayOrders),
+    perDay.push({ date: daysBack(i), orders: dayOrders.length, units: units(dayOrders), freight: freightSum(dayOrders),
       clients: new Set(dayOrders.map(o => o.clientId || o.clientName)).size,
       skus: new Set(dayOrders.flatMap(o => o.items.map(x => x.sku))).size });
   }
@@ -2036,7 +2072,9 @@ function dashStats(N){
       orders: cur.length, ordersPrev: prev.length,
       units: units(cur), unitsPrev: units(prev),
       clients: new Set(cur.map(o => o.clientId || o.clientName)).size,
-      activeSkus, open: open.length
+      activeSkus, open: open.length,
+      freight: freightSum(cur), freightPrev: freightSum(prev),
+      freightKnown: cur.filter(o => o.freight != null).length
     } };
 }
 function delta(cur, prev, N){
@@ -2122,6 +2160,13 @@ function renderDashboard(){
   '<div class="kpis">' +
     '<div class="kpi"><div class="kpi-k">Orders shipped · ' + N + 'd</div><div class="kpi-v">' + nfc(st.kpi.orders) + '</div>' + delta(st.kpi.orders, st.kpi.ordersPrev, N) + '<div class="kpi-spark" id="sp-orders"></div></div>' +
     '<div class="kpi"><div class="kpi-k">Products sold · ' + N + 'd</div><div class="kpi-v">' + nfc(st.kpi.units) + '</div>' + delta(st.kpi.units, st.kpi.unitsPrev, N) + '<div class="kpi-spark" id="sp-units"></div></div>' +
+    '<div class="kpi"><div class="kpi-k">Freight spend · ' + N + 'd</div><div class="kpi-v">' + money(st.kpi.freight) + '</div>' +
+      (st.kpi.freightKnown
+        ? (st.kpi.freightKnown < st.kpi.orders
+            ? '<span class="kpi-d">from ' + nf(st.kpi.freightKnown) + ' of ' + nf(st.kpi.orders) + ' orders</span>'
+            : delta(st.kpi.freight, st.kpi.freightPrev, N))
+        : '<span class="kpi-d">— no costs returned yet</span>') +
+      '<div class="kpi-spark" id="sp-freight"></div></div>' +
     '<div class="kpi"><div class="kpi-k">Active clients</div><div class="kpi-v">' + st.kpi.clients + '</div><span class="kpi-d">shipping in range</span><div class="kpi-spark" id="sp-clients"></div></div>' +
     '<div class="kpi"><div class="kpi-k">Active SKUs</div><div class="kpi-v">' + st.kpi.activeSkus + '</div><span class="kpi-d">' + (col.clients().length ? 'across all clients' : 'shipped in range') + '</span><div class="kpi-spark" id="sp-skus"></div></div>' +
     '<div class="kpi"><div class="kpi-k">Open orders</div><div class="kpi-v">' + st.kpi.open + '</div><span class="kpi-d">awaiting pick &amp; pack</span><div class="kpi-spark" id="sp-open"></div></div>' +
@@ -2192,6 +2237,7 @@ function renderDashboard(){
 
   sparkline($('#sp-orders'), st.perDay.map(d => d.orders));
   sparkline($('#sp-units'), st.perDay.map(d => d.units));
+  sparkline($('#sp-freight'), st.perDay.map(d => d.freight));
   sparkline($('#sp-clients'), st.perDay.map(d => d.clients));
   sparkline($('#sp-skus'), st.perDay.map(d => d.skus));
 
@@ -2199,16 +2245,17 @@ function renderDashboard(){
   const desc = (a, b) => new Date(b.date) - new Date(a.date);
   const shipped = st.cur.slice().sort(desc);
   const feed = st.open.slice().sort(desc)
-    .concat(['packed', 'transit', 'delivered'].flatMap(s => shipped.filter(o => o.status === s).slice(0, 40)).sort(desc));
+    .concat(['packed', 'transit', 'delivered'].flatMap(s => shipped.filter(o => o.status === s).slice(0, SHIP_FEED_MAX)).sort(desc));
   $('#shipFeed').innerHTML = feed.map(shipRow).join('') || '<p style="color:var(--faint);font-size:12.5px;padding:12px 0">No shipments in this range.</p>';
   filterShipFeed();
 }
+const SHIP_FEED_MAX = 100;
 function filterShipFeed(){
   const q = dashShipQ.trim().toLowerCase();
   let shown = 0;
   $$('#shipFeed .ship-item').forEach(el => {
     const hit = (!q || el.dataset.search.indexOf(q) >= 0) && (!dashShipStatus || el.dataset.status === dashShipStatus);
-    el.style.display = (hit && shown < 10) ? '' : 'none';
+    el.style.display = (hit && shown < SHIP_FEED_MAX) ? '' : 'none';
     if(hit) shown++;
   });
 }
