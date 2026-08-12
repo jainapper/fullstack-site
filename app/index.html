@@ -716,7 +716,7 @@ table.rows td.num{font-size:12px}
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="ssAuto" checked><span>Auto-sync every 60 seconds — tops up new orders and fills gaps in the background</span></label>
       <div class="conn-msg" id="ssMsg"></div>
       <pre id="ssDiagOut" style="display:none;white-space:pre-wrap;word-break:break-word;background:rgba(255,255,255,.03);border:1px solid var(--stroke);border-radius:10px;padding:11px 13px;margin-top:10px;font-family:var(--mono);font-size:10.5px;line-height:1.55;color:var(--dim);max-height:300px;overflow:auto"></pre>
-      <p class="set-note">Every Starshipit child account has its own API key (Settings → API inside that account) and the whole login shares one subscription key. Each synced order is tagged with its child account as the client. Keys live only in this browser; on fs-database.vercel.app the built-in proxy makes the connection work with no extra setup.</p>
+      <p class="set-note">Every Starshipit child account has its own API key (Settings → API inside that account) and the whole login shares one subscription key. Each synced order is tagged with its child account as the client. Keys live only in this browser. Starshipit calls are routed through the Fullstack proxy automatically, so no extra setup is needed; set a Proxy base URL only if you want to use your own.</p>
     </div>
 
     <div class="set-sec">
@@ -1255,19 +1255,13 @@ function seed(){
  *  Direct browser calls are normally blocked by CORS — a tiny proxy  *
  *  (see README) makes the live connection work. Demo data otherwise. *
  * ================================================================== */
+const SS_PROXY = 'https://fs-starshipit-proxy.vercel.app';
 async function ssFetch(path, apiKey){
   const ss = col.settings().ss;
-  const builtin = !ss.proxy && location.protocol.indexOf('http') === 0;
-  let url;
-  if(builtin){
-    /* built-in Vercel proxy takes the upstream path as ?p= (fixed function path) */
-    const qIdx = path.indexOf('?');
-    const p = qIdx >= 0 ? path.slice(0, qIdx) : path;
-    const rest = qIdx >= 0 ? '&' + path.slice(qIdx + 1) : '';
-    url = location.origin + '/api/ss?p=' + encodeURIComponent(p) + rest;
-  } else {
-    url = (ss.proxy || 'https://api.starshipit.com').replace(/\/$/, '') + path;
-  }
+  /* Browsers cannot call api.starshipit.com directly (CORS), and static hosting
+     has no serverless function to proxy it — so requests go through SS_PROXY
+     unless a proxy of your own is set in Settings. */
+  const url = (ss.proxy ? ss.proxy.replace(/\/$/, '') : SS_PROXY) + path;
   const res = await fetch(url, { headers: {
     'Content-Type': 'application/json',
     'StarShipIT-Api-Key': apiKey || '',
@@ -1721,7 +1715,7 @@ async function ssDiagnose(){
   btn.textContent = 'Diagnosing…';
   const L = [];
   L.push('Account tested: ' + acct.label);
-  L.push('Route: ' + (col.settings().ss.proxy || (location.origin + '/api/ss')));
+  L.push('Route: ' + (col.settings().ss.proxy || SS_PROXY));
   let sample = null;
   for(const path of ['/api/orders/shipped?limit=5&page=1', '/api/orders/unshipped?limit=5&page=1', '/api/orders/delivered?limit=5&page=1']){
     try{
