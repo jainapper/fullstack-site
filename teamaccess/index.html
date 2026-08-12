@@ -766,6 +766,19 @@ table.rows td.num{font-size:12px}
   </div>
 </div>
 
+<div class="lock" id="pwResetScreen" role="dialog" aria-label="Set a new password">
+  <div class="lock-card">
+    <img src="assets/logo-white.png" alt="Fullstack Fulfillment">
+    <h1>Set a new password<span style="color:var(--accent)">.</span></h1>
+    <p class="lock-sub" id="pwResetWho">Choose a new password for your Fullstack account.</p>
+    <div><label class="f-lab" for="pwNew">New password</label><input class="f-in" id="pwNew" type="password" autocomplete="new-password" placeholder="At least 10 characters"></div>
+    <div><label class="f-lab" for="pwNew2">Confirm password</label><input class="f-in" id="pwNew2" type="password" autocomplete="new-password" placeholder="Type it again"></div>
+    <div class="conn-msg" id="pwResetMsg"></div>
+    <button class="btn" id="pwResetGo" style="justify-content:center">Save password →</button>
+    <p class="lock-note">This link works once and expires an hour after it was sent. Pick something you have not used anywhere else.</p>
+  </div>
+</div>
+
 <div class="lock" id="lockScreen" role="dialog" aria-label="Sign in">
   <div class="lock-card">
     <img src="assets/logo-white.png" alt="Fullstack Fulfillment">
@@ -4261,6 +4274,57 @@ function showLock(preselectId){
   $('#lockScreen').classList.add('on');
   setTimeout(() => { ($('#lockUser').value ? $('#lockPw') : $('#lockUser')).focus(); }, 80);
 }
+/* Supabase sends recovery links as #access_token=…&type=recovery. Landing here
+   with one means "let this person choose a new password", not "sign in". */
+function parseAuthHash(){
+  const h = String(location.hash || '').replace(/^#\/?/, '');
+  if(h.indexOf('access_token=') < 0) return null;
+  const q = new URLSearchParams(h);
+  return { token: q.get('access_token'), refresh: q.get('refresh_token'), type: q.get('type') };
+}
+function startRecoveryIfPresent(){
+  const a = parseAuthHash();
+  if(!a || !a.token || a.type !== 'recovery') return false;
+  recoveryAuth = a;
+  try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  $('#pwResetScreen').classList.add('on');
+  setTimeout(() => $('#pwNew').focus(), 80);
+  return true;
+}
+let recoveryAuth = null;
+async function pwResetSubmit(){
+  const m = $('#pwResetMsg'), go = $('#pwResetGo');
+  const a = $('#pwNew').value, b = $('#pwNew2').value;
+  m.className = 'conn-msg';
+  if(a.length < 10){ m.textContent = 'Use at least 10 characters.'; m.className = 'conn-msg err'; return; }
+  if(a !== b){ m.textContent = 'Those two do not match.'; m.className = 'conn-msg err'; $('#pwNew2').select(); return; }
+  go.textContent = 'Saving…';
+  try{
+    const r = await fetch(SB.url + '/auth/v1/user', {
+      method: 'PUT',
+      headers: { apikey: SB.anon, Authorization: 'Bearer ' + recoveryAuth.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: a })
+    });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(j.msg || j.message || j.error_description || ('HTTP ' + r.status));
+    /* the recovery token is already a valid session — keep the person signed in */
+    sbSaveSession(sbStamp({ access_token: recoveryAuth.token, refresh_token: recoveryAuth.refresh, token_type: 'bearer', expires_in: 3600, user: j }));
+    go.textContent = 'Save password →';
+    $('#pwResetScreen').classList.remove('on');
+    const email = (j && j.email) || '';
+    let u = colUsers().find(x => String(x.email || '').toLowerCase() === email.toLowerCase());
+    if(!u){ try{ u = await adoptServerUser(email); }catch(e){} }
+    else { try{ await sbApplyMyProfile(u); }catch(e){} }
+    if(u) commitUser(u); else location.reload();
+    toast('Password updated — you are signed in');
+  }catch(e){
+    go.textContent = 'Save password →';
+    m.textContent = /expired|invalid|JWT/i.test(e.message)
+      ? 'That reset link has expired. Send a fresh one and try again.'
+      : ('Could not save the password — ' + e.message);
+    m.className = 'conn-msg err';
+  }
+}
 async function lockSubmit(){
   const m = $('#lockMsg');
   const email = String($('#lockUser').value || '').trim().toLowerCase();
@@ -4361,6 +4425,7 @@ purgeDemo();
 
 document.addEventListener('DOMContentLoaded', () => {
   fillUserSwitcher();
+  if(startRecoveryIfPresent()) return;    /* a reset link takes over the screen */
   const cur = currentUser();
   /* This app is served on a public address, so it must never open without a
      sign-in. Entry requires a live Fullstack (Supabase) session; a device that
@@ -4370,6 +4435,8 @@ document.addEventListener('DOMContentLoaded', () => {
   else if(cur && cur.pw && cur.role === 'admin' && authedId() === cur.id && !adminUser) adminUser = { name: cur.name };
   $('#lockUser').addEventListener('change', lockSync);
   $('#lockGo').addEventListener('click', lockSubmit);
+  $('#pwResetGo').addEventListener('click', pwResetSubmit);
+  $('#pwNew2').addEventListener('keydown', e => { if(e.key === 'Enter') pwResetSubmit(); });
   $('#lockPw').addEventListener('keydown', e => { if(e.key === 'Enter') lockSubmit(); });
   $('#lockUser').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); ($('#lockPw').value ? lockSubmit() : $('#lockPw').focus()); } });
   { const b = $('#sbIn'); if(b) b.addEventListener('click', () => { $('#setModal').classList.remove('on'); showLock(); }); }
