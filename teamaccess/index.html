@@ -775,7 +775,7 @@ table.rows td.num{font-size:12px}
     <div id="lockPwWrap"><label class="f-lab" for="lockPw">Password</label><input class="f-in" id="lockPw" type="password" autocomplete="current-password" placeholder="••••••••"></div>
     <div class="conn-msg" id="lockMsg"></div>
     <button class="btn" id="lockGo" style="justify-content:center">Enter →</button>
-    <p class="lock-note">Signing in with your email password connects this device to the shared Fullstack database. Team members without a password enter on this device only; admin accounts also unlock purchase-order controls.</p>
+    <p class="lock-note">Sign in with your Fullstack email and password. Access, and which tabs you see, come from your account on the Fullstack server; admin accounts also unlock purchase-order controls.</p>
   </div>
 </div>
 
@@ -4312,6 +4312,13 @@ async function lockSubmit(){
     }
     if(!server) toast('Signed in on this device only — changes stay here until you reconnect');
   }
+  if(!(typeof SB !== 'undefined' && SB.session)){
+    /* No server session means this person has not proved who they are — on a
+       public URL that must not be enough to open the database. */
+    m.textContent = 'Sign in with your Fullstack account to continue.';
+    m.className = 'conn-msg err';
+    return;
+  }
   commitUser(u);
   if(typeof SB !== 'undefined' && SB.session) sbSync();
   toast('G’day, ' + u.name.split(' ')[0]);
@@ -4352,7 +4359,11 @@ purgeDemo();
 document.addEventListener('DOMContentLoaded', () => {
   fillUserSwitcher();
   const cur = currentUser();
-  if(cur && cur.pw && authedId() !== cur.id) showLock(cur.id);
+  /* This app is served on a public address, so it must never open without a
+     sign-in. Entry requires a live Fullstack (Supabase) session; a device that
+     has signed in before keeps its session and is not asked again. */
+  const hasSession = !!(typeof SB !== 'undefined' && SB.session);
+  if(!hasSession || !cur || (cur.pw && authedId() !== cur.id)) showLock(cur ? cur.id : '');
   else if(cur && cur.pw && cur.role === 'admin' && authedId() === cur.id && !adminUser) adminUser = { name: cur.name };
   $('#lockUser').addEventListener('change', lockSync);
   $('#lockGo').addEventListener('click', lockSubmit);
@@ -4493,6 +4504,8 @@ async function sbSignIn(email, password){
 }
 function sbSignOut(){
   sbSaveSession(null);
+  try{ sessionStorage.removeItem('fsdb.auth'); }catch(e){}
+  try{ showLock(); }catch(e){}
   SB.state = 'signed-out';
   SB.note = '';
   sbShadowReset();
