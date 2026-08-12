@@ -1356,7 +1356,7 @@ table.stock{width:100%;border-collapse:collapse;font-size:13px}
   </div>
   <div class="foot-bottom">
     <span>© 2026 Fullstack Fulfilment Australia Pty Ltd. All rights reserved.</span>
-    <span class="foot-bottom-right"><a href="#/terms">Terms &amp; Conditions</a> · <a href="#/privacy">Privacy Policy</a><a class="foot-team" href="https://fs-database.vercel.app" target="_blank" rel="noopener noreferrer">Team Access</a></span>
+    <span class="foot-bottom-right"><a href="#/terms">Terms &amp; Conditions</a> · <a href="#/privacy">Privacy Policy</a><a class="foot-team" href="app/" target="_blank" rel="noopener noreferrer">Team Access</a></span>
   </div>
 </footer>
 
@@ -1488,7 +1488,7 @@ form.addEventListener('submit', function(e){
 /* ————— onboarding flow ————— */
 var VIDEO_URL = ''; /* drop the produced welcome video URL (mp4 or YouTube embed) here */
 var PORTAL_URL = ''; /* set to the live Extensiv client-portal login URL to send Client Login straight there */
-var TEAM_URL = 'https://fs-database.vercel.app'; /* the FS Database internal ops app — staff sign in there */
+var TEAM_URL = 'app/'; /* the FS Database internal ops app (patched build, served from this site) */
 var OB_STEPS = [
   {sec:'Company Information', type:'statement', q:'First, we need your company information', d:'The basics — who you are and where you\'re based. This is how we set up your account in Extensiv and keep everything organised on our end.'},
   {sec:'Company Information', type:'text', q:'What is your company name?', req:true},

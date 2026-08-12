@@ -1,0 +1,15 @@
+{
+  "name": "FS Database — Fullstack Fulfillment",
+  "short_name": "FS Database",
+  "description": "Fullstack Fulfillment internal ops database — dashboard, leads, onboarding, go-live, documents, carriers, catalog and purchase orders.",
+  "start_url": "./index.html#/dashboard",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0c0a",
+  "theme_color": "#0d0c0a",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
