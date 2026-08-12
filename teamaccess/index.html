@@ -788,6 +788,7 @@ table.rows td.num{font-size:12px}
     <div id="lockPwWrap"><label class="f-lab" for="lockPw">Password</label><input class="f-in" id="lockPw" type="password" autocomplete="current-password" placeholder="••••••••"></div>
     <div class="conn-msg" id="lockMsg"></div>
     <button class="btn" id="lockGo" style="justify-content:center">Enter →</button>
+    <button type="button" id="lockForgot" style="background:none;border:0;color:var(--dim);font-size:12.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:10px 0 0;align-self:center">Forgot your password?</button>
     <p class="lock-note">Sign in with your Fullstack email and password. Access, and which tabs you see, come from your account on the Fullstack server; admin accounts also unlock purchase-order controls.</p>
   </div>
 </div>
@@ -4284,7 +4285,14 @@ function parseAuthHash(){
 }
 function startRecoveryIfPresent(){
   const a = parseAuthHash();
-  if(!a || !a.token || a.type !== 'recovery') return false;
+  if(!a || !a.token) return false;
+  if(a.type && a.type !== 'recovery'){
+    /* magic link / invite / confirmation — already proof of identity, so sign in */
+    sbSaveSession(sbStamp({ access_token: a.token, refresh_token: a.refresh, token_type: 'bearer', expires_in: 3600 }));
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+    finishMagicLink();
+    return true;
+  }
   recoveryAuth = a;
   try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
   $('#pwResetScreen').classList.add('on');
@@ -4292,6 +4300,41 @@ function startRecoveryIfPresent(){
   return true;
 }
 let recoveryAuth = null;
+async function finishMagicLink(){
+  let me = null;
+  try{
+    const r = await fetch(SB.url + '/auth/v1/user', { headers: { apikey: SB.anon, Authorization: 'Bearer ' + (SB.session && SB.session.access_token) } });
+    if(r.ok) me = await r.json();
+  }catch(e){}
+  const email = (me && me.email) || '';
+  if(SB.session && me) SB.session.user = me;
+  let u = colUsers().find(x => String(x.email || '').toLowerCase() === email.toLowerCase());
+  if(!u && email){ try{ u = await adoptServerUser(email); }catch(e){} }
+  else if(u){ try{ await sbApplyMyProfile(u); }catch(e){} }
+  if(u) commitUser(u); else location.reload();
+  toast('Signed in');
+}
+async function lockForgot(){
+  const m = $('#lockMsg');
+  const email = String($('#lockUser').value || '').trim().toLowerCase();
+  if(!email){ m.textContent = 'Enter your work email first, then tap Forgot your password.'; m.className = 'conn-msg err'; $('#lockUser').focus(); return; }
+  const btn = $('#lockForgot');
+  btn.textContent = 'Sending…';
+  try{
+    const r = await fetch(SB.url + '/auth/v1/recover?redirect_to=' + encodeURIComponent(location.origin + location.pathname), {
+      method: 'POST',
+      headers: { apikey: SB.anon, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    if(!r.ok){ const j = await r.json().catch(() => ({})); throw new Error(j.msg || j.message || ('HTTP ' + r.status)); }
+    m.textContent = 'Check your email — the reset link opens right here.';
+    m.className = 'conn-msg ok';
+  }catch(e){
+    m.textContent = 'Could not send the reset email — ' + e.message;
+    m.className = 'conn-msg err';
+  }
+  btn.textContent = 'Forgot your password?';
+}
 async function pwResetSubmit(){
   const m = $('#pwResetMsg'), go = $('#pwResetGo');
   const a = $('#pwNew').value, b = $('#pwNew2').value;
@@ -4436,6 +4479,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#lockUser').addEventListener('change', lockSync);
   $('#lockGo').addEventListener('click', lockSubmit);
   $('#pwResetGo').addEventListener('click', pwResetSubmit);
+  $('#lockForgot').addEventListener('click', lockForgot);
   $('#pwNew2').addEventListener('keydown', e => { if(e.key === 'Enter') pwResetSubmit(); });
   $('#lockPw').addEventListener('keydown', e => { if(e.key === 'Enter') lockSubmit(); });
   $('#lockUser').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); ($('#lockPw').value ? lockSubmit() : $('#lockPw').focus()); } });
