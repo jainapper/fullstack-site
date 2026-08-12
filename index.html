@@ -31,7 +31,7 @@ a{color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 ::selection{background:var(--accent);color:#0d0c0a}
 
-#view-quote,#view-calc,#view-ob,#view-terms,#view-privacy,#view-login,#view-dash,#view-team{display:none}
+#view-quote,#view-calc,#view-ob,#view-terms,#view-privacy,#view-login,#view-dash{display:none}
 body.on-quote #view-home{display:none}
 body.on-quote #view-quote{display:block}
 body.on-calc #view-home{display:none}
@@ -47,8 +47,6 @@ body.on-login #view-home{display:none}
 body.on-login #view-login{display:block}
 body.on-dash #view-home{display:none}
 body.on-dash #view-dash{display:block}
-body.on-team #view-home{display:none}
-body.on-team #view-team{display:block}
 
 /* ————— nav ————— */
 nav{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;display:flex;align-items:center;gap:6px;padding:8px 8px 8px 18px;background:rgba(21,19,16,.72);backdrop-filter:blur(18px);border:1px solid var(--stroke);border-radius:100px;width:min(1060px,calc(100% - 32px))}
@@ -1331,22 +1329,7 @@ table.stock{width:100%;border-collapse:collapse;font-size:13px}
   </div>
 </div><!-- /view-dash -->
 
-<div id="view-team">
-  <div class="login-stage">
-    <div class="login-glow"></div>
-    <form class="login-card" id="teamForm" novalidate>
-      <img class="logo" src="assets/logo-white.png" alt="Fullstack Fulfillment">
-      <span class="team-badge">Staff only</span>
-      <h1>Team access</h1>
-      <p class="login-sub">Sign in to the Fullstack operations systems.</p>
-      <div class="f-field"><label class="f-label" for="teamEmail">Work email</label><input class="f-input" id="teamEmail" type="email" autocomplete="off" placeholder="you@fullstackfs.com.au"></div>
-      <div class="f-field"><label class="f-label" for="teamPass">Password</label><input class="f-input" id="teamPass" type="password" autocomplete="off" placeholder="••••••••"></div>
-      <button class="login-btn" type="submit">Sign in →</button>
-      <div class="team-err" id="teamErr">Team access is limited to Fullstack staff accounts.</div>
-      <p class="login-note">Design prototype — nothing you type here is stored or sent. At launch this points to the team's Extensiv and Starshipit sign-in, protected by your existing staff accounts and 2FA.</p>
-    </form>
-  </div>
-</div><!-- /view-team -->
+
 
 <footer>
   <div class="foot-grid">
@@ -1373,7 +1356,7 @@ table.stock{width:100%;border-collapse:collapse;font-size:13px}
   </div>
   <div class="foot-bottom">
     <span>© 2026 Fullstack Fulfilment Australia Pty Ltd. All rights reserved.</span>
-    <span class="foot-bottom-right"><a href="#/terms">Terms &amp; Conditions</a> · <a href="#/privacy">Privacy Policy</a><a class="foot-team" href="#/team">Team Access</a></span>
+    <span class="foot-bottom-right"><a href="#/terms">Terms &amp; Conditions</a> · <a href="#/privacy">Privacy Policy</a><a class="foot-team" href="https://fs-database.vercel.app" target="_blank" rel="noopener noreferrer">Team Access</a></span>
   </div>
 </footer>
 
@@ -1393,7 +1376,6 @@ function route(){
   document.body.classList.toggle('on-privacy', view === 'privacy');
   document.body.classList.toggle('on-login', view === 'login');
   document.body.classList.toggle('on-dash', view === 'dash');
-  document.body.classList.toggle('on-team', view === 'team');
   if(view !== 'ob' && typeof ovStop === 'function') ovStop();
   closeMenu();
   if(view !== 'home'){ window.scrollTo(0,0); return; }
@@ -1506,7 +1488,7 @@ form.addEventListener('submit', function(e){
 /* ————— onboarding flow ————— */
 var VIDEO_URL = ''; /* drop the produced welcome video URL (mp4 or YouTube embed) here */
 var PORTAL_URL = ''; /* set to the live Extensiv client-portal login URL to send Client Login straight there */
-var TEAM_URL = ''; /* set to the internal staff sign-in URL (Extensiv / Starshipit / SSO) to send Team Access straight there */
+var TEAM_URL = 'https://fs-database.vercel.app'; /* the FS Database internal ops app — staff sign in there */
 var OB_STEPS = [
   {sec:'Company Information', type:'statement', q:'First, we need your company information', d:'The basics — who you are and where you\'re based. This is how we set up your account in Extensiv and keep everything organised on our end.'},
   {sec:'Company Information', type:'text', q:'What is your company name?', req:true},
@@ -1757,12 +1739,7 @@ obVideo.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key =
 var loginForm = document.getElementById('loginForm');
 if(loginForm) loginForm.addEventListener('submit', function(e){ e.preventDefault(); location.hash = '#/dashboard'; });
 
-var teamForm = document.getElementById('teamForm');
-if(teamForm) teamForm.addEventListener('submit', function(e){
-  e.preventDefault();
-  if(TEAM_URL){ window.location.href = TEAM_URL; return; }
-  document.getElementById('teamErr').classList.add('show');
-});
+
 
 if(location.hash) route();
 </script>
