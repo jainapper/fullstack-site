@@ -4280,43 +4280,46 @@ async function lockSubmit(){
       return;
     }
     go.textContent = 'Enter →';
-    u = await adoptServerUser(email);
+    try{ u = await adoptServerUser(email); }
+    catch(e){ u = { id: 'u-' + uid(), name: email.split('@')[0], email: email, role: 'member', tabs: { dashboard: true }, added: new Date().toISOString() };
+              const us = colUsers(); us.push(u); saveUsers(); }
     commitUser(u);
     if(typeof SB !== 'undefined' && SB.session) sbSync();
     toast('G’day, ' + u.name.split(' ')[0]);
     return;
   }
-  if(u.pw){
-    const pw = $('#lockPw').value;
-    const go = $('#lockGo');
-    let server = false, offline = false;
-    if(u.email && typeof sbSignIn === 'function'){
-      go.textContent = 'Signing in…';
-      try{
-        await sbSignIn(u.email, pw); server = true;
-        try{ await sbApplyMyProfile(u); }catch(e){}
-      }
-      catch(e){ if(!e.rejected) offline = true; }
-      go.textContent = 'Enter →';
+  /* A known email on this device still has to prove itself. The typed password
+     is ALWAYS tried against the server first — a local record without a stored
+     password must never skip the sign-in and lock the person out. */
+  const pw = $('#lockPw').value;
+  const go = $('#lockGo');
+  let server = !!(typeof SB !== 'undefined' && SB.session);
+  let offline = false, rejected = false;
+  if(pw && (u.email || email) && typeof sbSignIn === 'function'){
+    go.textContent = 'Signing in…';
+    try{
+      await sbSignIn(u.email || email, pw);
+      server = true;
+      try{ await sbApplyMyProfile(u); }catch(e){}
+    }catch(e){
+      if(e && e.rejected) rejected = true; else offline = true;
     }
-    if(!server){
-      /* No account on the server, or no signal to reach it — fall back to the
-         password held in this browser so the app still opens. */
-      const h = await pwHash(u.id, pw);
-      if(h !== u.pw){
-        m.textContent = offline ? 'Wrong password — and the shared database could not be reached.' : 'Wrong password.';
-        m.className = 'conn-msg err';
-        $('#lockPw').select();
-        return;
-      }
-    }
-    if(!server) toast('Signed in on this device only — changes stay here until you reconnect');
+    go.textContent = 'Enter →';
   }
-  if(!(typeof SB !== 'undefined' && SB.session)){
-    /* No server session means this person has not proved who they are — on a
-       public URL that must not be enough to open the database. */
-    m.textContent = 'Sign in with your Fullstack account to continue.';
+  if(!server && u.pw && pw){
+    /* Fallback for a device that has been used before but cannot reach the
+       server right now. */
+    const h = await pwHash(u.id, pw);
+    if(h === u.pw){
+      toast('Signed in on this device only — changes stay here until you reconnect');
+    } else if(!rejected){ rejected = true; }
+  }
+  if(!server && !(u.pw && pw && (await pwHash(u.id, pw)) === u.pw)){
+    m.textContent = rejected ? 'Email or password not recognised.'
+      : (offline ? 'Could not reach the shared database — check your connection and try again.'
+                 : 'Enter your password to continue.');
     m.className = 'conn-msg err';
+    $('#lockPw').select();
     return;
   }
   commitUser(u);
