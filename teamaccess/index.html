@@ -4198,14 +4198,41 @@ function lockSelUser(){
   if(!v) return null;
   return colUsers().find(u => String(u.email || '').toLowerCase() === v) || null;
 }
+/* The caller's OWN profile row. Admins can read every profile, so this must be
+   filtered by the signed-in user id — an unfiltered "first row" can hand back a
+   colleague's permissions. */
+async function sbMyProfile(){
+  const uid = SB.session && SB.session.user && SB.session.user.id;
+  const mail = SB.session && SB.session.user && SB.session.user.email;
+  const tries = [];
+  if(uid) tries.push('/rest/v1/profiles?id=eq.' + encodeURIComponent(uid) + '&select=name,email,role,tabs');
+  if(mail) tries.push('/rest/v1/profiles?email=eq.' + encodeURIComponent(mail) + '&select=name,email,role,tabs');
+  for(const q of tries){
+    try{
+      const rows = await sbReq(q);
+      if(Array.isArray(rows) && rows.length) return rows[0];
+    }catch(e){}
+  }
+  return null;
+}
+/* Permissions live on the server, so refresh them at every sign-in rather than
+   trusting whatever this device happened to store earlier. */
+async function sbApplyMyProfile(u){
+  const prof = await sbMyProfile();
+  if(!prof) return false;
+  const all = {}; TABS.forEach(t => all[t[0]] = true);
+  if(prof.name) u.name = prof.name;
+  u.role = prof.role === 'admin' ? 'admin' : 'member';
+  u.tabs = (prof.tabs && typeof prof.tabs === 'object') ? prof.tabs : (u.role === 'admin' ? all : { dashboard: true });
+  const users = colUsers();
+  const at = users.findIndex(x => x.id === u.id);
+  if(at >= 0){ users[at] = u; saveUsers(); }
+  return true;
+}
 async function adoptServerUser(email){
   /* Signed in against Supabase from a device that has never seen this account:
      take name, role and tab permissions from the caller's own profile row. */
-  let prof = null;
-  try{
-    const rows = await sbReq('/rest/v1/profiles?select=name,email,role,tabs&limit=1');
-    if(Array.isArray(rows) && rows.length) prof = rows[0];
-  }catch(e){}
+  const prof = await sbMyProfile();
   const all = {}; TABS.forEach(t => all[t[0]] = true);
   const admin = !!(prof && prof.role === 'admin');
   const u = {
@@ -4265,7 +4292,10 @@ async function lockSubmit(){
     let server = false, offline = false;
     if(u.email && typeof sbSignIn === 'function'){
       go.textContent = 'Signing in…';
-      try{ await sbSignIn(u.email, pw); server = true; }
+      try{
+        await sbSignIn(u.email, pw); server = true;
+        try{ await sbApplyMyProfile(u); }catch(e){}
+      }
       catch(e){ if(!e.rejected) offline = true; }
       go.textContent = 'Enter →';
     }
