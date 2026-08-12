@@ -1383,6 +1383,20 @@ function fillSsAccounts(){
   DB.set('settings', s);
   $('#ssAccounts').innerHTML = s.ss.accounts.map(ssAcctRow).join('');
 }
+/* Settings used to persist only when Connect was pressed, so typing keys and
+   closing the panel silently discarded them — indistinguishable from the child
+   accounts being deleted. Everything typed is now saved as you go. */
+let ssPersistT;
+function persistSsForm(){
+  const sub = $('#ssSubKey'), px = $('#ssProxy');
+  if(!sub && !px) return;
+  const s = col.settings();
+  if(sub) s.ss.subKey = sub.value.trim();
+  if(px) s.ss.proxy = px.value.trim();
+  DB.set('settings', s);
+  readAccountRows();
+}
+function persistSsFormSoon(){ clearTimeout(ssPersistT); ssPersistT = setTimeout(persistSsForm, 400); }
 function readAccountRows(){
   const rows = $$('#ssAccounts [data-acct-row]');
   /* The settings form may not be rendered yet; reading it then would blank the
@@ -2837,6 +2851,8 @@ function updateCounts(){
 }
 function openOverlay(sel){ closeOverlays(); $('#scrim').classList.add('on'); $(sel).classList.add('on'); }
 function closeOverlays(){
+  const setOpen = $('#settingsModal') && $('#settingsModal').classList.contains('on');
+  if(setOpen){ try{ persistSsForm(); }catch(e){} }
   $('#scrim').classList.remove('on');
   $$('.drawer,.modal').forEach(el => el.classList.remove('on'));
 }
@@ -4320,6 +4336,9 @@ document.addEventListener('DOMContentLoaded', () => {
     DB.set('settings', s);
     fillSsAccounts();
   });
+  $('#ssAccounts').addEventListener('input', persistSsFormSoon);
+  $('#ssSubKey').addEventListener('input', persistSsFormSoon);
+  $('#ssProxy').addEventListener('input', persistSsFormSoon);
   $('#ssAccounts').addEventListener('click', e => {
     const d = e.target.closest('[data-acct-del]');
     if(d){
