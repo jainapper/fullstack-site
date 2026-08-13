@@ -774,6 +774,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="acctPwGo">Change password</button>
         </div>
       </div>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 01:59 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone. Without a sign-in the app still runs, but only in this browser.</p>
     </div>
   </div>
@@ -2890,8 +2891,9 @@ function updateCounts(){
 }
 function openOverlay(sel){ closeOverlays(); $('#scrim').classList.add('on'); $(sel).classList.add('on'); }
 function closeOverlays(){
-  const setOpen = $('#settingsModal') && $('#settingsModal').classList.contains('on');
-  if(setOpen){ try{ persistSsForm(); }catch(e){} }
+  /* Closing deliberately writes NOTHING. Every keystroke is already saved, so
+     there is nothing to flush — and a close that wrote from a stale form is what
+     used to wipe the child accounts. */
   $('#scrim').classList.remove('on');
   $$('.drawer,.modal').forEach(el => el.classList.remove('on'));
 }
@@ -4293,6 +4295,23 @@ async function sbMyProfile(){
 }
 /* Permissions live on the server, so refresh them at every sign-in rather than
    trusting whatever this device happened to store earlier. */
+let permsOk = false;
+async function refreshPermissions(tries){
+  const n = tries == null ? 3 : tries;
+  const me = (typeof currentUser === 'function') ? currentUser() : null;
+  if(!me || typeof SB === 'undefined' || !SB.session) return false;
+  for(let i = 0; i < n; i++){
+    try{
+      if(await sbApplyMyProfile(me)){ permsOk = true; return true; }
+    }catch(e){}
+    await new Promise(r => setTimeout(r, 800 * (i + 1)));
+  }
+  /* Never leave someone quietly locked out of their own tabs. */
+  if(!permsOk){
+    try{ toast('Could not confirm your access just now — some tabs may be hidden. Reload to retry.'); }catch(e){}
+  }
+  return false;
+}
 async function sbApplyMyProfile(u){
   const prof = await sbMyProfile();
   if(!prof) return false;
@@ -4542,14 +4561,12 @@ purgeDemo();
 document.addEventListener('DOMContentLoaded', () => {
   fillUserSwitcher();
   if(startRecoveryIfPresent()) return;    /* a reset link takes over the screen */
-  /* An existing session should still re-check the server for role and tabs, so a
-     device that cached old permissions corrects itself on the next load. */
-  setTimeout(() => {
-    try{
-      const me = currentUser();
-      if(me && typeof SB !== 'undefined' && SB.session) sbApplyMyProfile(me);
-    }catch(e){}
-  }, 400);
+  /* An existing session re-checks the server for role and tabs on every load, so a
+     device holding stale permissions corrects itself. This used to hang off a
+     single short timer, which lost the race whenever the network was slow — it
+     now retries, and says so plainly if it never succeeds rather than silently
+     leaving someone on a reduced set of tabs. */
+  refreshPermissions();
   const cur = currentUser();
   /* This app is served on a public address, so it must never open without a
      sign-in. Entry requires a live Fullstack (Supabase) session; a device that
