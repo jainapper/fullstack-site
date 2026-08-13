@@ -627,7 +627,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-13 04:06 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-13 04:11 UTC</b></div>
     </div>
   </aside>
 
@@ -791,7 +791,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 04:06 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 04:11 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -5038,7 +5038,12 @@ async function sbSync(){
   try{
     await sbPushInner();                     /* push what we owe before reading back */
     const changed = await sbPull();
-    await sbPullSettings();
+    const gotKeys = await sbPullSettings();
+    if(gotKeys){
+      /* keys just came down from the server — show them straight away */
+      try{ ssObserve('pull'); fillSsAccounts(); const f = $('#ssSubKey'); if(f) f.value = (col.settings().ss || {}).subKey || ''; }catch(e){}
+      try{ toast('Starshipit keys restored from the shared database'); }catch(e){}
+    }
     if(SB.state !== 'error') SB.state = 'live';
     if(changed && !ssUserBusy()) route();
   }catch(e){
