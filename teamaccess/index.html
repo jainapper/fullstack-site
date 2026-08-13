@@ -761,6 +761,19 @@ table.rows td.num{font-size:12px}
         <button class="btn ghost small" id="sbSyncNow">Sync now</button>
         <button class="btn ghost small" id="sbOut">Sign out of shared database</button>
       </div>
+
+      <div id="acctPwWrap" style="margin-top:16px;border-top:1px dashed rgba(255,255,255,.12);padding-top:14px;display:none">
+        <div class="set-cap" style="font-size:11px">Your password</div>
+        <p class="set-note" id="acctWho" style="margin-top:4px">—</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div><label class="f-lab" for="acctPw1">New password</label><input class="f-in" id="acctPw1" type="password" autocomplete="new-password" placeholder="At least 10 characters" style="width:100%"></div>
+          <div><label class="f-lab" for="acctPw2">Confirm</label><input class="f-in" id="acctPw2" type="password" autocomplete="new-password" placeholder="Type it again" style="width:100%"></div>
+        </div>
+        <div class="conn-msg" id="acctPwMsg" style="margin-top:8px"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <button class="btn ghost small" id="acctPwGo">Change password</button>
+        </div>
+      </div>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone. Without a sign-in the app still runs, but only in this browser.</p>
     </div>
   </div>
@@ -3893,8 +3906,45 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 /* settings modal — fill Eagle fields too */
+async function acctPwChange(){
+  const m = $('#acctPwMsg'), go = $('#acctPwGo');
+  const a = $('#acctPw1').value, b = $('#acctPw2').value;
+  m.className = 'conn-msg';
+  if(!(typeof SB !== 'undefined' && SB.session)){ m.textContent = 'Sign in to the shared database first.'; m.className = 'conn-msg err'; return; }
+  if(a.length < 10){ m.textContent = 'Use at least 10 characters.'; m.className = 'conn-msg err'; return; }
+  if(a !== b){ m.textContent = 'Those two do not match.'; m.className = 'conn-msg err'; $('#acctPw2').select(); return; }
+  go.textContent = 'Saving…';
+  try{
+    const r = await fetch(SB.url + '/auth/v1/user', {
+      method: 'PUT',
+      headers: { apikey: SB.anon, Authorization: 'Bearer ' + SB.session.access_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: a })
+    });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(j.msg || j.message || j.error_description || ('HTTP ' + r.status));
+    $('#acctPw1').value = ''; $('#acctPw2').value = '';
+    m.textContent = 'Password changed. Use it next time you sign in.';
+    m.className = 'conn-msg ok';
+    toast('Password changed');
+  }catch(e){
+    m.textContent = /expired|JWT|401/i.test(e.message)
+      ? 'Your session has expired — sign out and back in, then try again.'
+      : ('Could not change the password — ' + e.message);
+    m.className = 'conn-msg err';
+  }
+  go.textContent = 'Change password';
+}
 function openSettings(){
   try{ renderSbNote(); }catch(e){}
+  const signedIn = !!(typeof SB !== 'undefined' && SB.session);
+  const who = signedIn && SB.session.user && SB.session.user.email;
+  const wrap = $('#acctPwWrap');
+  if(wrap){
+    wrap.style.display = signedIn ? '' : 'none';
+    $('#acctWho').textContent = who ? ('Signed in as ' + who + '. This changes the password you sign in with.')
+                                    : 'This changes the password you sign in with.';
+    $('#acctPwMsg').textContent = ''; $('#acctPwMsg').className = 'conn-msg';
+  }
   const s = col.settings();
   $('#ssSubKey').value = s.ss.subKey || '';
   $('#ssProxy').value = s.ss.proxy || '';
@@ -4480,6 +4530,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#lockGo').addEventListener('click', lockSubmit);
   $('#pwResetGo').addEventListener('click', pwResetSubmit);
   $('#lockForgot').addEventListener('click', lockForgot);
+  { const g = $('#acctPwGo'); if(g){ g.addEventListener('click', acctPwChange); $('#acctPw2').addEventListener('keydown', e => { if(e.key === 'Enter') acctPwChange(); }); } }
   $('#pwNew2').addEventListener('keydown', e => { if(e.key === 'Enter') pwResetSubmit(); });
   $('#lockPw').addEventListener('keydown', e => { if(e.key === 'Enter') lockSubmit(); });
   $('#lockUser').addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); ($('#lockPw').value ? lockSubmit() : $('#lockPw').focus()); } });
