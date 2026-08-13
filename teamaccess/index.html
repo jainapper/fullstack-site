@@ -774,7 +774,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="acctPwGo">Change password</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 01:59 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 02:08 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone. Without a sign-in the app still runs, but only in this browser.</p>
     </div>
   </div>
@@ -3985,6 +3985,52 @@ const TABS = [
 ];
 function colUsers(){ return DB.get('users', []); }
 function saveUsers(){ DB.set('users', colUsers()); }
+/* The server profile calls the documents tab "docs" while the app calls it
+   "documents". Left unmapped, that one key silently switched the Documents tab
+   off every time permissions loaded. Translate in both directions. */
+const TAB_ALIASES = { documents: ['documents', 'docs'] };
+function normalizeTabs(raw){
+  const src = (raw && typeof raw === 'object') ? raw : {};
+  const out = {};
+  TABS.forEach(t => {
+    const key = t[0];
+    const names = TAB_ALIASES[key] || [key];
+    let val;
+    for(const n of names){ if(src[n] !== undefined){ val = !!src[n]; break; } }
+    out[key] = val === undefined ? !!src[key] : val;
+  });
+  out.dashboard = true;                       /* dashboard is always on */
+  return out;
+}
+function tabsForServer(tabs){
+  const out = Object.assign({}, tabs || {});
+  Object.keys(TAB_ALIASES).forEach(key => {
+    TAB_ALIASES[key].forEach(alias => { out[alias] = !!out[key]; });
+  });
+  return out;
+}
+/* Permissions are read back from the profiles table on every load, so an edit
+   made here has to land there too — otherwise the next refresh quietly reverts
+   it and the change looks like it never saved. */
+async function sbPushProfile(u){
+  if(!u || !u.email || typeof SB === 'undefined' || !SB.session) return false;
+  try{
+    const rows = await sbReq('/rest/v1/profiles?email=eq.' + encodeURIComponent(String(u.email).toLowerCase()), {
+      method: 'PATCH',
+      headers: { Prefer: 'return=representation' },
+      body: { role: u.role === 'admin' ? 'admin' : 'member', tabs: tabsForServer(u.tabs), name: u.name || '' }
+    });
+    return Array.isArray(rows) ? rows.length > 0 : true;
+  }catch(e){ return false; }
+}
+function saveUsersAndProfile(u){
+  saveUsers();
+  sbPushProfile(u).then(ok => {
+    if(!ok && u && u.email && typeof SB !== 'undefined' && SB.session){
+      toast('Saved on this device, but the server refused the change — you may not have admin rights for it.');
+    }
+  });
+}
 function initials(name){
   const words = String(name || '?').replace(/[^A-Za-zÀ-ÿ0-9 ]/g, ' ').trim().split(/\s+/).filter(Boolean);
   return (words.slice(0, 2).map(w => w[0]).join('') || '?').toUpperCase();
@@ -4194,7 +4240,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(!u) return;
       u.tabs = u.tabs || {};
       TABS.forEach(x => { u.tabs[x[0]] = x[0] === 'dashboard' ? true : (x[0] === 'team' && u.role === 'admin') ? true : on; });
-      saveUsers(); applyTabAccess(); renderTeam();
+      saveUsersAndProfile(u); applyTabAccess(); renderTeam();
     }
     else if(t.dataset.uswitch){ switchUser(t.dataset.uswitch); }
     else if(t.dataset.usetpw){
@@ -4220,7 +4266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(tg){
       const p = tg.dataset.utab.split(':');
       const u = colUsers().find(x => x.id === p[0]);
-      if(u){ u.tabs = u.tabs || {}; u.tabs[p[1]] = tg.checked; saveUsers(); applyTabAccess(); }
+      if(u){ u.tabs = u.tabs || {}; u.tabs[p[1]] = tg.checked; saveUsersAndProfile(u); applyTabAccess(); }
       return;
     }
     const rl = e.target.closest('[data-urole]');
@@ -4232,7 +4278,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       u.role = rl.value;
       if(u.role === 'admin'){ u.tabs = u.tabs || {}; u.tabs.team = true; }
-      saveUsers(); applyTabAccess(); renderTeam();
+      saveUsersAndProfile(u); applyTabAccess(); renderTeam();
     }
   });
 });
@@ -4318,7 +4364,7 @@ async function sbApplyMyProfile(u){
   const all = {}; TABS.forEach(t => all[t[0]] = true);
   if(prof.name) u.name = prof.name;
   u.role = prof.role === 'admin' ? 'admin' : 'member';
-  u.tabs = (prof.tabs && typeof prof.tabs === 'object') ? prof.tabs : (u.role === 'admin' ? all : { dashboard: true });
+  u.tabs = (prof.tabs && typeof prof.tabs === 'object') ? normalizeTabs(prof.tabs) : (u.role === 'admin' ? all : { dashboard: true });
   const users = colUsers();
   const at = users.findIndex(x => x.id === u.id);
   if(at >= 0){ users[at] = u; saveUsers(); }
@@ -4346,7 +4392,7 @@ async function adoptServerUser(email){
     name: (prof && prof.name) || email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
     email: email,
     role: admin ? 'admin' : 'member',
-    tabs: (prof && prof.tabs && typeof prof.tabs === 'object') ? prof.tabs : (admin ? Object.assign({}, all) : { dashboard:true }),
+    tabs: (prof && prof.tabs && typeof prof.tabs === 'object') ? normalizeTabs(prof.tabs) : (admin ? Object.assign({}, all) : { dashboard:true }),
     added: new Date().toISOString()
   };
   const users = colUsers(); users.push(u); saveUsers();
