@@ -314,6 +314,17 @@ table.rows td.num,table.rows th.num{text-align:right;font-family:var(--mono);fon
 .modal-card h2{font-size:19px;font-weight:800;margin-bottom:4px}
 .modal-card .msub{color:var(--dim);font-size:13px;margin-bottom:18px}
 .modal-card .x{position:absolute;top:18px;right:18px}
+/* The settings panel is long. Its close button used to be pinned to the top of
+   the scrolling content, so it disappeared as soon as you scrolled to the child
+   accounts — leaving no way out. Header and actions now stay on screen. */
+.modal-card.tall{padding-top:0;padding-bottom:0}
+.modal-top{position:sticky;top:0;z-index:8;background:var(--raise);margin:0 -28px;padding:20px 28px 12px;border-bottom:1px solid var(--stroke);display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.modal-top h2{margin-bottom:2px}
+.modal-top .msub{margin-bottom:0}
+.modal-top .x{position:static;flex-shrink:0;font-size:20px;line-height:1;padding:4px 8px}
+.modal-actions{position:sticky;bottom:0;z-index:8;background:var(--raise);margin:0 -28px;padding:14px 28px 18px;border-top:1px solid var(--stroke);display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.modal-actions .grow{margin-right:auto;font-size:12px;color:var(--faint)}
+@media (max-width:640px){ .modal-top,.modal-actions{margin:0 -24px;padding-left:24px;padding-right:24px} }
 .set-sec{border-top:1px solid var(--stroke);padding-top:16px;margin-top:16px}
 .set-sec:first-of-type{border-top:0;padding-top:0;margin-top:0}
 .set-cap{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
@@ -695,10 +706,14 @@ table.rows td.num{font-size:12px}
 </div>
 
 <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-label="Settings">
-  <div class="modal-card">
-    <button class="x" data-close>✕</button>
-    <h2>Settings</h2>
-    <p class="msub">Starshipit connection and local data.</p>
+  <div class="modal-card tall">
+    <div class="modal-top">
+      <div>
+        <h2>Settings</h2>
+        <p class="msub">Starshipit connection and local data.</p>
+      </div>
+      <button class="x" data-close title="Close">✕</button>
+    </div>
 
     <div class="set-sec">
       <div class="set-cap">Starshipit API</div>
@@ -774,8 +789,14 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="acctPwGo">Change password</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 02:08 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
-      <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone. Without a sign-in the app still runs, but only in this browser.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 02:13 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
+    </div>
+
+    <div class="modal-actions">
+      <span class="grow" id="setSavedNote">Changes save as you type</span>
+      <button class="btn ghost small" data-close>Close</button>
+      <button class="btn small" id="setSaveClose">Save &amp; close</button>
     </div>
   </div>
 </div>
@@ -4624,6 +4645,20 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#lockGo').addEventListener('click', lockSubmit);
   $('#pwResetGo').addEventListener('click', pwResetSubmit);
   $('#lockForgot').addEventListener('click', lockForgot);
+  { const b = $('#setSaveClose'); if(b) b.addEventListener('click', () => {
+      try{ persistSsForm(); }catch(e){}
+      try{ readAccountRows(); }catch(e){}
+      const n = (col.settings().ss.accounts || []).filter(a => a.apiKey).length;
+      toast(n ? ('Saved — ' + n + ' child account' + (n === 1 ? '' : 's') + ' stored') : 'Saved');
+      closeOverlays();
+    }); }
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && $('#settingsModal').classList.contains('on')) closeOverlays();
+  });
+  $('#settingsModal').addEventListener('mousedown', e => {
+    /* clicking the dimmed area outside the panel closes it too */
+    if(e.target === $('#settingsModal')) closeOverlays();
+  });
   { const g = $('#acctPwGo'); if(g){ g.addEventListener('click', acctPwChange); $('#acctPw2').addEventListener('keydown', e => { if(e.key === 'Enter') acctPwChange(); }); } }
   $('#pwNew2').addEventListener('keydown', e => { if(e.key === 'Enter') pwResetSubmit(); });
   $('#lockPw').addEventListener('keydown', e => { if(e.key === 'Enter') lockSubmit(); });
