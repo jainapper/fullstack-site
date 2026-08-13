@@ -627,7 +627,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-13 03:48 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-13 04:06 UTC</b></div>
     </div>
   </aside>
 
@@ -787,9 +787,11 @@ table.rows td.num{font-size:12px}
         <div class="conn-msg" id="acctPwMsg" style="margin-top:8px"></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
           <button class="btn ghost small" id="acctPwGo">Change password</button>
+          <button class="btn ghost small" id="ssRestore" title="Put back the last set of Starshipit keys this browser held">Restore Starshipit keys</button>
+          <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 03:48 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 04:06 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -914,7 +916,54 @@ const col = {
 };
 /* Settings hold the Starshipit keys. If a bulk write has filled storage, free
    space by trimming order history rather than letting the keys fail to save. */
+/* ————— Starshipit key safety net —————
+   DB.get returns the live cached object, so callers that do
+   `const s = col.settings(); s.ss.accounts = …` mutate state immediately —
+   which is how the child accounts kept disappearing through paths that looked
+   safe. This keeps an INDEPENDENT deep copy of the last state that had keys,
+   watches for the count dropping, and can put them straight back. */
+const SS_HIST = 'fsdb.ssHistory', SS_GOOD = 'fsdb.ssLastGood';
+function ssHistory(){ try{ return JSON.parse(localStorage.getItem(SS_HIST) || '[]'); }catch(e){ return []; } }
+function ssKeyCount(ss){ return (((ss || {}).accounts) || []).filter(a => a && a.apiKey).length; }
+function ssLastGood(){ try{ return JSON.parse(localStorage.getItem(SS_GOOD) || 'null'); }catch(e){ return null; } }
+function ssObserve(tag){
+  try{
+    const ss = (DB.get('settings', {}) || {}).ss || {};
+    const now = ssKeyCount(ss);
+    const good = ssLastGood();
+    const had = ssKeyCount(good);
+    if(now > 0){
+      if(now !== had || (good && good.subKey !== ss.subKey)){
+        localStorage.setItem(SS_GOOD, JSON.stringify({ subKey: ss.subKey || '', accounts: JSON.parse(JSON.stringify(ss.accounts || [])), at: new Date().toISOString() }));
+      }
+      return;
+    }
+    if(had > 0){
+      const hist = ssHistory();
+      const last = hist[0];
+      if(last && Date.now() - new Date(last.at).getTime() < 4000) return;   /* one entry per event */
+      hist.unshift({ at: new Date().toISOString(), from: had, to: now, tag: tag || '',
+                     stack: (new Error().stack || '').split('\n').slice(2, 6).join(' | ').replace(/https?:\/\/[^ )]+/g, '') });
+      localStorage.setItem(SS_HIST, JSON.stringify(hist.slice(0, 10)));
+      try{ toast('Starshipit keys disappeared — open Settings and press Restore Starshipit keys'); }catch(e){}
+    }
+  }catch(e){}
+}
+function ssRestoreLast(){
+  const good = ssLastGood();
+  if(!good || !ssKeyCount(good)){ toast('No saved keys to restore'); return false; }
+  const s2 = col.settings();
+  s2.ss = s2.ss || {};
+  s2.ss.subKey = good.subKey || s2.ss.subKey || '';
+  s2.ss.accounts = JSON.parse(JSON.stringify(good.accounts));
+  DB.set('settings', s2);
+  try{ fillSsAccounts(); const f = $('#ssSubKey'); if(f) f.value = s2.ss.subKey || ''; }catch(e){}
+  toast('Restored ' + ssKeyCount(good) + ' child accounts');
+  return true;
+}
+setInterval(() => ssObserve('watch'), 2000);
 function saveSettings(sObj){
+  try{ ssObserve('save'); }catch(e){}
   if(DB.set('settings', sObj)) return true;
   for(let attempt = 0; attempt < 3; attempt++){
     const orders = DB.get('ssOrders', []);
@@ -4645,6 +4694,13 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#lockGo').addEventListener('click', lockSubmit);
   $('#pwResetGo').addEventListener('click', pwResetSubmit);
   $('#lockForgot').addEventListener('click', lockForgot);
+  { const r = $('#ssRestore'); if(r) r.addEventListener('click', ssRestoreLast); }
+  { const h = $('#ssHistBtn'); if(h) h.addEventListener('click', () => {
+      const hist = ssHistory();
+      if(!hist.length){ toast('No key changes recorded'); return; }
+      alert('Starshipit key history (newest first):\n\n' + hist.map(x =>
+        new Date(x.at).toLocaleString() + ' — ' + x.from + ' → ' + x.to + ' keys [' + (x.tag || '') + ']\n    ' + (x.stack || 'unknown')).join('\n\n'));
+    }); }
   { const b = $('#setSaveClose'); if(b) b.addEventListener('click', () => {
       try{ persistSsForm(); }catch(e){}
       try{ readAccountRows(); }catch(e){}
