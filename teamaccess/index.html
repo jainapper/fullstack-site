@@ -627,7 +627,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-13 03:36 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-13 03:48 UTC</b></div>
     </div>
   </aside>
 
@@ -789,7 +789,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="acctPwGo">Change password</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 03:36 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 03:48 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -4162,7 +4162,7 @@ function renderTeam(){
     }).join('') + '</div></div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
     (isCur ? '' : '<button class="btn ghost small" data-uswitch="' + u.id + '">Switch to this user</button>') +
-    (canEdit ? '<button class="btn ghost small" data-usetpw="' + u.id + '">' + (u.pw ? 'Reset password' : 'Set password') + '</button>' : '') +
+    (canEdit ? '<button class="btn ghost small" data-usetpw="' + u.id + '" title="Locks this browser only — it does not create a sign-in">' + (u.pw ? 'Reset device lock' : 'Set device lock') + '</button>' : '') +
     '<span class="spacer" style="flex:1"></span>' +
     (canEdit && !isCur && !lastAdmin ? '<button class="iconbtn" data-udel="' + u.id + '">Delete</button>' : '') +
     '</div></div>';
