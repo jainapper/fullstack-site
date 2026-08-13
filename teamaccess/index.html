@@ -1406,9 +1406,10 @@ function ssAcctRow(a){
 }
 function fillSsAccounts(){
   const s = col.settings();
-  if(!s.ss.accounts.length) s.ss.accounts.push({ id: uid(), label: '', apiKey: '' });
-  DB.set('settings', s);
-  $('#ssAccounts').innerHTML = s.ss.accounts.map(ssAcctRow).join('');
+  /* Render an empty starter row WITHOUT storing it — persisting a blank account
+     used to make the saved list look like a single empty entry. */
+  const rows = s.ss.accounts.length ? s.ss.accounts : [{ id: uid(), label: '', apiKey: '' }];
+  $('#ssAccounts').innerHTML = rows.map(ssAcctRow).join('');
 }
 /* Settings used to persist only when Connect was pressed, so typing keys and
    closing the panel silently discarded them — indistinguishable from the child
@@ -1426,18 +1427,29 @@ function persistSsForm(){
 function persistSsFormSoon(){ clearTimeout(ssPersistT); ssPersistT = setTimeout(persistSsForm, 400); }
 function readAccountRows(){
   const rows = $$('#ssAccounts [data-acct-row]');
-  /* The settings form may not be rendered yet; reading it then would blank the
-     stored accounts — and with them the API keys. */
-  if(!rows.length) return;
-  const next = rows.map(row => ({
-    id: row.dataset.acctRow,
-    label: row.querySelector('[data-acct-label]').value.trim() || 'Account',
-    apiKey: row.querySelector('[data-acct-key]').value.trim()
-  }));
+  if(!rows.length) return;                       /* form not rendered — nothing to read */
   const s = col.settings();
-  const had = (s.ss.accounts || []).filter(a => a.apiKey).length;
-  if(had && !next.filter(a => a.apiKey).length) return;   /* refuse to blank real keys */
-  s.ss.accounts = next;
+  const stored = (s.ss.accounts || []).slice();
+  const byId = {};
+  stored.forEach((a, i) => { byId[a.id] = i; });
+  /* MERGE, never replace. A row on screen updates its own account; accounts that
+     are not on screen are left alone. Only the ✕ button removes one, so a panel
+     showing a stale or partial list can no longer wipe the saved keys. */
+  rows.forEach(row => {
+    const id = row.dataset.acctRow;
+    const label = row.querySelector('[data-acct-label]').value.trim();
+    const key = row.querySelector('[data-acct-key]').value.trim();
+    const at = byId[id];
+    if(at == null){
+      if(label || key) stored.push({ id: id, label: label || 'Account', apiKey: key });
+      return;
+    }
+    const cur = stored[at];
+    cur.label = label || cur.label || 'Account';
+    /* An empty box never erases a stored key — use ✕ to remove an account. */
+    if(key) cur.apiKey = key;
+  });
+  s.ss.accounts = stored;
   saveSettings(s);
 }
 /* The list endpoints return order summaries; line items and delivery dates
@@ -4291,6 +4303,17 @@ async function sbApplyMyProfile(u){
   const users = colUsers();
   const at = users.findIndex(x => x.id === u.id);
   if(at >= 0){ users[at] = u; saveUsers(); }
+  /* Permissions arrive asynchronously, so repaint the tabs the moment they land —
+     otherwise the sidebar keeps whatever this device had cached and the tabs
+     appear or disappear depending on which finished first. */
+  try{
+    if(String(col.settings().currentUserId) === String(u.id)){
+      if(u.role === 'admin' && !adminUser) adminUser = { name: u.name };
+      fillUserSwitcher(); applyTabAccess();
+      const name = (location.hash.replace(/^#\/?/, '') || 'dashboard').split('/')[0];
+      if(!tabAllowed(name)) location.hash = '#/dashboard'; else route();
+    }
+  }catch(e){}
   return true;
 }
 async function adoptServerUser(email){
@@ -4519,6 +4542,14 @@ purgeDemo();
 document.addEventListener('DOMContentLoaded', () => {
   fillUserSwitcher();
   if(startRecoveryIfPresent()) return;    /* a reset link takes over the screen */
+  /* An existing session should still re-check the server for role and tabs, so a
+     device that cached old permissions corrects itself on the next load. */
+  setTimeout(() => {
+    try{
+      const me = currentUser();
+      if(me && typeof SB !== 'undefined' && SB.session) sbApplyMyProfile(me);
+    }catch(e){}
+  }, 400);
   const cur = currentUser();
   /* This app is served on a public address, so it must never open without a
      sign-in. Entry requires a live Fullstack (Supabase) session; a device that
