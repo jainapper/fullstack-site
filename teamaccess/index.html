@@ -791,7 +791,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-13 04:11 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-20 05:51 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -1389,25 +1389,40 @@ function ssDate(v){
   const t = new Date(v);
   return isNaN(t.getTime()) ? null : t.toISOString();
 }
+/* Starshipit writes delivery state as an enum with no separators ("OutForDelivery"),
+   so normalise before matching or "out for delivery" reads as delivered. */
+function ssNorm(v){ return String(v == null ? '' : v).toLowerCase().replace(/[^a-z]/g, ''); }
+function ssLooksDelivered(v){
+  const t = ssNorm(v);
+  if(!t) return false;
+  if(t.indexOf('outfordeliver') >= 0) return false;
+  if(t.indexOf('attempt') >= 0 || t.indexOf('failed') >= 0 ||
+     t.indexOf('unabletodeliver') >= 0 || t.indexOf('awaitingdeliver') >= 0) return false;
+  return t.indexOf('deliver') >= 0;
+}
 /* Delivery timestamps live in several places depending on carrier and endpoint:
    on the order, on a tracking summary, or only inside the tracking event list. */
 function ssDelivered(o){
   if(!o) return null;
+  const tsObj = (o.tracking_status && typeof o.tracking_status === 'object') ? o.tracking_status : null;
   const direct = o.delivery_date || o.delivered_date || o.date_delivered || o.actual_delivery_date ||
                  o.deliveredAt || o.delivered_at ||
-                 (o.tracking_status && (o.tracking_status.delivered_date || o.tracking_status.delivery_date));
+                 (tsObj && (tsObj.delivered_date || tsObj.delivery_date));
   const d = ssDate(direct);
   if(d) return d;
   const evs = o.events || o.tracking_events || o.trackingEvents || o.history ||
-              (o.tracking_status && o.tracking_status.events) ||
+              (tsObj && tsObj.events) ||
               (o.tracking && o.tracking.events) || [];
   if(Array.isArray(evs)){
     /* last event that reads as delivered wins */
     let best = null;
     evs.forEach(e => {
-      const txt = String((e && (e.status || e.description || e.event || e.message || e.detail)) || '').toLowerCase();
-      if(txt.indexOf('deliver') < 0 || txt.indexOf('out for deliver') >= 0 || txt.indexOf('attempted') >= 0) return;
-      const when = ssDate(e.event_datetime || e.date || e.timestamp || e.occurred_at || e.datetime || e.event_date || e.time);
+      if(!e) return;
+      /* category is the canonical enum; the older names are kept for other plans. */
+      const primary = [e.category, e.name, e.status, e.event, e.message, e.detail, e.description, e.method]
+                        .find(x => x != null && String(x).trim() !== '');
+      if(!ssLooksDelivered(primary)) return;
+      const when = ssDate(e.time || e.event_datetime || e.date || e.timestamp || e.occurred_at || e.datetime || e.event_date);
       if(when && (!best || when > best)) best = when;
     });
     if(best) return best;
@@ -1415,9 +1430,11 @@ function ssDelivered(o){
   return null;
 }
 function ssIsDelivered(o){
-  const st = String(o.status || o.tracking_status_text || o.shipment_status ||
-                    (o.tracking_status && (o.tracking_status.status || o.tracking_status.name)) || '').toLowerCase();
-  return st.indexOf('deliver') >= 0;
+  if(!o) return false;
+  const ts = o.tracking_status;
+  return [ typeof ts === 'string' ? ts : (ts && (ts.status || ts.name)),
+           o.status, o.order_status, o.tracking_status_text, o.shipment_status, o.delivery_status,
+           o.packages && o.packages[0] && o.packages[0].delivery_status ].some(ssLooksDelivered);
 }
 /* Freight is what the carrier charged. Starshipit names it differently by plan
    and endpoint, so read every known shape and take the first real number. */
@@ -1428,10 +1445,21 @@ function ssMoney(v){
 }
 function ssFreight(o){
   if(!o) return null;
-  const direct = [o.shipping_cost, o.freight_cost, o.carrier_cost, o.cost, o.price,
+  /* total_shipping_price is what Starshipit actually returns on the order detail;
+     price_breakdown carries the same figure as a formatted string on some plans. */
+  const direct = [o.total_shipping_price, o.shipping_cost, o.freight_cost, o.carrier_cost, o.cost, o.price,
                   o.shipping_price, o.total_shipping, o.shipping_total, o.freight,
                   o.rate, o.quoted_price, o.label_cost];
   for(const c of direct){ const n = ssMoney(c); if(n != null) return n; }
+  const pb = o.price_breakdown;
+  if(pb && typeof pb === 'object' && !Array.isArray(pb)){
+    for(const k of Object.keys(pb)){
+      if(/^calculated price$/i.test(k.trim())){ const n = ssMoney(pb[k]); if(n != null) return n; }
+    }
+    for(const k of Object.keys(pb)){
+      if(/price|total|charge/i.test(k) && !/ex gst/i.test(k)){ const n = ssMoney(pb[k]); if(n != null) return n; }
+    }
+  }
   const nested = [].concat(Array.isArray(o.shipments) ? o.shipments : [],
                            Array.isArray(o.packages) ? o.packages : [],
                            Array.isArray(o.labels) ? o.labels : []);
