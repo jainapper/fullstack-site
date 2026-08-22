@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terms of Service — Marco</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#16181d; --muted:#5b6270; --rule:#e4e7ec;
+    --accent:#1f3a8a; --flag-bg:#fff4e5; --flag-fg:#7a4100; --flag-rule:#f0b429;
+    --box-bg:#f7f8fa;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1115; --fg:#e8eaee; --muted:#9aa2b1; --rule:#262a33;
+      --accent:#9db4ff; --flag-bg:#2a1f0d; --flag-fg:#f5c76e; --flag-rule:#8a6410;
+      --box-bg:#171a21;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto;padding:56px 24px 96px}
+  header.doc{border-bottom:1px solid var(--rule);padding-bottom:28px;margin-bottom:36px}
+  .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:600;color:var(--muted)}
+  h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:12px 0 14px;letter-spacing:-.02em}
+  .meta{color:var(--muted);font-size:14px}
+  .meta b{color:var(--fg)}
+  h2{font-size:20px;margin:44px 0 12px;letter-spacing:-.01em;scroll-margin-top:20px}
+  h3{font-size:16px;margin:26px 0 8px;color:var(--fg)}
+  p,li{color:var(--fg)}
+  ul,ol{padding-left:22px}
+  li{margin:6px 0}
+  a{color:var(--accent)}
+  .lead{font-size:17px;color:var(--muted)}
+  .callout{background:var(--box-bg);border:1px solid var(--rule);border-left:3px solid var(--accent);
+    border-radius:6px;padding:16px 18px;margin:20px 0}
+  .callout p:first-child{margin-top:0}
+  .callout p:last-child{margin-bottom:0}
+  .flag{background:var(--flag-bg);color:var(--flag-fg);border:1px solid var(--flag-rule);
+    border-radius:6px;padding:16px 18px;margin:24px 0;font-size:14.5px}
+  .flag b{color:var(--flag-fg)}
+  .todo{background:var(--flag-bg);color:var(--flag-fg);border-bottom:1px dashed var(--flag-rule);
+    padding:1px 4px;border-radius:3px;font-weight:600;white-space:nowrap}
+  .caps{font-variant:normal;text-transform:uppercase;font-size:13.5px;letter-spacing:.03em;font-weight:700}
+  .toc{background:var(--box-bg);border:1px solid var(--rule);border-radius:8px;padding:18px 22px;margin:32px 0}
+  .toc ol{margin:8px 0 0;columns:2;column-gap:32px}
+  .toc li{margin:4px 0;break-inside:avoid}
+  @media(max-width:620px){.toc ol{columns:1}}
+  hr{border:0;border-top:1px solid var(--rule);margin:44px 0}
+  .sig{color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="flag">
+  <b>Draft for review — remove this box before publishing.</b> Every <span class="todo">[INSERT: …]</span> below is a
+  decision only you can make (entity details, jurisdiction, liability cap, notice periods). This draft is written to be
+  robust under Australian law, but it is not legal advice and should be reviewed by an Australian-qualified commercial
+  lawyer before it goes live — particularly clauses 13 to 15.
+</div>
+
+<header class="doc">
+  <div class="eyebrow">Legal</div>
+  <h1>Terms of Service</h1>
+  <p class="meta">
+    <b>Marco</b> — regulatory intelligence for supplements, foods and cosmetics<br>
+    Effective date: <span class="todo">[INSERT: effective date]</span> &nbsp;·&nbsp;
+    Version <span class="todo">[INSERT: version]</span>
+  </p>
+</header>
+
+<p class="lead">These terms govern your access to and use of the Marco platform. They are written for businesses. Please
+read clauses 3, 4 and 5 closely — they explain what Marco's outputs are, what they are not, and what you remain
+responsible for — and clauses 13 to 15, which limit our liability to you.</p>
+
+<div class="toc">
+  <div class="eyebrow">Contents</div>
+  <ol>
+    <li><a href="#s1">These terms</a></li>
+    <li><a href="#s2">Definitions</a></li>
+    <li><a href="#s3">What Marco is, and what it is not</a></li>
+    <li><a href="#s4">Regulatory data and Outputs</a></li>
+    <li><a href="#s5">Your responsibilities and independent verification</a></li>
+    <li><a href="#s6">Your acknowledgements</a></li>
+    <li><a href="#s7">Acceptable use</a></li>
+    <li><a href="#s8">Accounts and security</a></li>
+    <li><a href="#s9">Fees, payment and GST</a></li>
+    <li><a href="#s10">Intellectual property, Your Data and confidentiality</a></li>
+    <li><a href="#s11">Availability, support and changes</a></li>
+    <li><a href="#s12">Third-party services</a></li>
+    <li><a href="#s13">Disclaimer of warranties</a></li>
+    <li><a href="#s14">Australian Consumer Law</a></li>
+    <li><a href="#s15">Limitation of liability</a></li>
+    <li><a href="#s16">Indemnity</a></li>
+    <li><a href="#s17">Term, suspension and termination</a></li>
+    <li><a href="#s18">Changes to these terms</a></li>
+    <li><a href="#s19">Disputes</a></li>
+    <li><a href="#s20">General</a></li>
+    <li><a href="#s21">Governing law</a></li>
+    <li><a href="#s22">Contact</a></li>
+  </ol>
+</div>
+
+<h2 id="s1">1. These terms</h2>
+
+<p>1.1 The Marco platform at <a href="https://trustmarco.com">trustmarco.com</a> and all related applications, APIs,
+data and reports (together, the <b>Platform</b>) are provided by
+<span class="todo">[INSERT: full legal entity name]</span> Pty Ltd
+ACN <span class="todo">[INSERT: ACN]</span> / ABN <span class="todo">[INSERT: ABN]</span>, a company incorporated in
+Australia (<b>Marco</b>, <b>we</b>, <b>us</b>, <b>our</b>).</p>
+
+<p>1.2 These Terms of Service (<b>Terms</b>) form a binding agreement between Marco and the entity that subscribes to or
+uses the Platform (<b>you</b>, <b>your</b>). They apply each time you access the Platform, whether on a paid plan, a
+free plan, a trial, or an evaluation.</p>
+
+<p>1.3 By creating an account, clicking to accept, or using the Platform, you agree to these Terms. If you are accepting
+on behalf of a company or other entity, you warrant that you have authority to bind that entity, and <b>you</b> means
+that entity.</p>
+
+<p>1.4 <b>The Platform is supplied for business use only.</b> It is not offered to, and must not be used by, individuals
+acquiring it for personal, domestic or household use or consumption. It is designed for use by manufacturers, brand
+owners, sponsors, importers, formulators, contract manufacturers and their regulatory advisers.</p>
+
+<p>1.5 Where you and Marco have signed a separate written agreement, order form or enterprise agreement, that document
+prevails over these Terms to the extent of any inconsistency.</p>
+
+<h2 id="s2">2. Definitions</h2>
+
+<ul>
+  <li><b>ACL</b> means the Australian Consumer Law in Schedule 2 to the <i>Competition and Consumer Act 2010</i> (Cth).</li>
+  <li><b>Output</b> means any result, verdict, score, flag, status, classification, citation, pathway recommendation,
+    cost or timeline estimate, label assessment, ingredient record, justification, report or other material generated
+    or displayed by the Platform, including anything described as a "pass", "fail", "compliant", "non-compliant",
+    "permitted", "restricted", "review required" or similar.</li>
+  <li><b>Regulatory Source</b> means any third-party legislative, regulatory, standards or registry source that the
+    Platform draws on, including the Therapeutic Goods Administration (TGA) and the Australian Register of Therapeutic
+    Goods (ARTG), Food Standards Australia New Zealand (FSANZ) and the Australia New Zealand Food Standards Code, the
+    Australian Industrial Chemicals Introduction Scheme (AICIS), Health Canada, the United States Food and Drug
+    Administration (FDA), Brazil's Agência Nacional de Vigilância Sanitária (ANVISA), New Zealand Medsafe, and any
+    other source added from time to time.</li>
+  <li><b>Your Data</b> means formulations, specifications, ingredient lists, artwork, labels, documents, test results
+    and any other material you or your users upload to, or generate in, the Platform.</li>
+  <li><b>Your Products</b> means any product, formulation, label, claim, dossier or submission that you develop,
+    manufacture, supply, export, register, notify or market.</li>
+</ul>
+
+<h2 id="s3">3. What Marco is, and what it is not</h2>
+
+<div class="callout">
+  <p><b>In plain terms:</b> Marco is a research and decision-support tool. It reads regulatory data and shows you what
+  it found, with the rule behind each result so you can check it yourself. It does not approve your product, it does
+  not certify it, and it does not replace your regulatory affairs function or your lawyer. The decision to formulate,
+  label, register or release a product is always yours.</p>
+</div>
+
+<h3>3.1 Marco is an information and decision-support tool</h3>
+<p>The Platform aggregates, structures and cross-references publicly available regulatory information and applies rules
+and automated processing to it, so that you can research faster and record your reasoning. Its purpose is to surface
+information and highlight issues for your consideration.</p>
+
+<h3>3.2 Outputs are not advice</h3>
+<p>Outputs are general information only. They are <b>not</b> regulatory advice, legal advice, medical or health advice,
+scientific or toxicological advice, or professional advice of any kind. They do not take account of your particular
+circumstances, your manufacturing processes, your intended claims, your supply chain, your contractual obligations, or
+any correspondence or undertakings between you and a regulator. No advisory, consulting, fiduciary or professional
+relationship arises between you and Marco, and no duty of care beyond the express terms of this agreement is assumed by
+us.</p>
+
+<h3>3.3 Marco is not a regulator, certifier or assessment body</h3>
+<p>Marco is not a government agency, regulator, notified body, certification body, conformity assessment body or
+accredited laboratory, and is not endorsed by, affiliated with, or acting for any Regulatory Source. Outputs are not
+approvals, registrations, listings, notifications, licences, certificates, clearances or determinations of compliance,
+and must never be presented to a regulator, customer, retailer, insurer or any third party as if they were. Marco's
+name, marks and Outputs must not be used to suggest that a product has been certified or approved by Marco.</p>
+
+<h3>3.4 What a positive Output means, and what it does not</h3>
+<p>An Output indicating that a formulation, ingredient, claim or label appears permitted, compliant or free of
+identified issues means only this: <b>on the data held by the Platform at the moment the Output was generated, applying
+the rules the Platform encodes, to the information you supplied, no adverse finding was identified.</b> It is a
+preliminary indication to guide your own assessment. It is not a representation, warranty, guarantee or assurance
+that:</p>
+<ul>
+  <li>Your Product complies, or will comply, with any law, standard, code or regulatory requirement;</li>
+  <li>Your Product may lawfully be manufactured, supplied, exported, advertised, registered or sold in any market;</li>
+  <li>a regulator, auditor, certifier, customer or court would reach the same conclusion; or</li>
+  <li>Your Product will not be subject to enforcement action, recall, cancellation, seizure, refusal, penalty or
+    litigation.</li>
+</ul>
+
+<h3>3.5 You remain the responsible party</h3>
+<p>You are, and remain at all times, the sponsor, manufacturer, importer, supplier, introducer or responsible person
+for Your Products under applicable law, including the <i>Therapeutic Goods Act 1989</i> (Cth), the
+<i>Food Standards Australia New Zealand Act 1991</i> (Cth) and the Australia New Zealand Food Standards Code, the
+<i>Industrial Chemicals Act 2019</i> (Cth), the ACL, and the equivalent laws of every other market you supply. Nothing
+in the Platform, and nothing in these Terms, transfers, shares, reduces or discharges any of those obligations, and
+Marco does not assume any of them.</p>
+
+<h2 id="s4">4. Regulatory data and Outputs</h2>
+
+<h3>4.1 Third-party sources</h3>
+<p>The Platform depends on data published and controlled by Regulatory Sources. We do not author, control, verify or
+guarantee that data. It may be incomplete, ambiguous, out of date, withdrawn, published in error, translated, mirrored,
+restructured, or subject to interpretation, transitional arrangements, grandfathering, exemptions or unpublished
+regulator practice. Errors may also arise in ingestion, transcription, matching, mapping or synonym resolution.</p>
+
+<h3>4.2 Outputs are point-in-time</h3>
+<p>An Output speaks only as at the date and time it was generated. Regulatory requirements, permitted-ingredient lists,
+monographs, standards and registry entries change, sometimes with immediate effect and sometimes retrospectively. We do
+not warrant that any Output remains accurate after it is generated, and unless you have an active subscription to a
+feature that expressly provides ongoing monitoring, we are under no obligation to notify you of a change affecting a
+previous Output.</p>
+
+<h3>4.3 Outputs depend entirely on your inputs</h3>
+<p>Outputs are generated from the information you provide. An incomplete, inaccurate, mis-transcribed, mis-specified or
+out-of-date input — including an incorrect CAS number, INCI name, AAN, botanical species, part, extract ratio, solvent,
+salt form, concentration, dose, serving size, route of administration, product category, intended use, target market or
+intended claim — will produce an incorrect Output. Assessing whether an input correctly describes Your Product is your
+responsibility, not ours.</p>
+
+<h3>4.4 Automated and machine-assisted processing</h3>
+<p>The Platform uses automated rules processing, data matching, optical character recognition and machine learning,
+including artificial intelligence models, to produce Outputs, including in the label scanner, ingredient matching and
+Pathway Advisor features. These techniques are probabilistic. They can misread, mis-match, omit, over-extend or
+otherwise produce results that are wrong, and they can do so while presenting a confident result. Outputs are not
+reviewed by a human regulatory professional before they are shown to you unless we expressly state otherwise for a
+particular feature.</p>
+
+<h3>4.5 Markets without positive lists, and the meaning of silence</h3>
+<p>Some markets do not maintain a positive list of permitted ingredients, and instead operate on notification,
+self-substantiation, adulteration or general-safety frameworks — including, for dietary supplements in the United
+States, the regime under the Federal Food, Drug, and Cosmetic Act as amended by DSHEA. Where that is so, the Platform
+tells you so rather than returning a compliance verdict. <b>The absence of an adverse finding is not a finding of
+compliance.</b> A "no issues identified", "not listed", "no data", "not assessed" or blank result means only that the
+Platform did not identify a relevant record; it does not mean the ingredient, claim, label or product is lawful,
+permitted or safe.</p>
+
+<h3>4.6 Coverage is limited</h3>
+<p>The Platform covers selected markets, product categories, regulatory instruments and check types, which change over
+time. It does not cover every requirement that may apply to Your Products — including, without limitation, state and
+territory law, advertising and therapeutic-claims codes, industry codes, intellectual property, customs and import
+requirements, GMP and manufacturing licensing, halal, kosher or organic certification, novel-food and novel-ingredient
+assessments, packaging and environmental requirements, or contractual requirements imposed by your customers or
+retailers. Do not treat the Platform as a complete regulatory checklist.</p>
+
+<h3>4.7 Citations and estimates</h3>
+<p>Citations and rule references are provided so you can go to the source and verify the position yourself. Providing a
+citation is not a warranty that the cited instrument is current, correctly identified, correctly interpreted, or
+applicable to Your Product. Timelines, costs, pathway recommendations and similar estimates are indicative only, are
+based on general assumptions, and are not a quote, forecast or assurance of any outcome, cost or duration.</p>
+
+<h2 id="s5">5. Your responsibilities and independent verification</h2>
+
+<div class="callout">
+  <p><b>This is the most important obligation in these Terms.</b> Marco is a starting point for your assessment, never
+  the end of it. Verify every Output against the primary source and have a qualified professional sign off before you
+  act.</p>
+</div>
+
+<p>5.1 <b>Independent verification.</b> Before you rely on any Output for any purpose, you must independently verify it
+against the primary Regulatory Source and any other source a competent regulatory professional would consult.</p>
+
+<p>5.2 <b>Professional sign-off.</b> You must obtain advice from appropriately qualified and, where required, licensed
+regulatory, legal, scientific and medical professionals before you formulate, manufacture, label, make any claim about,
+register, notify, export, advertise, supply or release Your Products.</p>
+
+<p>5.3 <b>No sole reliance.</b> You must not rely on the Platform as the sole or determinative basis for any decision
+about Your Products, and in particular must not use an Output as the sole basis for any regulatory submission,
+notification, declaration, certification, self-assessment, label, advertisement, claim substantiation, safety
+assessment or market release.</p>
+
+<p>5.4 <b>Your own systems.</b> You must maintain your own quality management, regulatory affairs, pharmacovigilance,
+recordkeeping, complaint-handling and recall systems, independent of the Platform. The Platform is not a quality
+management system, is not validated for use as a regulated record under any law, and must not be relied on as your
+system of record where law requires you to keep one.</p>
+
+<p>5.5 <b>Accurate inputs.</b> You must provide complete, accurate and current information, keep it up to date, and
+promptly correct any error you become aware of.</p>
+
+<p>5.6 <b>Rights in Your Data.</b> You warrant that you own or are licensed to use all of Your Data, that uploading it
+does not breach any confidentiality obligation or third-party right, and that you have obtained any consent required to
+provide it to us.</p>
+
+<p>5.7 <b>Compliance with law.</b> You must comply with all laws applicable to you and Your Products, including
+sanctions, export control and anti-corruption laws, and must not use the Platform in breach of any law.</p>
+
+<h2 id="s6">6. Your acknowledgements</h2>
+
+<p>You acknowledge and agree that each of the following is a material basis on which Marco supplies the Platform to you
+at the price it does:</p>
+<ul>
+  <li>the Platform is a decision-support tool and not a substitute for professional regulatory judgement;</li>
+  <li>Outputs may be incorrect, incomplete or out of date, including where they appear definitive;</li>
+  <li>regulatory compliance is inherently a matter of judgement, interpretation and regulator discretion, and reasonable
+    experts can and do disagree;</li>
+  <li>you have the skills and resources, or access to advisers with them, to evaluate Outputs independently;</li>
+  <li>you assume all risk arising from your use of, and any decision you make in reliance on, the Platform; and</li>
+  <li>the allocation of risk in clauses 13 to 16 is reasonable and reflects the price of the Platform, which is set on
+    the basis that Marco does not assume the regulatory or commercial risk of Your Products.</li>
+</ul>
+
+<h2 id="s7">7. Acceptable use</h2>
+
+<p>7.1 We grant you a non-exclusive, non-transferable, revocable right to access and use the Platform during your
+subscription term, for your internal business purposes, in accordance with these Terms and any plan limits.</p>
+
+<p>7.2 You must not, and must not permit anyone to:</p>
+<ul>
+  <li>resell, sublicense, rent, or provide the Platform or Outputs as a service to third parties, except that you may
+    share an Output with your own professional advisers and with a customer or regulator to whom it is relevant,
+    provided the Output is shared in full, unaltered, and with these Terms' limitations made clear;</li>
+  <li>present Outputs as certification, approval or independent verification by Marco, or alter an Output so as to
+    change its meaning or remove its qualifications;</li>
+  <li>scrape, crawl, bulk-export or systematically extract the Platform's data, or use it to build or train a competing
+    product, dataset or model;</li>
+  <li>reverse engineer, decompile or attempt to derive the Platform's rules, source code or data structures;</li>
+  <li>circumvent access controls, usage limits or security measures, or share credentials;</li>
+  <li>upload malicious code, or anything unlawful or infringing; or</li>
+  <li>use the Platform in a way that damages, disables or unreasonably burdens it.</li>
+</ul>
+
+<h2 id="s8">8. Accounts and security</h2>
+
+<p>8.1 You are responsible for all activity under your account and for the acts and omissions of your users, who must
+each be an individual and must not share credentials.</p>
+
+<p>8.2 You must keep credentials secure and notify us promptly at
+<span class="todo">[INSERT: security contact email]</span> if you suspect unauthorised access.</p>
+
+<p>8.3 You are responsible for the accuracy of the account, billing and contact details you provide.</p>
+
+<h2 id="s9">9. Fees, payment and GST</h2>
+
+<p>9.1 You must pay the fees for your plan in advance, in the currency and cycle shown at purchase or in your order
+form, without set-off or deduction.</p>
+
+<p>9.2 Unless stated otherwise, fees are exclusive of GST and any other applicable taxes, which you must pay in
+addition. Where GST applies to a supply under these Terms, you must pay an additional amount equal to the GST payable,
+against a valid tax invoice.</p>
+
+<p>9.3 Subscriptions renew automatically for successive terms unless cancelled before the end of the current term. You
+may cancel at any time, effective at the end of the current term.</p>
+
+<p>9.4 <b>Fees are non-refundable</b> except where a refund is required by law, including under the ACL, or where we
+expressly agree otherwise. Cancelling mid-term does not entitle you to a refund of fees for the balance of that term.</p>
+
+<p>9.5 We may change our fees on at least <span class="todo">[INSERT: 30/60]</span> days' written notice, effective from
+your next renewal. If you do not accept the change, you may cancel before it takes effect.</p>
+
+<p>9.6 We may suspend access to the Platform if an invoice is more than <span class="todo">[INSERT: 14/30]</span> days
+overdue and remains unpaid <span class="todo">[INSERT: 7/14]</span> days after we notify you, and may recover
+reasonable costs of collection.</p>
+
+<h2 id="s10">10. Intellectual property, Your Data and confidentiality</h2>
+
+<p>10.1 <b>Marco's IP.</b> As between the parties, Marco owns all intellectual property rights in the Platform,
+including its software, interfaces, rule logic, data models, structured datasets, compilations and the form and
+presentation of Outputs. Nothing in these Terms transfers any of those rights to you. We reserve all rights not
+expressly granted. Feedback you give us may be used by us without restriction or obligation to you.</p>
+
+<p>10.2 <b>Your Data.</b> As between the parties, you own Your Data. You grant us a non-exclusive, worldwide,
+royalty-free licence to host, copy, process, transmit and display Your Data to the extent necessary to provide,
+support, secure and improve the Platform, and to comply with law.</p>
+
+<p>10.3 <b>Outputs.</b> Subject to clause 10.1 and to your payment of fees, you may use Outputs for your internal
+business purposes and, consistently with clause 7.2, share them with your advisers, customers and regulators.</p>
+
+<p>10.4 <b>Aggregated data.</b> We may generate and use de-identified, aggregated statistical data derived from use of
+the Platform to operate, analyse and improve it, provided that data does not identify you, your users, or the
+composition of any specific formulation of yours.</p>
+
+<p>10.5 <b>Confidentiality.</b> Each party must keep the other's confidential information confidential, use it only for
+purposes of this agreement, and protect it with at least reasonable care. This does not apply to information that is
+public through no breach, independently developed, lawfully received from a third party, or required to be disclosed by
+law or a regulator, provided the disclosing party is notified where lawful. <b>We treat Your Data — including your
+formulations — as your confidential information.</b></p>
+
+<p>10.6 <b>Privacy.</b> We handle personal information in accordance with the <i>Privacy Act 1988</i> (Cth) and our
+Privacy Policy at <span class="todo">[INSERT: privacy policy URL]</span>, which forms part of these Terms.</p>
+
+<p>10.7 <b>Backups.</b> You are responsible for maintaining your own copies of Your Data. While we take reasonable
+measures to back up the Platform, we do not warrant that Your Data will not be lost or corrupted and, to the extent
+permitted by law, we are not liable for such loss or corruption.</p>
+
+<h2 id="s11">11. Availability, support and changes</h2>
+
+<p>11.1 We aim to make the Platform available continuously, but it is provided on an "as available" basis. We do not
+warrant uninterrupted or error-free availability unless we have agreed a written service level agreement with you.</p>
+
+<p>11.2 We may perform scheduled and emergency maintenance, and may suspend the Platform where reasonably necessary for
+security, legal or operational reasons. We will give reasonable notice where practicable.</p>
+
+<p>11.3 We may add, change, deprecate or remove features, data sources, markets and check types. We will not make a
+change that materially and adversely reduces the core functionality of your plan without giving you at least
+<span class="todo">[INSERT: 30]</span> days' notice, and if we do, you may terminate and receive a pro-rata refund of
+prepaid fees for the unused balance of your term.</p>
+
+<h2 id="s12">12. Third-party services</h2>
+
+<p>Where the Platform links to or integrates with third-party services or data, those services are supplied by the
+relevant third party on its own terms. We are not responsible for them, do not endorse them, and are not liable for
+their acts, omissions, availability, accuracy or content.</p>
+
+<h2 id="s13">13. Disclaimer of warranties</h2>
+
+<p>13.1 Subject always to clause 14 (Australian Consumer Law), and to the maximum extent permitted by law:</p>
+<ul>
+  <li>the Platform and all Outputs are provided <span class="caps">"as is" and "as available"</span>, with all
+    faults;</li>
+  <li>we exclude all conditions, warranties, guarantees, representations and terms not expressly set out in these
+    Terms, whether implied by statute, common law, custom or otherwise, including any implied terms as to
+    merchantability, fitness for a particular purpose, accuracy, completeness, currency, non-infringement or quiet
+    enjoyment; and</li>
+  <li><b>we make no warranty, representation or guarantee that any Output is accurate, complete, current, correct, or
+    fit for any regulatory or commercial purpose, or that reliance on the Platform will result in Your Product being
+    compliant with any law or acceptable to any regulator, certifier, auditor, customer or court.</b></li>
+</ul>
+
+<p>13.2 No advice or information, whether oral or written, obtained from Marco or through the Platform creates any
+warranty not expressly stated in these Terms.</p>
+
+<h2 id="s14">14. Australian Consumer Law</h2>
+
+<div class="callout">
+  <p>Nothing in these Terms excludes, restricts or modifies any guarantee, right or remedy you may have under the ACL or
+  any other law that cannot lawfully be excluded, restricted or modified. To the extent any term of these Terms would
+  do so, that term does not apply.</p>
+</div>
+
+<p>14.1 Certain consumer guarantees apply under the ACL, including that services will be supplied with due care and
+skill and will be reasonably fit for any purpose made known to us. Those guarantees cannot be excluded.</p>
+
+<p>14.2 The Platform is not of a kind ordinarily acquired for personal, domestic or household use or consumption.
+Accordingly, and to the extent permitted by section 64A of the ACL, our liability for a failure to comply with a
+consumer guarantee (other than a guarantee under sections 51, 52 or 53 of the ACL) is limited, at our option, to:</p>
+<ul>
+  <li>supplying the relevant services again; or</li>
+  <li>paying the cost of having the relevant services supplied again.</li>
+</ul>
+
+<p>14.3 Clause 14.2 does not apply where it would not be fair and reasonable for us to rely on it.</p>
+
+<p>14.4 The limitations in clause 15 apply only to the extent permitted by law, and operate subject to this clause 14.</p>
+
+<h2 id="s15">15. Limitation of liability</h2>
+
+<p>15.1 <b>Excluded loss.</b> To the maximum extent permitted by law, and subject to clause 14, Marco is not liable to
+you, whether in contract, tort (including negligence), under statute, in equity or otherwise, for any of the
+following, however arising and even if we were advised of the possibility:</p>
+<ul>
+  <li>loss of profit, revenue, anticipated savings, business, opportunity, contract, goodwill or reputation;</li>
+  <li>any indirect, consequential, special, incidental, punitive or exemplary loss;</li>
+  <li>loss or corruption of data;</li>
+  <li>the cost of any product recall, withdrawal, quarantine, rework, reformulation, re-labelling, re-testing,
+    re-registration, destruction, disposal or replacement of stock;</li>
+  <li>any fine, penalty, infringement notice, enforcement cost, cancellation, suspension, refusal, seizure, sanction or
+    other action imposed or taken by a regulator, court or certification body;</li>
+  <li>any claim made against you by a third party, including a consumer, customer, retailer, distributor or
+    contract manufacturer; or</li>
+  <li>any loss arising because an Output was inaccurate, incomplete or out of date, or because you relied on an Output
+    without carrying out the independent verification required by clause 5.</li>
+</ul>
+
+<p>15.2 <b>Aggregate cap.</b> To the maximum extent permitted by law, and subject to clause 14, Marco's total aggregate
+liability to you for all claims arising out of or in connection with these Terms or the Platform, in aggregate across
+all claims and in any 12-month period, is limited to the greater of:</p>
+<ul>
+  <li>the fees actually paid by you to Marco for the Platform in the 12 months immediately preceding the first event
+    giving rise to the claim; and</li>
+  <li>AUD $<span class="todo">[INSERT: floor amount, e.g. 100 or 1,000]</span>.</li>
+</ul>
+
+<p>15.3 <b>Free and trial access.</b> Where you access the Platform on a free plan, trial, beta or evaluation basis, our
+aggregate liability is limited to AUD $100, and clause 13 applies with full force. Beta and preview features may be
+withdrawn or changed at any time.</p>
+
+<p>15.4 <b>Your contribution.</b> Our liability is reduced to the extent that your act or omission, or that of your
+personnel or advisers — including any failure to verify an Output under clause 5, any inaccurate input, or any failure
+to obtain professional advice — caused or contributed to the loss.</p>
+
+<p>15.5 <b>Mitigation.</b> You must take reasonable steps to mitigate any loss. We are not liable for loss you could
+reasonably have avoided.</p>
+
+<p>15.6 <b>Time limit.</b> To the extent permitted by law, you must notify us in writing of any claim within
+<span class="todo">[INSERT: 12]</span> months after you first became aware, or ought reasonably to have become aware, of
+the circumstances giving rise to it. Claims notified later are barred.</p>
+
+<p>15.7 <b>Basis of the bargain.</b> You acknowledge that the limitations in this clause 15 are a fair and reasonable
+allocation of risk between the parties, reflect the price of the Platform, and that Marco would not supply the Platform
+at that price without them.</p>
+
+<h2 id="s16">16. Indemnity</h2>
+
+<p>16.1 You indemnify Marco and its officers, employees and contractors against all liabilities, losses, damages,
+fines, penalties, costs and expenses (including reasonable legal costs) reasonably incurred and arising out of or in
+connection with:</p>
+<ul>
+  <li>Your Products, including their formulation, manufacture, safety, quality, labelling, claims, registration,
+    advertising, supply, export, recall or withdrawal;</li>
+  <li>any claim by a third party — including a consumer, customer, regulator or certifier — arising from Your
+    Products;</li>
+  <li>your breach of these Terms, including clauses 5, 7 and 10.2;</li>
+  <li>Your Data, including any claim that it infringes a third party's rights or breaches a confidentiality
+    obligation; or</li>
+  <li>your use of, or reliance on, any Output otherwise than in accordance with clause 5, or any presentation of an
+    Output to a third party as a certification, approval or verification by Marco.</li>
+</ul>
+
+<p>16.2 The indemnity in clause 16.1 is reduced proportionately to the extent that Marco's own negligence or wilful
+misconduct caused the relevant liability.</p>
+
+<p>16.3 We will notify you promptly of any claim to which this indemnity applies, will not settle it without your
+consent (not to be unreasonably withheld), and will allow you to participate in its defence at your cost.</p>
+
+<h2 id="s17">17. Term, suspension and termination</h2>
+
+<p>17.1 These Terms apply from when you first access the Platform until your subscription ends or the agreement is
+terminated.</p>
+
+<p>17.2 Either party may terminate for convenience, effective at the end of the then-current subscription term, by
+notice before that term ends.</p>
+
+<p>17.3 Either party may terminate immediately by notice if the other materially breaches these Terms and fails to
+remedy the breach within <span class="todo">[INSERT: 14/30]</span> days of notice, or becomes insolvent.</p>
+
+<p>17.4 We may suspend or restrict access immediately where reasonably necessary to prevent a security risk, a breach
+of law, or material harm to the Platform or other customers, or where clause 9.6 applies. We will tell you why and
+restore access once the cause is resolved.</p>
+
+<p>17.5 On termination, your right to access the Platform ends. You may export Your Data during the
+<span class="todo">[INSERT: 30]</span> days after termination, after which we may delete it, subject to our legal
+retention obligations and to backups being overwritten in the ordinary course.</p>
+
+<p>17.6 Clauses 3, 4, 5, 6, 10, 13, 14, 15, 16, 19, 20, 21 and any other clause intended to survive, survive
+termination.</p>
+
+<h2 id="s18">18. Changes to these terms</h2>
+
+<p>18.1 We may update these Terms. We will give you at least <span class="todo">[INSERT: 30]</span> days' notice of any
+change that materially and adversely affects you, by email to your account contact or by notice in the Platform.</p>
+
+<p>18.2 If you do not accept a material change, you may terminate before it takes effect and receive a pro-rata refund
+of prepaid fees for the unused balance of your term. Continuing to use the Platform after a change takes effect means
+you accept it.</p>
+
+<p>18.3 Minor changes — including corrections, clarifications and changes required by law — may take effect on
+posting.</p>
+
+<h2 id="s19">19. Disputes</h2>
+
+<p>19.1 If a dispute arises, the party raising it must give the other written notice with reasonable detail. The parties
+must then negotiate in good faith, through senior representatives, for at least <span class="todo">[INSERT: 20]</span>
+business days.</p>
+
+<p>19.2 If the dispute is not resolved, either party may refer it to mediation in
+<span class="todo">[INSERT: city, e.g. Brisbane]</span> administered by the
+<span class="todo">[INSERT: e.g. Resolution Institute]</span>, with costs shared equally.</p>
+
+<p>19.3 Neither clause prevents a party from seeking urgent interlocutory relief, or from exercising any right under the
+ACL or applying to a regulator or ombudsman.</p>
+
+<h2 id="s20">20. General</h2>
+
+<p>20.1 <b>Assignment.</b> You may not assign or novate these Terms without our written consent, not to be unreasonably
+withheld. We may assign or novate on notice to you in connection with a reorganisation, merger or sale of business.</p>
+
+<p>20.2 <b>Force majeure.</b> Neither party is liable for a failure or delay caused by an event beyond its reasonable
+control, provided it takes reasonable steps to mitigate and resume performance. This does not excuse payment
+obligations already accrued.</p>
+
+<p>20.3 <b>Notices.</b> Notices to us go to <span class="todo">[INSERT: legal notices email]</span>. Notices to you go
+to your account contact email. Notice is taken to be given on the next business day after sending.</p>
+
+<p>20.4 <b>Entire agreement.</b> These Terms, together with any order form and our Privacy Policy, are the entire
+agreement between the parties on this subject and supersede all prior discussions, proposals and representations.
+Nothing in this clause limits any liability for fraud or under section 18 of the ACL.</p>
+
+<p>20.5 <b>Severance.</b> If a provision is void, voidable or unenforceable, it is read down to the extent necessary or,
+if it cannot be read down, severed, without affecting the rest of these Terms.</p>
+
+<p>20.6 <b>Waiver.</b> A right is not waived except in writing. A single or partial exercise of a right does not prevent
+its further exercise.</p>
+
+<p>20.7 <b>Relationship.</b> The parties are independent contractors. Nothing creates a partnership, joint venture,
+agency or employment relationship.</p>
+
+<p>20.8 <b>No third-party rights.</b> Except for the indemnified persons in clause 16.1, no person other than the
+parties has any right under these Terms.</p>
+
+<p>20.9 <b>Interpretation.</b> Headings and the plain-language boxes are for convenience and do not affect
+interpretation. "Including" and similar words are not words of limitation. No rule of construction operates against the
+party that drafted these Terms.</p>
+
+<h2 id="s21">21. Governing law</h2>
+
+<p>These Terms are governed by the laws of <span class="todo">[INSERT: Queensland]</span>, Australia. Each party submits
+to the non-exclusive jurisdiction of the courts of <span class="todo">[INSERT: Queensland]</span> and the courts
+competent to hear appeals from them.</p>
+
+<h2 id="s22">22. Contact</h2>
+
+<p class="sig">
+  <b><span class="todo">[INSERT: full legal entity name]</span> Pty Ltd</b><br>
+  ABN <span class="todo">[INSERT: ABN]</span><br>
+  <span class="todo">[INSERT: registered address]</span><br>
+  Email: <span class="todo">[INSERT: legal/contact email]</span><br>
+  Web: <a href="https://trustmarco.com">trustmarco.com</a>
+</p>
+
+<hr>
+
+<p class="sig">Last updated: <span class="todo">[INSERT: date]</span>.</p>
+
+</div>
+</body>
+</html>
