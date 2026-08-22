@@ -1,0 +1,663 @@
+<title>Where To Buy The Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+  :root {
+    --ground:      #F7F8F5;
+    --surface:     #FFFFFF;
+    --surface-alt: #F0F2EE;
+    --ink:         #161D19;
+    --ink-muted:   #5C6660;
+    --ink-faint:   #8A938D;
+    --accent:      #0F6E4E;
+    --accent-soft: #E4EFE9;
+    --signal:      #B4531F;
+    --signal-soft: #FBEDE4;
+    --rule:        #DDE2DC;
+    --rule-strong: #161D19;
+
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --body:    "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+    --measure: 68ch;
+    --page:    1120px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #101512;
+      --surface:     #171D19;
+      --surface-alt: #1D2521;
+      --ink:         #E8EDE8;
+      --ink-muted:   #99A49D;
+      --ink-faint:   #6F7A74;
+      --accent:      #4FBF8F;
+      --accent-soft: #16302561;
+      --signal:      #E2874E;
+      --signal-soft: #33200f80;
+      --rule:        #28312C;
+      --rule-strong: #7E8B84;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #101512;
+    --surface:     #171D19;
+    --surface-alt: #1D2521;
+    --ink:         #E8EDE8;
+    --ink-muted:   #99A49D;
+    --ink-faint:   #6F7A74;
+    --accent:      #4FBF8F;
+    --accent-soft: #16302561;
+    --signal:      #E2874E;
+    --signal-soft: #33200f80;
+    --rule:        #28312C;
+    --rule-strong: #7E8B84;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 24px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: var(--page); margin: 0 auto; }
+  .col  { max-width: var(--measure); }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    padding: 72px 0 40px;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent); margin: 0;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 700; font-size: clamp(2.6rem, 6.4vw, 4.4rem);
+    line-height: 0.98; letter-spacing: -0.035em;
+    text-wrap: balance; margin: 0; max-width: 15ch;
+  }
+  .deck {
+    font-size: 1.24rem; line-height: 1.5; color: var(--ink-muted);
+    margin: 0; max-width: 56ch;
+  }
+
+  /* ---------- generic sections ---------- */
+
+  section { padding-top: 68px; }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 700; font-size: clamp(1.5rem, 3vw, 2rem);
+    letter-spacing: -0.022em; line-height: 1.1;
+    text-wrap: balance; margin: 0 0 8px;
+  }
+  h3 {
+    font-family: var(--display);
+    font-weight: 600; font-size: 1.06rem;
+    letter-spacing: -0.008em; margin: 0 0 6px;
+  }
+  .section-note {
+    font-size: 1.02rem; color: var(--ink-muted);
+    margin: 0 0 30px; max-width: 62ch;
+  }
+  p { margin: 0 0 16px; }
+  .col > p:last-child { margin-bottom: 0; }
+
+  .rule-head {
+    display: flex; align-items: baseline; gap: 14px;
+    border-top: 2px solid var(--rule-strong);
+    padding-top: 12px; margin-bottom: 20px;
+  }
+  .rule-head .num {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; color: var(--ink-faint);
+    text-transform: uppercase; white-space: nowrap;
+  }
+
+  /* ---------- callout ---------- */
+
+  .callout {
+    background: var(--signal-soft);
+    border-left: 3px solid var(--signal);
+    padding: 20px 24px;
+    margin-top: 34px;
+    max-width: var(--measure);
+  }
+  .callout .tag {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--signal); display: block; margin-bottom: 7px;
+  }
+  .callout p { margin: 0 0 12px; font-size: 0.97rem; line-height: 1.55; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ---------- retailer table ---------- */
+
+  .table-wrap { overflow-x: auto; border-top: 2px solid var(--rule-strong); }
+  table { border-collapse: collapse; width: 100%; min-width: 780px; }
+  thead th {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.11em; text-transform: uppercase; color: var(--ink-faint);
+    text-align: left; padding: 12px 16px 12px 0; vertical-align: bottom;
+    border-bottom: 1px solid var(--rule);
+  }
+  tbody td {
+    padding: 16px 16px 16px 0; vertical-align: top;
+    border-bottom: 1px solid var(--rule); font-size: 0.94rem; line-height: 1.5;
+  }
+  tbody tr:hover { background: var(--surface-alt); }
+  td.store { width: 20%; }
+  .store-name {
+    font-family: var(--display); font-weight: 600; font-size: 1rem;
+    display: block; letter-spacing: -0.01em;
+  }
+  .store-url {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+    display: block; margin-top: 3px; word-break: break-all;
+  }
+  .catch { color: var(--signal); }
+  .num-cell { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.87rem; }
+
+  /* ---------- supplement label panels ---------- */
+
+  .panels {
+    display: grid; gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-top: 6px solid var(--rule-strong);
+    padding: 18px 20px 6px;
+    display: flex; flex-direction: column;
+  }
+  .panel.tier2 { border-top-color: var(--accent); }
+  .panel.tier3 { border-top-color: var(--signal); }
+  .panel-name {
+    font-family: var(--display); font-weight: 700;
+    font-size: 1.02rem; letter-spacing: 0.01em; text-transform: uppercase;
+    margin: 0 0 3px; line-height: 1.15;
+  }
+  .panel-dose {
+    font-family: var(--body); font-style: italic;
+    font-size: 0.9rem; color: var(--ink-muted);
+    margin: 0 0 12px; padding-bottom: 12px;
+    border-bottom: 2px solid var(--rule-strong);
+  }
+  .row {
+    display: grid; grid-template-columns: 78px 1fr; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid var(--rule);
+    font-size: 0.9rem; line-height: 1.45;
+  }
+  .panel .row:last-child { border-bottom: none; }
+  .row dt {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--ink-faint); padding-top: 3px;
+  }
+  .row dd { margin: 0; }
+  .row dd.price {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 0.87rem; font-weight: 500;
+  }
+  .row dd.avoid { color: var(--signal); }
+  dl { margin: 0; }
+
+  /* ---------- basket cards ---------- */
+
+  .baskets { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+  .basket {
+    background: var(--surface); border: 1px solid var(--rule);
+    padding: 22px 22px 18px; display: flex; flex-direction: column;
+  }
+  .basket-head {
+    font-family: var(--display); font-weight: 700; font-size: 1.06rem;
+    letter-spacing: -0.01em; margin: 0 0 2px;
+  }
+  .basket-why {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 16px;
+  }
+  .basket ul { list-style: none; margin: 0 0 16px; padding: 0; flex: 1; }
+  .basket li {
+    display: flex; justify-content: space-between; gap: 14px;
+    padding: 8px 0; border-bottom: 1px solid var(--rule);
+    font-size: 0.92rem; line-height: 1.4;
+  }
+  .basket li span.amt {
+    font-family: var(--mono); font-variant-numeric: tabular-nums;
+    font-size: 0.85rem; color: var(--ink-muted); white-space: nowrap;
+  }
+  .basket-total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-top: 2px solid var(--rule-strong); padding-top: 12px;
+    font-family: var(--mono); font-size: 0.85rem;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .basket-total strong {
+    font-size: 1.15rem; font-weight: 600; letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- checklist ---------- */
+
+  .checks { display: grid; gap: 2px; border-top: 2px solid var(--rule-strong); }
+  .check {
+    display: grid; grid-template-columns: 130px 1fr; gap: 20px;
+    padding: 16px 0; border-bottom: 1px solid var(--rule);
+  }
+  .check .label {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent);
+    padding-top: 3px;
+  }
+  .check p { margin: 0; font-size: 0.95rem; line-height: 1.55; }
+
+  /* ---------- footer ---------- */
+
+  footer {
+    margin-top: 76px; padding-top: 26px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.86rem; color: var(--ink-muted);
+  }
+  footer h3 {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-faint); margin: 0 0 10px;
+  }
+  footer ul { margin: 0 0 26px; padding-left: 18px; }
+  footer li { margin-bottom: 5px; line-height: 1.5; }
+
+  code {
+    font-family: var(--mono); font-size: 0.86em;
+    background: var(--accent-soft); padding: 1px 5px; border-radius: 2px;
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 0 18px 72px; font-size: 16px; }
+    .masthead { padding-top: 48px; }
+    .check { grid-template-columns: 1fr; gap: 6px; }
+    .row { grid-template-columns: 70px 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Sourcing guide · Australia · August 2026</p>
+    <h1>Where to buy the stack</h1>
+    <p class="deck">Every supplement in a standard stack matched to the retailer that actually sells it cheapest here — plus the three you can't just add to a cart in Australia.</p>
+  </header>
+
+  <div class="callout">
+    <span class="tag">Read this first — I couldn't open your document</span>
+    <p>The Google Drive link is blocked by this session's network policy, so I have not seen the advice you wanted me to work from. Rather than guess at its contents and hand you nothing, this covers the components that appear in essentially every reputable stack guide, sorted by where to buy them.</p>
+    <p><strong>Paste the doc's supplement list into the chat</strong> (or re-share it as a plain link) and I'll cut this down to exactly your stack, with the doses it specifies.</p>
+    <p>I've also assumed you're buying in Australia, based on this repo. Say the word if it's somewhere else and I'll redo the retailer list.</p>
+  </div>
+
+  <section>
+    <div class="rule-head"><span class="num">01 / Sources</span></div>
+    <h2>The five places worth ordering from</h2>
+    <p class="section-note">No single store wins. Powders come from one, capsules from another, and anything you need today comes from the pharmacy. Splitting a first order across three is normal and usually saves more than the shipping costs.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Store</th>
+            <th>Buy here for</th>
+            <th>Shipping</th>
+            <th>Speed</th>
+            <th>The catch</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="store"><span class="store-name">Bulk Nutrients</span><span class="store-url">bulknutrients.com.au</span></td>
+            <td>Creatine, whey, electrolytes, aminos — anything that comes as a powder. Australian-made and batch-tested.</td>
+            <td class="num-cell">$7.95 flat<br>free over $99</td>
+            <td>Next business day to Melbourne &amp; Sydney from their Tasmanian warehouse</td>
+            <td class="catch">Almost no vitamins, minerals or herbals. Don't come here for magnesium or ashwagandha.</td>
+          </tr>
+          <tr>
+            <td class="store"><span class="store-name">iHerb</span><span class="store-url">au.iherb.com</span></td>
+            <td>Everything in a capsule: magnesium glycinate, D3+K2, omega-3 concentrates, L-theanine, ashwagandha, CoQ10.</td>
+            <td class="num-cell">free over ~$60–80<br>GST charged at checkout</td>
+            <td>7–14 business days standard; DHL Express is much faster for a fee</td>
+            <td class="catch">Slow, and products arrive as a personal import rather than TGA-listed stock. Order in one big batch.</td>
+          </tr>
+          <tr>
+            <td class="store"><span class="store-name">Chemist Warehouse</span><span class="store-url">chemistwarehouse.com.au</span></td>
+            <td>Fish oil, mainstream multivitamins, anything you want in your hand this afternoon. House-brand generics are the value play.</td>
+            <td class="num-cell">free over a spend<br>threshold, or C&amp;C</td>
+            <td>Same-day Click &amp; Collect</td>
+            <td class="catch">Poor value on specialty items — often 2–4× iHerb. Time purchases to the sale calendar below.</td>
+          </tr>
+          <tr>
+            <td class="store"><span class="store-name">Amazon AU</span><span class="store-url">amazon.com.au</span></td>
+            <td>Restocking staples you already know you want, on Subscribe &amp; Save.</td>
+            <td class="num-cell">free with Prime<br>S&amp;S up to 25% off</td>
+            <td>Next day on Prime</td>
+            <td class="catch">Marketplace sellers mark up the same iHerb SKUs. Only buy listings that ship from and are sold by Amazon AU.</td>
+          </tr>
+          <tr>
+            <td class="store"><span class="store-name">Nutrition Warehouse</span><span class="store-url">+ Elite Supps, Mr Supplement</span></td>
+            <td>Walking in, asking a person, and walking out. Good for trying a flavour before committing to 5 kg of it.</td>
+            <td class="num-cell">varies by store</td>
+            <td>In-store, today</td>
+            <td class="catch">Anchored to brand RRP. You'll pay a clear premium over Bulk Nutrients for the same actives.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col" style="margin-top: 28px;">
+      <p><strong>Worth knowing:</strong> a March 2026 comparison of 30 products found iHerb cheaper on 27 of them, with 55–80% savings on specialty items like magnesium, CoQ10 and L-theanine. Chemist Warehouse won on just three — omega-3 fish oil, glucosamine and BCAAs. That split is the single most useful thing on this page: <em>capsules and herbals from iHerb, fish oil from the pharmacy, powders from Bulk Nutrients.</em></p>
+      <p><strong>Chemist Warehouse sale calendar:</strong> the Half Yearly Sale runs in January and July, EOFY in late June, Black Friday in late November and Boxing Day on 26 December, with rolling half-price brand weeks in between. If an item on your list is a Blackmores, Swisse, Ostelin, Cenovis or Nature's Own product, it goes to half price often enough that paying full price is a choice.</p>
+      <p><strong>One more for powders:</strong> <a href="https://www.trueprotein.com.au">True Protein</a> is the other Australian-made, third-party-tested option if you want to customise blends. Slightly dearer than Bulk Nutrients, better if you care about flavour and sourcing detail.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="rule-head"><span class="num">02 / The stack</span></div>
+    <h2>Item by item, and who to buy it from</h2>
+    <p class="section-note">Grouped by how much agreement there is behind them. The first group is what nearly every stack document lands on; the second is common and defensible; the third you should not buy until a blood test says you need it.</p>
+
+    <h3 style="margin: 34px 0 16px; font-size: 0.95rem; font-family: var(--mono); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint);">Group one — the near-universal core</h3>
+    <div class="panels">
+
+      <div class="panel">
+        <p class="panel-name">Creatine Monohydrate</p>
+        <p class="panel-dose">5 g daily, any time. No loading phase needed.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Bulk Nutrients</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$48 / 1 kg <span style="color:var(--ink-faint)">(200 serves)</span></dd></div>
+          <div class="row"><dt>Look for</dt><dd>Plain monohydrate, HASTA or Informed Sport batch-tested</dd></div>
+          <div class="row"><dt>Skip</dt><dd class="avoid">HCl, ethyl ester, "buffered" — you pay more for no added benefit</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel">
+        <p class="panel-name">Protein Powder</p>
+        <p class="panel-dose">Enough to fill the gap to ~1.6 g/kg bodyweight daily.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Bulk Nutrients or True Protein</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">~$59 / 1 kg WPC<br>WPI runs higher</dd></div>
+          <div class="row"><dt>Look for</dt><dd>WPC if price matters, WPI if dairy sits badly. Compare cost per gram of <em>protein</em>, not per kg of powder</dd></div>
+          <div class="row"><dt>Note</dt><dd class="avoid">Whey pricing rose sharply through 2026 and is still climbing — buy the larger bag</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel">
+        <p class="panel-name">Vitamin D3</p>
+        <p class="panel-dose">1000–2000 IU daily with a meal containing fat.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>iHerb for value, Chemist Warehouse for convenience</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$10–25 for 6–12 months</dd></div>
+          <div class="row"><dt>Look for</dt><dd>D3 (cholecalciferol), not D2. A D3+K2 combination is fine and often the same price</dd></div>
+          <div class="row"><dt>Local pick</dt><dd>Ostelin is the pharmacy default and goes half price regularly</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel">
+        <p class="panel-name">Magnesium</p>
+        <p class="panel-dose">200–400 mg elemental, evening.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>iHerb — one of the biggest price gaps of anything on this list</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$15–30 <span style="color:var(--ink-faint)">vs $40–70 locally</span></dd></div>
+          <div class="row"><dt>Look for</dt><dd>Glycinate or bisglycinate. Check the <em>elemental</em> magnesium on the panel, not the compound weight</dd></div>
+          <div class="row"><dt>Skip</dt><dd class="avoid">Oxide — poorly absorbed, mostly sold because it's cheap to make</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel">
+        <p class="panel-name">Omega-3 / Fish Oil</p>
+        <p class="panel-dose">1–2 g combined EPA + DHA daily.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Chemist Warehouse — the one category where they genuinely win</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$15–30 for 200–400 caps on sale</dd></div>
+          <div class="row"><dt>Look for</dt><dd>The EPA+DHA numbers on the back, not the "1000 mg fish oil" on the front. A 1000 mg cap often holds only ~300 mg of actives</dd></div>
+          <div class="row"><dt>Upgrade</dt><dd>Triglyceride-form concentrates from iHerb if you want fewer, stronger capsules</dd></div>
+        </dl>
+      </div>
+
+    </div>
+
+    <h3 style="margin: 42px 0 16px; font-size: 0.95rem; font-family: var(--mono); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint);">Group two — common, defensible add-ons</h3>
+    <div class="panels">
+
+      <div class="panel tier2">
+        <p class="panel-name">Electrolytes</p>
+        <p class="panel-dose">Around training, in heat, or on low-carb.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Bulk Nutrients</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$25–40 / tub</dd></div>
+          <div class="row"><dt>Look for</dt><dd>Sodium as the headline number. Bulk's unflavoured mix costs a fraction of the sachet brands</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel tier2">
+        <p class="panel-name">L-Theanine</p>
+        <p class="panel-dose">100–200 mg, usually paired with caffeine.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>iHerb</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$15–25 <span style="color:var(--ink-faint)">vs 3–4× locally</span></dd></div>
+          <div class="row"><dt>Look for</dt><dd>Suntheanine or plain L-theanine; both work</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel tier2">
+        <p class="panel-name">Ashwagandha</p>
+        <p class="panel-dose">300–600 mg standardised extract.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>iHerb</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$15–30</dd></div>
+          <div class="row"><dt>Look for</dt><dd>KSM-66 or Sensoril — the two extracts the research actually used</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel tier2">
+        <p class="panel-name">Zinc</p>
+        <p class="panel-dose">15–30 mg, with food, not daily forever.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>iHerb or Chemist Warehouse</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$10–20</dd></div>
+          <div class="row"><dt>Careful</dt><dd class="avoid">Long-run high-dose zinc depletes copper. Don't stack it with a multi that already contains it</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel tier2">
+        <p class="panel-name">Creatine's Cheap Cousin: Fibre</p>
+        <p class="panel-dose">5–10 g psyllium husk if diet is short.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Supermarket or Chemist Warehouse</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$8–15 / kg</dd></div>
+          <div class="row"><dt>Look for</dt><dd>Plain husk. The branded sachets are the same thing with sweetener</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel tier2">
+        <p class="panel-name">Collagen Peptides</p>
+        <p class="panel-dose">10–15 g daily if joints or skin are the goal.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Bulk Nutrients</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$35–55 / kg</dd></div>
+          <div class="row"><dt>Honest note</dt><dd class="avoid">Weakest evidence in group two. If budget is tight, this is the first one to cut</dd></div>
+        </dl>
+      </div>
+
+    </div>
+
+    <h3 style="margin: 42px 0 16px; font-size: 0.95rem; font-family: var(--mono); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint);">Group three — get bloods first, then buy</h3>
+    <div class="panels">
+
+      <div class="panel tier3">
+        <p class="panel-name">Iron</p>
+        <p class="panel-dose">Only on a documented deficiency.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Chemist Warehouse, after a ferritin test</dd></div>
+          <div class="row"><dt>Why wait</dt><dd class="avoid">Supplementing iron you don't need causes real harm. This is not a "might as well" item</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel tier3">
+        <p class="panel-name">Vitamin B12</p>
+        <p class="panel-dose">Relevant if you eat little or no meat.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>iHerb</dd></div>
+          <div class="row"><dt>Ballpark</dt><dd class="price">$10–20</dd></div>
+          <div class="row"><dt>Look for</dt><dd>Methylcobalamin, sublingual</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel tier3">
+        <p class="panel-name">Anything Hormonal</p>
+        <p class="panel-dose">Test boosters, "TRT alternatives", DHEA.</p>
+        <dl>
+          <div class="row"><dt>Buy from</dt><dd>Nowhere — talk to a GP</dd></div>
+          <div class="row"><dt>Why</dt><dd class="avoid">DHEA is prescription-only in Australia, and over-the-counter "test boosters" are the category most often found spiked with undeclared actives</dd></div>
+        </dl>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="rule-head"><span class="num">03 / Restrictions</span></div>
+    <h2>Three things you can't simply add to a cart here</h2>
+    <p class="section-note">Australia regulates supplements more tightly than the US, and a stack guide written overseas will happily recommend things you can't legally order. If any of these are in your document, this is why the link 404s at checkout.</p>
+
+    <div class="checks">
+      <div class="check">
+        <span class="label">Melatonin</span>
+        <p>Prescription-only in Australia, with two narrow exceptions available from a pharmacist without a script: modified-release tablets of 2 mg or less for adults 55 and over, and immediate-release preparations of 5 mg or less for jet lag in adults 18 and over. Importing it is where people get caught — the TGA has issued repeated safety alerts about counterfeit melatonin sold to Australians online, and in early 2026 escalated enforcement, seizing over 12 tonnes of non-compliant product and fining a major marketplace $150,000 over Schedule 4 breaches. Even with a valid prescription, counterfeit product can't be brought in under the Personal Importation Scheme. Get it from a pharmacy.</p>
+      </div>
+      <div class="check">
+        <span class="label">NMN</span>
+        <p>Status changed recently, in your favour. NMN formulations are now lawfully listed on the ARTG — Bioglan NMN 500 was registered in December 2025 — so you can buy it locally rather than importing. Prices remain high and the evidence remains thin; treat it as optional.</p>
+      </div>
+      <div class="check">
+        <span class="label">SARMs &amp; peptides</span>
+        <p>If the document recommends anything in this family, it isn't a supplement question. These are prescription substances or unapproved goods in Australia and importing them carries genuine legal risk on top of the health one. There is no retailer to point you at.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="rule-head"><span class="num">04 / Quality</span></div>
+    <h2>Four checks before you pay</h2>
+    <p class="section-note">Thirty seconds each, and they eliminate most of what goes wrong with buying supplements online.</p>
+
+    <div class="checks">
+      <div class="check">
+        <span class="label">AUST L / AUST R</span>
+        <p>Anything legally sold in Australia carries a TGA listing number on the label — <code>AUST L</code> for listed, <code>AUST R</code> for registered. Its absence on a domestic product is a warning sign. Imports bought through the Personal Importation Scheme won't have one, which is expected, but means nobody has vetted it for you.</p>
+      </div>
+      <div class="check">
+        <span class="label">Batch testing</span>
+        <p>HASTA is Australia's certification body and the only local lab independently certifying sports supplements against the WADA prohibited list. Informed Sport and NSF Certified for Sport are the international equivalents; NSF screens each batch against 290+ substances. Relevant if you're tested for sport, and a decent proxy for manufacturing care even if you aren't.</p>
+      </div>
+      <div class="check">
+        <span class="label">Verify the claim</span>
+        <p>A certification logo on a label means nothing on its own. Each program publishes a searchable list of certified products — if it isn't on the certifier's own website, treat the logo as decoration. HASTA-certified products carry batch-specific numbers you can look up.</p>
+      </div>
+      <div class="check">
+        <span class="label">Read the back panel</span>
+        <p>Front-of-pack numbers describe the compound; the back describes the dose. "1000 mg fish oil" can mean 300 mg of EPA+DHA, and "500 mg magnesium citrate" can mean 80 mg of elemental magnesium. Compare products on the actives, and work out cost per serve before deciding anything is cheap.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="rule-head"><span class="num">05 / First order</span></div>
+    <h2>How I'd actually place it</h2>
+    <p class="section-note">Three carts, placed the same evening. Each is sized to clear its own free-shipping threshold, which is why splitting beats consolidating. Figures are ballpark for August 2026 — treat them as a sanity check against what you see at checkout, not as quotes.</p>
+
+    <div class="baskets">
+
+      <div class="basket">
+        <p class="basket-head">Bulk Nutrients</p>
+        <p class="basket-why">Clears $99 → free shipping</p>
+        <ul>
+          <li><span>Creatine monohydrate, 1 kg</span><span class="amt">$48</span></li>
+          <li><span>Whey protein concentrate, 1 kg</span><span class="amt">$59</span></li>
+          <li><span>Electrolytes, optional</span><span class="amt">$25–40</span></li>
+        </ul>
+        <div class="basket-total"><span>Cart</span><strong>~$107</strong></div>
+      </div>
+
+      <div class="basket">
+        <p class="basket-head">iHerb</p>
+        <p class="basket-why">One batch — don't drip-feed</p>
+        <ul>
+          <li><span>Magnesium glycinate</span><span class="amt">$15–30</span></li>
+          <li><span>Vitamin D3 + K2</span><span class="amt">$10–25</span></li>
+          <li><span>L-theanine</span><span class="amt">$15–25</span></li>
+          <li><span>Ashwagandha, KSM-66</span><span class="amt">$15–30</span></li>
+        </ul>
+        <div class="basket-total"><span>Cart</span><strong>~$55–110</strong></div>
+      </div>
+
+      <div class="basket">
+        <p class="basket-head">Chemist Warehouse</p>
+        <p class="basket-why">Click &amp; Collect, same day</p>
+        <ul>
+          <li><span>Fish oil, high EPA+DHA</span><span class="amt">$15–30</span></li>
+          <li><span>Anything you want to start tonight</span><span class="amt">—</span></li>
+        </ul>
+        <div class="basket-total"><span>Cart</span><strong>~$15–30</strong></div>
+      </div>
+
+    </div>
+
+    <div class="col" style="margin-top: 30px;">
+      <p>Two habits that compound: put the items you'll take indefinitely — magnesium, D3, fish oil — on iHerb's Autoship &amp; Save or Amazon's Subscribe &amp; Save, which run 5% and up to 25% off respectively. And buy powders in the largest size you'll get through before it expires, since the per-kilo drop is steeper than any sale.</p>
+      <p>The one thing worth timing rather than buying now: if a pharmacy-brand item is on your list, check whether a half-price brand week is running before paying full price for it.</p>
+    </div>
+  </section>
+
+  <footer>
+    <h3>Sources</h3>
+    <ul>
+      <li><a href="https://suppup.com.au/blog/best-places-buy-supplements-online-australia">Best Places to Buy Supplements Online in Australia: 8 Stores Compared (2026)</a> — SuppUp</li>
+      <li><a href="https://suppup.com.au/blog/iherb-vs-chemist-warehouse-supplements-australia">iHerb vs Chemist Warehouse: 30 Prices Compared (2026)</a> — SuppUp</li>
+      <li><a href="https://www.shopback.com.au/blog/finance/iherb-vs-au-pharmacy-chains">iHerb Shipping to Australia vs Domestic Pharmacy Chains in 2026</a> — ShopBack</li>
+      <li><a href="https://au.iherb.com/shipping/au">iHerb Shipping Info &amp; Policy</a> — iHerb Australia</li>
+      <li><a href="https://www.bulknutrients.com.au/products/creatine-monohydrate">Creatine Monohydrate</a> and <a href="https://www.bulknutrients.com.au/blog/feature-articles/price-update-whats-changing-and-why-its-happening">Supplement Price Update</a> — Bulk Nutrients</li>
+      <li><a href="https://www.tga.gov.au/news/news-articles/regulation-melatonin-products-australia">Regulation of melatonin products in Australia</a> and <a href="https://www.tga.gov.au/safety/safety-monitoring-and-information/safety-alerts/safety-concerns-over-imported-counterfeit-melatonin-products">Safety concerns over imported counterfeit melatonin products</a> — TGA</li>
+      <li><a href="https://ecotraders.com.au/blogs/vitamins-supplements/nmn-australia-tga-status">NMN in Australia: TGA Status, Standards &amp; ARTG Listings</a></li>
+      <li><a href="https://www.nsf.org/consumer-resources/articles/certified-for-sport-program">Certified for Sport Program</a> — NSF, and <a href="https://www.usada.org/substances/supplement-connect/reduce-risk-testing-positive-experiencing-adverse-health-effects/">Reduce Your Supplement Risk</a> — USADA</li>
+    </ul>
+
+    <h3>One caveat</h3>
+    <p style="max-width: 68ch;">This is a sourcing guide, not medical advice. Doses here are the common ranges you'll see on labels, included so you can compare products on the same basis — they aren't a recommendation for you specifically. If you're on medication, anything in group three especially is worth running past a GP or pharmacist first, and the pharmacist at the counter is free.</p>
+  </footer>
+
+</div>
