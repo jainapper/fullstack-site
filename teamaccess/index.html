@@ -211,6 +211,12 @@ table.rows td.num,table.rows th.num{text-align:right;font-family:var(--mono);fon
 
 /* ————— onboarding ————— */
 .ob-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.ob-agg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:4px 0}
+.ob-agg-k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.ob-agg-v{font-size:21px;font-weight:800;margin:6px 0 8px}
+.ob-agg-v span{font-size:13px;font-weight:600;color:var(--faint)}
+.ob-agg-d{margin-top:6px;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+@media(max-width:820px){.ob-agg{grid-template-columns:1fr}}
 .ob-card{background:var(--raise);border:1px solid var(--stroke);border-radius:18px;padding:20px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:12px}
 .ob-card:hover{border-color:rgba(245,93,47,.35);transform:translateY(-2px)}
 .ob-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -622,7 +628,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:12 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:26 UTC</b></div>
     </div>
   </aside>
 
@@ -671,6 +677,15 @@ table.rows td.num{font-size:12px}
   <div class="drawer-body" id="catDrawerBody"></div>
   <div class="drawer-foot">
     <button class="btn" id="catSave">Save item</button>
+    <button class="btn ghost" data-close>Cancel</button>
+  </div>
+</aside>
+
+<aside class="drawer" id="obDrawer" aria-label="Edit onboarding client">
+  <div class="drawer-head"><h2>Edit client</h2><button class="x" data-close>✕</button></div>
+  <div class="drawer-body" id="obDrawerBody"></div>
+  <div class="drawer-foot">
+    <button class="btn" id="obSave">Save changes</button>
     <button class="btn ghost" data-close>Cancel</button>
   </div>
 </aside>
@@ -786,7 +801,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:12 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:26 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -3097,14 +3112,16 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#view-onboarding').addEventListener('click', e => {
     const open = e.target.closest('[data-open-ob]');
     if(open && !e.target.closest('a,button,select,input,textarea')){ location.hash = '#/onboarding/' + open.dataset.openOb; return; }
-    const t = e.target.closest('[data-act],[data-yn],[data-kyc],[data-up],[data-dl],[data-rm],[data-agr-unlink],[data-q-edit],[data-q-del],[data-cq-edit],[data-cq-del]');
+    const t = e.target.closest('[data-act],[data-yn],[data-kyc],[data-up],[data-dl],[data-rm],[data-agr-unlink],[data-q-edit],[data-q-del],[data-cq-edit],[data-cq-del],[data-ob-edit],[data-ob-del]');
     if(!t) return;
+    if(t.dataset.obEdit){ const ob = obById(t.dataset.obEdit); if(ob){ obEditForm(ob); openOverlay('#obDrawer'); } return; }
+    if(t.dataset.obDel){ obDelete(t.dataset.obDel); return; }
     if(t.dataset.act === 'ob-back'){ location.hash = '#/onboarding'; }
     else if(t.dataset.act === 'ob-add'){
       const name = $('#obNewName').value.trim();
       if(!name){ toast('Type the client name first'); return; }
       const obs = col.onboarding();
-      const ob = { id: 'ob-' + uid(), clientName: name, acct: 'FS-' + (1055 + obs.length), started: new Date().toISOString(),
+      const ob = { id: 'ob-' + uid(), clientName: name, acct: obNextAcct(), started: new Date().toISOString(),
         status: 'in_progress', answers: { company_name: name }, files: {}, kyc: {}, agreements: {}, extras: [], notes: '' };
       obs.unshift(ob); DB.set('onboarding', obs);
       updateCounts(); location.hash = '#/onboarding/' + ob.id;
@@ -5504,6 +5521,138 @@ function renderCatalog(param){
 function renderPO(param){ location.hash = param ? '#/catalog/' + param : '#/catalog'; }
 Object.assign(RENDER, { catalog: renderCatalog, po: renderPO });
 
+
+/* ══════════ New Client Onboarding: summary, edit, delete ══════════ */
+
+/* Account numbers used to be FS-(1055 + list length), which repeats a number
+   as soon as anything is deleted. Derive from the highest existing instead. */
+function obNextAcct(){
+  let max = 1054;
+  col.onboarding().forEach(o => {
+    const m = /^FS-(\d+)$/.exec(String(o.acct || '').trim());
+    if(m) max = Math.max(max, parseInt(m[1], 10));
+  });
+  return 'FS-' + (max + 1);
+}
+
+const OB_STALE_DAYS = 21;
+function obSummary(){
+  const obs = col.onboarding();
+  const s = { total: obs.length, in_progress: 0, awaiting_client: 0, complete: 0,
+              q: 0, qTotal: 0, kyc: 0, kycTotal: 0, signed: 0, agrTotal: 0, pctSum: 0, stalled: 0 };
+  const cutoff = Date.now() - OB_STALE_DAYS * 86400e3;
+  obs.forEach(ob => {
+    const c = obCounts(ob);
+    s[ob.status] = (s[ob.status] || 0) + 1;
+    s.q += c.q; s.qTotal += c.qTotal;
+    s.kyc += c.kyc; s.kycTotal += c.kycTotal;
+    s.signed += c.signed; s.agrTotal += c.agrTotal;
+    s.pctSum += c.pct;
+    if(ob.status !== 'complete' && new Date(ob.started).getTime() < cutoff) s.stalled++;
+  });
+  s.avg = obs.length ? Math.round(s.pctSum / obs.length) : 0;
+  return s;
+}
+
+function renderOnboarding(param){
+  const v = $('#view-onboarding');
+  if(param){ renderObDetail(v, param); return; }
+  const obs = col.onboarding();
+  const s = obSummary();
+  const pctOf = (a, b) => b ? Math.round(a / b * 100) : 0;
+
+  v.innerHTML =
+  '<div class="view-head"><div class="vh-title"><h1>New Client Onboarding<em>.</em></h1>' +
+  '<p class="vh-sub">The website questionnaire lands here — answers, KYC checks, uploads and agreements for every new client, in one place.</p></div>' +
+  '<div class="vh-actions"><input class="f-in" id="obNewName" placeholder="New client name…" style="width:200px">' +
+  '<button class="btn" data-act="ob-add">+ Start onboarding</button></div></div>' +
+
+  (obs.length ?
+  '<div class="kpis">' +
+    '<div class="kpi"><div class="kpi-k">Clients onboarding</div><div class="kpi-v">' + nf(s.total) + '</div>' +
+      '<div class="kpi-d">' + (s.stalled ? '⚠ ' + s.stalled + ' over ' + OB_STALE_DAYS + ' days' : 'all moving') + '</div></div>' +
+    '<div class="kpi"><div class="kpi-k">In progress</div><div class="kpi-v">' + nf(s.in_progress) + '</div>' +
+      '<div class="kpi-d">being worked on</div></div>' +
+    '<div class="kpi"><div class="kpi-k">Awaiting client</div><div class="kpi-v">' + nf(s.awaiting_client) + '</div>' +
+      '<div class="kpi-d">waiting on them</div></div>' +
+    '<div class="kpi"><div class="kpi-k">Complete</div><div class="kpi-v">' + nf(s.complete) + '</div>' +
+      '<div class="kpi-d">ready to go live</div></div>' +
+    '<div class="kpi"><div class="kpi-k">Average completion</div><div class="kpi-v">' + s.avg + '%</div>' +
+      '<div class="prog" style="margin-top:8px"><i style="width:' + s.avg + '%"></i></div></div>' +
+  '</div>' +
+
+  '<div class="panel" style="margin-bottom:16px"><div class="panel-head"><span class="panel-title">Across all clients</span>' +
+  '<span class="panel-meta">what is still outstanding</span></div>' +
+  '<div class="ob-agg">' +
+    [['Questionnaire answers', s.q, s.qTotal], ['KYC checks', s.kyc, s.kycTotal], ['Agreements signed', s.signed, s.agrTotal]]
+      .map(r => '<div class="ob-agg-item"><div class="ob-agg-k">' + r[0] + '</div>' +
+        '<div class="ob-agg-v">' + nf(r[1]) + ' <span>/ ' + nf(r[2]) + '</span></div>' +
+        '<div class="prog"><i style="width:' + pctOf(r[1], r[2]) + '%"></i></div>' +
+        '<div class="ob-agg-d">' + nf(Math.max(0, r[2] - r[1])) + ' outstanding</div></div>').join('') +
+  '</div></div>' : '') +
+
+  (obs.length ? '<div class="ob-grid">' + obs.map(ob => {
+    const c = obCounts(ob);
+    const stale = ob.status !== 'complete' && new Date(ob.started).getTime() < Date.now() - OB_STALE_DAYS * 86400e3;
+    return '<div class="ob-card" data-open-ob="' + ob.id + '" role="button" tabindex="0">' +
+    '<div class="ob-card-top"><div><h3>' + esc(ob.clientName) + '</h3><div class="ob-acct">' + esc(ob.acct || '') + ' · started ' + esc(fmtDY(ob.started)) + '</div></div>' +
+    '<div style="display:flex;align-items:center;gap:6px">' + (stale ? '<span class="pill warn" title="No movement for over ' + OB_STALE_DAYS + ' days">Stalled</span>' : '') + obStatusPill(ob.status) +
+    '<button class="iconbtn" data-ob-edit="' + ob.id + '" title="Edit client">✎</button>' +
+    '<button class="iconbtn" data-ob-del="' + ob.id + '" title="Delete onboarding">✕</button></div></div>' +
+    '<div class="prog"><i style="width:' + c.pct + '%"></i></div>' +
+    '<div class="prog-lab"><span>' + c.pct + '% complete</span><span>' + c.q + '/' + c.qTotal + ' answers</span></div>' +
+    '<div class="ob-chips"><span class="chip">Questionnaire ' + c.q + '/' + c.qTotal + '</span><span class="chip">KYC ' + c.kyc + '/' + c.kycTotal + '</span><span class="chip">Agreements ' + c.signed + '/' + c.agrTotal + ' signed</span></div>' +
+    '<span class="ob-open">Open onboarding →</span></div>';
+  }).join('') + '</div>'
+  : '<div class="empty"><img src="assets/roo-white.png" alt=""><p>No onboarding in progress. Convert a won lead, or start one manually above.</p></div>');
+}
+
+/* ————— edit ————— */
+let obEditingId = null;
+function obEditForm(ob){
+  obEditingId = ob.id;
+  $('#obDrawerBody').innerHTML =
+  '<div><label class="f-lab">Client name <span>*</span></label><input class="f-in" id="of-name" value="' + esc(ob.clientName || '') + '"></div>' +
+  '<div class="f-row2"><div><label class="f-lab">Account number</label><input class="f-in" id="of-acct" value="' + esc(ob.acct || '') + '" placeholder="FS-1055"></div>' +
+  '<div><label class="f-lab">Status</label><select class="sel f-in" id="of-status">' +
+    OB_STATUSES.map(s => '<option value="' + s[0] + '"' + (ob.status === s[0] ? ' selected' : '') + '>' + s[1] + '</option>').join('') + '</select></div></div>' +
+  '<div><label class="f-lab">Started</label><input class="f-in" id="of-started" type="date" value="' + esc(String(ob.started || '').slice(0, 10)) + '"></div>' +
+  '<div><label class="f-lab">Notes</label><textarea class="f-in" id="of-notes" rows="3">' + esc(ob.notes || '') + '</textarea></div>' +
+  '<p class="set-note">Renaming here also updates the company name in the questionnaire if it still matches the old name.</p>';
+}
+function saveObFromDrawer(){
+  const ob = obById(obEditingId);
+  if(!ob){ closeOverlays(); return; }
+  const name = $('#of-name').value.trim();
+  if(!name){ toast('Client name is required'); return; }
+  const wasName = ob.clientName;
+  ob.clientName = name;
+  ob.acct = $('#of-acct').value.trim();
+  ob.status = $('#of-status').value;
+  const d = $('#of-started').value;
+  if(d) ob.started = new Date(d + 'T00:00:00').toISOString();
+  ob.notes = $('#of-notes').value;
+  /* keep the questionnaire's company name in step, but never clobber a real answer */
+  if(ob.answers && ob.answers.company_name === wasName) ob.answers.company_name = name;
+  saveOb(); updateCounts(); closeOverlays(); route();
+  toast('Saved ' + name);
+}
+function obDelete(id){
+  const ob = obById(id);
+  if(!ob) return;
+  const c = obCounts(ob);
+  const warn = 'Delete the onboarding for "' + ob.clientName + '"?\n\n' +
+    c.q + ' questionnaire answers, ' + c.kyc + ' KYC checks and ' + c.signed +
+    ' signed agreements will be removed. This cannot be undone.';
+  if(!confirm(warn)) return;
+  const obs = col.onboarding().filter(o => o.id !== id);
+  DB.set('onboarding', obs);
+  updateCounts(); route();
+  toast(ob.clientName + ' deleted');
+}
+
+if($('#obSave')) $('#obSave').addEventListener('click', saveObFromDrawer);
+Object.assign(RENDER, { onboarding: renderOnboarding });
 </script>
 </body>
 </html>
