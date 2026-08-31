@@ -212,6 +212,11 @@ table.rows td.num,table.rows th.num{text-align:right;font-family:var(--mono);fon
 /* ————— onboarding ————— */
 .ob-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 .ob-agg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;padding:4px 0}
+.ob-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ob-acts{display:flex;gap:8px}
+.ob-acts .tbtn{font-size:11.5px;padding:6px 12px}
+.ob-acts .tbtn.danger{color:#ff7a6b;border-color:rgba(255,122,107,.35)}
+.ob-acts .tbtn.danger:hover{background:rgba(255,122,107,.12);border-color:rgba(255,122,107,.65)}
 .ob-agg-k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
 .ob-agg-v{font-size:21px;font-weight:800;margin:6px 0 8px}
 .ob-agg-v span{font-size:13px;font-weight:600;color:var(--faint)}
@@ -628,7 +633,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:57 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 03:16 UTC</b></div>
     </div>
   </aside>
 
@@ -801,7 +806,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:57 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 03:16 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -2302,6 +2307,7 @@ function clientRows(st){
 }
 function renderDashboard(){
   const v = $('#view-dashboard');
+  if(!v) return;                      /* tab removed — superseded by renderStarshipit */
   const s = col.settings();
   const N = s.range || 30;
   const st = dashStats(N);
@@ -3024,7 +3030,7 @@ document.addEventListener('DOMContentLoaded', () => {
   route();
 
   window.addEventListener('hashchange', route);
-  window.addEventListener('resize', debounce(() => { if($('#view-dashboard').classList.contains('on')) renderDashboard(); }, 250));
+  window.addEventListener('resize', debounce(() => { const d = $('#view-dashboard'); if(d && d.classList.contains('on')) renderDashboard(); }, 250));
 
   /* shell */
   $('#burger').addEventListener('click', () => $('#side').classList.add('open'));
@@ -3073,8 +3079,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   $('#importIn').addEventListener('change', e => { if(e.target.files[0]) importBackup(e.target.files[0]); });
 
-  /* dashboard */
-  $('#view-dashboard').addEventListener('click', e => {
+  /* dashboard — the element is gone since the tab was replaced by the Starshipit
+     launcher. Guarded because this runs inside DOMContentLoaded: throwing here
+     silently stopped every listener below from attaching. */
+  const _vDash = $('#view-dashboard');
+  if(_vDash) _vDash.addEventListener('click', e => {
     const t = e.target.closest('[data-range],[data-act],[data-shipstatus]');
     if(!t) return;
     if(t.dataset.range){ const s = col.settings(); s.range = +t.dataset.range; DB.set('settings', s); renderDashboard(); }
@@ -3087,7 +3096,7 @@ document.addEventListener('DOMContentLoaded', () => {
       filterShipFeed();
     }
   });
-  $('#view-dashboard').addEventListener('input', e => {
+  if(_vDash) _vDash.addEventListener('input', e => {
     if(e.target.id === 'shipSearch'){ dashShipQ = e.target.value; filterShipFeed(); }
   });
 
@@ -4209,10 +4218,10 @@ function fillUserSwitcher(){
 function route(){
   const h = location.hash.replace(/^#\/?/, '') || 'starshipit';
   const parts = h.split('/');
-  let name = RENDER[parts[0]] ? parts[0] : 'dashboard';
+  let name = RENDER[parts[0]] ? parts[0] : 'starshipit';
   if(!tabAllowed(name)){
-    if(parts[0] !== 'dashboard'){ location.hash = '#/dashboard'; return; }
-    name = 'dashboard';
+    if(parts[0] !== 'starshipit'){ location.hash = '#/starshipit'; return; }
+    name = 'starshipit';
   }
   $$('.view').forEach(x => x.classList.toggle('on', x.dataset.view === name));
   $$('#sideNav a').forEach(a => a.classList.toggle('on', a.dataset.route === name));
@@ -4248,7 +4257,7 @@ function renderTeam(){
       (canEdit ? '<span style="margin-left:auto;display:inline-flex;gap:5px"><button class="tbtn" data-uall="' + u.id + '">All</button><button class="tbtn" data-unone="' + u.id + '">None</button></span>' : '') + '</div>' +
     '<div class="tab-toggles">' +
     TABS.map(t => {
-      const locked = t[0] === 'dashboard' || (t[0] === 'team' && u.role === 'admin');
+      const locked = t[0] === 'starshipit' || (t[0] === 'team' && u.role === 'admin');
       const on = locked ? true : !!(u.tabs && u.tabs[t[0]]);
       return '<label class="chk"><input type="checkbox" data-utab="' + u.id + ':' + t[0] + '"' + (on ? ' checked' : '') + ((locked || !canEdit) ? ' disabled' : '') + '><span>' + esc(t[1]) + '</span></label>';
     }).join('') + '</div></div>' +
@@ -4364,7 +4373,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const u = colUsers().find(x => x.id === id);
       if(!u) return;
       u.tabs = u.tabs || {};
-      TABS.forEach(x => { u.tabs[x[0]] = x[0] === 'dashboard' ? true : (x[0] === 'team' && u.role === 'admin') ? true : on; });
+      TABS.forEach(x => { u.tabs[x[0]] = x[0] === 'starshipit' ? true : (x[0] === 'team' && u.role === 'admin') ? true : on; });
       saveUsersAndProfile(u); applyTabAccess(); renderTeam();
     }
     else if(t.dataset.uswitch){ switchUser(t.dataset.uswitch); }
@@ -5610,13 +5619,15 @@ function renderOnboarding(param){
     const stale = ob.status !== 'complete' && new Date(ob.started).getTime() < Date.now() - OB_STALE_DAYS * 86400e3;
     return '<div class="ob-card" data-open-ob="' + ob.id + '" role="button" tabindex="0">' +
     '<div class="ob-card-top"><div><h3>' + esc(ob.clientName) + '</h3><div class="ob-acct">' + esc(ob.acct || '') + ' · started ' + esc(fmtDY(ob.started)) + '</div></div>' +
-    '<div style="display:flex;align-items:center;gap:6px">' + (stale ? '<span class="pill warn" title="No movement for over ' + OB_STALE_DAYS + ' days">Stalled</span>' : '') + obStatusPill(ob.status) +
-    '<button class="iconbtn" data-ob-edit="' + ob.id + '" title="Edit client">✎</button>' +
-    '<button class="iconbtn" data-ob-del="' + ob.id + '" title="Delete onboarding">✕</button></div></div>' +
+    '<div style="display:flex;align-items:center;gap:6px">' + (stale ? '<span class="pill warn" title="No movement for over ' + OB_STALE_DAYS + ' days">Stalled</span>' : '') + obStatusPill(ob.status) + '</div></div>' +
     '<div class="prog"><i style="width:' + c.pct + '%"></i></div>' +
     '<div class="prog-lab"><span>' + c.pct + '% complete</span><span>' + c.q + '/' + c.qTotal + ' answers</span></div>' +
     '<div class="ob-chips"><span class="chip">Questionnaire ' + c.q + '/' + c.qTotal + '</span><span class="chip">KYC ' + c.kyc + '/' + c.kycTotal + '</span><span class="chip">Agreements ' + c.signed + '/' + c.agrTotal + ' signed</span></div>' +
-    '<span class="ob-open">Open onboarding →</span></div>';
+    '<div class="ob-foot"><span class="ob-open">Open onboarding →</span>' +
+    '<div class="ob-acts">' +
+    '<button class="tbtn" data-ob-edit="' + ob.id + '">✎ Edit</button>' +
+    '<button class="tbtn danger" data-ob-del="' + ob.id + '">✕ Delete</button>' +
+    '</div></div></div>';
   }).join('') + '</div>'
   : '<div class="empty"><img src="assets/roo-white.png" alt=""><p>No onboarding in progress. Convert a won lead, or start one manually above.</p></div>');
 }
