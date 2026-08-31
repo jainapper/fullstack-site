@@ -595,13 +595,8 @@ table.rows td.num{font-size:12px}
       </a>
       <a href="#/catalog" data-route="catalog">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l8 4.5v10l-8 4.5-8-4.5V7z"/><path d="M4 7l8 4.5L20 7M12 11.5V21.5"/></svg>
-        Fullstack Catalog
+        Catalog &amp; PO
         <span class="n-count" id="countCat"></span>
-      </a>
-      <a href="#/po" data-route="po">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
-        Fullstack PO
-        <span class="n-count" id="countPo"></span>
       </a>
       <a href="#/team" data-route="team">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="3.2"/><circle cx="16.5" cy="9.5" r="2.6"/><path d="M3 19.5c.5-3.3 2.6-5.2 5.5-5.2s5 1.9 5.5 5.2"/><path d="M15.5 14.6c2.4.2 4.1 1.9 4.5 4.4"/></svg>
@@ -627,7 +622,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-13 04:11 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:12 UTC</b></div>
     </div>
   </aside>
 
@@ -681,7 +676,7 @@ table.rows td.num{font-size:12px}
 </aside>
 
 <aside class="drawer" id="reqDrawer" aria-label="New product request">
-  <div class="drawer-head"><h2>New product request → Eagle AU</h2><button class="x" data-close>✕</button></div>
+  <div class="drawer-head"><h2>New product request → Eagle Labs</h2><button class="x" data-close>✕</button></div>
   <div class="drawer-body" id="reqDrawerBody"></div>
   <div class="drawer-foot">
     <button class="btn" id="reqSave">Save request</button>
@@ -735,7 +730,7 @@ table.rows td.num{font-size:12px}
     </div>
 
     <div class="set-sec">
-      <div class="set-cap">Eagle AU — supplier contact</div>
+      <div class="set-cap">Eagle Labs — supplier contact</div>
       <div style="display:flex;flex-direction:column;gap:11px">
         <div class="f-row2">
           <div><label class="f-lab" for="egContact">Contact name</label><input class="f-in" id="egContact" placeholder="Orders desk / rep"></div>
@@ -743,7 +738,7 @@ table.rows td.num{font-size:12px}
         </div>
         <div><label class="f-lab" for="egEmail">Orders email</label><input class="f-in" id="egEmail" type="email" placeholder="orders@…"></div>
       </div>
-      <p class="set-note">Product requests and approved POs are emailed here (and logged in the app). Where these should land on Eagle AU's side is still being confirmed — once known, this can point at their portal or API instead.</p>
+      <p class="set-note">Product requests and approved POs are emailed here (and logged in the app). Where these should land on Eagle Labs's side is still being confirmed — once known, this can point at their portal or API instead.</p>
     </div>
 
     <div class="set-sec">
@@ -791,7 +786,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-20 05:51 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:12 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -3255,7 +3250,7 @@ function money2(n){ return (n == null || isNaN(n)) ? '—' : '$' + Number(n).toL
 
 function seedV2(){
   const dISO = d => new Date(Date.now() - d * 86400e3).toISOString();
-  /* the FS catalog — products manufactured by Eagle AU; migrate any older-format data */
+  /* the FS catalog — products manufactured by Eagle Labs; migrate any older-format data */
   const catCur = DB.get('catalog', null);
   const migrate = Array.isArray(catCur) && catCur.some(c => c && ('usePerOrder' in c || 'unitCost' in c));
   if(catCur === null || migrate){
@@ -3533,7 +3528,7 @@ function glMarkLive(id){
 }
 
 /* ================================================================== *
- *  Fullstack Catalog + product requests to Eagle AU                  *
+ *  Fullstack Catalog + product requests to Eagle Labs                  *
  * ================================================================== */
 let catQ = '';
 function catById(id){ return colV2.catalog().find(c => c.id === id); }
@@ -3546,12 +3541,12 @@ function renderCatalog(){
   const pdf = DB.get('catalogPdf', null);
   v.innerHTML =
   '<div class="view-head"><div class="vh-title"><h1>Fullstack Catalog<em>.</em></h1>' +
-  '<p class="vh-sub">The products Eagle AU manufactures for Fullstack — with the catalog PDF and each product’s label template.</p></div>' +
+  '<p class="vh-sub">The products Eagle Labs manufactures for Fullstack — with the catalog PDF and each product’s label template.</p></div>' +
   '<div class="vh-actions"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
   '<input id="catSearch" type="text" placeholder="Search products…" value="' + esc(catQ) + '"></div>' +
   '<button class="btn" data-act="cat-additem">+ Add new product</button></div></div>' +
 
-  '<div class="panel" style="margin-bottom:12px"><div class="panel-head"><span class="panel-title">Eagle AU catalog PDF</span>' +
+  '<div class="panel" style="margin-bottom:12px"><div class="panel-head"><span class="panel-title">Eagle Labs catalog PDF</span>' +
   '<span class="panel-meta">the master product catalog</span></div>' +
   '<div class="fileslot">' + (pdf ? fileChip(pdf, 'catpdf') : uploadBtn('catpdf', 'Upload catalog PDF')) + '</div></div>' +
 
@@ -3617,7 +3612,7 @@ function reqDrawerForm(){
   '<div class="f-row2"><div><label class="f-lab">Target cost</label><input class="f-in" id="rf-cost" placeholder="e.g. $0.42 @ 5k"></div>' +
   '<div><label class="f-lab">Initial quantity</label><input class="f-in" id="rf-qty" placeholder="e.g. 5,000"></div></div>' +
   '<div><label class="f-lab">Notes</label><textarea class="f-in" id="rf-notes" rows="2"></textarea></div>' +
-  '<p class="set-note">Saved as a draft — submit it to Eagle AU from the requests list. Where requests land on Eagle’s side is still being confirmed, so for now submitting opens a pre-written email to the contact in Settings and logs the request here.</p>';
+  '<p class="set-note">Saved as a draft — submit it to Eagle Labs from the requests list. Where requests land on Eagle’s side is still being confirmed, so for now submitting opens a pre-written email to the contact in Settings and logs the request here.</p>';
 }
 function saveReqFromDrawer(){
   const name = $('#rf-name').value.trim(), spec = $('#rf-spec').value.trim();
@@ -3633,7 +3628,7 @@ function submitRequest(id){
   const r = colV2.requests().find(x => x.id === id);
   if(!r) return;
   const eg = col.settings().eagle || {};
-  if(!eg.email){ toast('Set the Eagle AU email in Settings first'); openSettings(); return; }
+  if(!eg.email){ toast('Set the Eagle Labs email in Settings first'); openSettings(); return; }
   const body = 'Hi ' + (eg.contact || 'team') + ',\n\nNew product request from Fullstack Fulfillment:\n\n' +
     'Product: ' + r.name + '\nType: ' + lbl(CAT_KINDS, r.kind) + '\nSpec: ' + r.spec +
     (r.qty ? '\nInitial quantity: ' + r.qty : '') + (r.targetCost ? '\nTarget cost: ' + r.targetCost : '') +
@@ -3661,7 +3656,7 @@ function poPill(status){
   return status === 'draft' ? '<span class="pill dim">Draft</span>'
     : status === 'pending' ? '<span class="pill warn">Awaiting 2nd signature</span>'
     : status === 'approved' ? '<span class="pill info">Approved — ready to send</span>'
-    : '<span class="pill ok">Sent to Eagle AU</span>';
+    : '<span class="pill ok">Sent to Eagle Labs</span>';
 }
 function lockChip(){
   return isAdmin()
@@ -3682,7 +3677,7 @@ function renderPO(param){
   const pos = colV2.pos();
   v.innerHTML =
   '<div class="view-head"><div class="vh-title"><h1>Fullstack PO<em>.</em></h1>' +
-  '<p class="vh-sub">Orders to Eagle AU, built straight from the Fullstack Catalog — admin-only, and every PO needs a second signature before it can be sent.</p></div>' +
+  '<p class="vh-sub">Orders to Eagle Labs, built straight from the Fullstack Catalog — admin-only, and every PO needs a second signature before it can be sent.</p></div>' +
   '<div class="vh-actions">' + lockChip() + '<button class="btn" data-act="po-new">+ New purchase order</button></div></div>' +
 
   '<div class="panel"><div class="panel-head"><span class="panel-title">Purchase orders</span><span class="panel-meta">' + pos.length + ' total</span></div>' +
@@ -3708,7 +3703,7 @@ function renderPoDetail(v, id){
   v.innerHTML =
   '<button class="ob-back" data-act="po-back">← All purchase orders</button>' +
   '<div class="ob-det-head"><div><h1 style="font-size:24px;font-weight:800">' + esc(po.number) + '<em style="font-style:normal;color:var(--accent)">.</em></h1>' +
-  '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center"><span class="chip">Supplier · Eagle AU</span>' +
+  '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center"><span class="chip">Supplier · Eagle Labs</span>' +
   '<span class="chip">Created ' + esc(fmtDY(po.created)) + '</span>' +
   '<label class="chip" style="gap:7px">Required by <input type="date" value="' + esc(po.requiredBy || '') + '" data-po-req="' + po.id + '"' + (canDate ? '' : ' disabled') + ' style="background:none;border:0;color:var(--text);font-family:var(--mono);font-size:10.5px;outline:none;color-scheme:dark"></label>' +
   poPill(po.status) + '</div></div>' +
@@ -3747,8 +3742,8 @@ function renderPoDetail(v, id){
   '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">' +
   (po.status === 'draft' ? '<button class="btn" data-po-sign1="' + po.id + '">Sign &amp; request countersign</button><button class="btn danger small" data-po-del="' + po.id + '">Delete draft</button>' : '') +
   (po.status === 'pending' ? '<button class="btn" data-po-sign2="' + po.id + '">Countersign as second person…</button><button class="btn ghost small" data-po-redraft="' + po.id + '">Back to draft</button>' : '') +
-  (po.status === 'approved' ? '<button class="btn" data-po-send="' + po.id + '">Send to Eagle AU ✉</button><button class="btn ghost small" data-po-dl="' + po.id + '">↓ Download PO</button>' : '') +
-  (po.status === 'sent' ? '<span class="gl-live-stamp">✓ Sent ' + esc(fmtDY(po.sentTs)) + '</span><button class="btn ghost small" data-po-dl="' + po.id + '">↓ Download PO</button><button class="btn ghost small" data-po-dup="' + po.id + '">Duplicate as draft</button>' : '') +
+  (po.status === 'approved' ? '<button class="btn" data-po-send="' + po.id + '">Send to Eagle Labs ✉</button><button class="btn ghost small" data-po-dl="' + po.id + '">↓ Download PDF</button>' : '') +
+  (po.status === 'sent' ? '<span class="gl-live-stamp">✓ Sent ' + esc(fmtDY(po.sentTs)) + '</span><button class="btn ghost small" data-po-dl="' + po.id + '">↓ Download PDF</button><button class="btn ghost small" data-po-dup="' + po.id + '">Duplicate as draft</button>' : '') +
   '</div></div>' +
   '</div>';
 }
@@ -3759,7 +3754,7 @@ function poDocText(po){
   L.push('======================================');
   L.push('PO number  : ' + po.number);
   L.push('Date       : ' + fmtDY(po.sig2 ? po.sig2.ts : po.created));
-  L.push('Supplier   : Eagle AU' + (eg.contact ? ' — ' + eg.contact : '') + (eg.email ? ' <' + eg.email + '>' : ''));
+  L.push('Supplier   : Eagle Labs' + (eg.contact ? ' — ' + eg.contact : '') + (eg.email ? ' <' + eg.email + '>' : ''));
   L.push('Required by: ' + (po.requiredBy ? fmtDY(po.requiredBy) : '—'));
   L.push('Deliver to : Fullstack Fulfillment — [warehouse address]');
   L.push('Contact    : 07 2111 6366 · info@fullstackfs.com.au');
@@ -3780,14 +3775,14 @@ function poDocText(po){
 function poDownload(po){ downloadRef({ name: po.number + '.txt', body: poDocText(po) }); }
 function poSend(po){
   const eg = col.settings().eagle || {};
-  if(!eg.email){ toast('Set the Eagle AU email in Settings first'); openSettings(); return; }
+  if(!eg.email){ toast('Set the Eagle Labs email in Settings first'); openSettings(); return; }
   location.href = 'mailto:' + encodeURIComponent(eg.email) + '?subject=' + encodeURIComponent('Fullstack Fulfillment — ' + po.number) +
     '&body=' + encodeURIComponent('Hi ' + (eg.contact || 'team') + ',\n\nPlease find our purchase order below.\n\n' + poDocText(po) + '\n\n(The PO document is also attached as a file.)');
   poDownload(po);
   po.status = 'sent';
   po.sentTs = new Date().toISOString();
   savePos(); updateCounts(); route();
-  toast(po.number + ' sent to Eagle AU');
+  toast(po.number + ' sent to Eagle Labs');
 }
 
 /* ————— counts (v2-aware override) ————— */
@@ -3927,6 +3922,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const t = e.target.closest('[data-act],[data-cat-del],[data-up],[data-dl],[data-rm]');
     if(!t) return;
     if(t.dataset.act === 'cat-additem'){ catDrawerForm(); openOverlay('#catDrawer'); }
+    else if(t.dataset.act === 'cat-import'){ importCatalogSeed(); renderCatalog(); }
     else if(t.dataset.catDel){
       const it = catById(t.dataset.catDel);
       if(it && confirm('Remove “' + it.name + '” from the catalog?')){
@@ -3947,11 +3943,11 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#view-po').addEventListener('click', e => {
     const t = e.target.closest('[data-act],[data-open-po],[data-po-sign1],[data-po-sign2],[data-po-del],[data-po-redraft],[data-po-send],[data-po-dl],[data-po-dup],[data-po-rmline]');
     if(!t) return;
-    if(t.dataset.act === 'po-back'){ location.hash = '#/po'; }
+    if(t.dataset.act === 'po-back'){ location.hash = '#/catalog'; }
     else if(t.dataset.act === 'po-unlock') requireAdmin(() => {});
     else if(t.dataset.act === 'po-lock'){ adminUser = null; route(); toast('Admin locked'); }
     else if(t.dataset.act === 'po-new') requireAdmin(() => createDraftPO([], ''));
-    else if(t.dataset.openPo){ location.hash = '#/po/' + t.dataset.openPo; }
+    else if(t.dataset.openPo){ location.hash = '#/catalog/' + t.dataset.openPo; }
     else if(t.dataset.poSign1) requireAdmin(() => {
       const po = poById(t.dataset.poSign1);
       if(!po) return;
@@ -5163,6 +5159,351 @@ document.addEventListener('DOMContentLoaded', () => {
   sbTimer = setInterval(() => { if(!document.hidden) sbSync(); }, 60000);
   document.addEventListener('visibilitychange', () => { if(!document.hidden) sbSync(); });
 });
+
+/* ══════ Catalog + PO merge, PDF generation, server-side send ══════ */
+/* ═══════════════ Fullstack Catalog + PO (merged tab) ═══════════════
+   Catalog and PO were separate tabs; a PO is always built from the catalog,
+   so they now live together under #/catalog. #/catalog/<poId> opens one PO. */
+
+/* The seven products in the Aug 2026 Fullstack Australia catalog. Seeded once
+   so the PO dropdown is never empty on a fresh device. */
+const CATALOG_SEED = [
+  { sku:'FS-AU029-30-150WBWC', name:'Carb Smart',          type:'capsule', flavor:'', size:'1 capsule (450 mg) · 30 servings' },
+  { sku:'FS-AU030-30-150WBWC', name:'Daily Burn',          type:'capsule', flavor:'', size:'1 capsule (400 mg) · 30 servings' },
+  { sku:'FS-AU003-30-150WBWC', name:'Energy Support',      type:'capsule', flavor:'', size:'1 capsule (400 mg) · 30 servings' },
+  { sku:'FS-AU005-30-150WBWC', name:'Inner Balance',       type:'capsule', flavor:'', size:'1 capsule (450 mg) · 30 servings' },
+  { sku:'FS-AU031-30-150WBWC', name:'Low Sugar',           type:'capsule', flavor:'', size:'1 capsule (450 mg) · 30 servings' },
+  { sku:'FS-AU004-30-150WBWC', name:"Men's Daily Formula", type:'capsule', flavor:'', size:'1 capsule (400 mg) · 30 servings' },
+  { sku:'FS-AU026-30-150WBWC', name:'Hemp Gummies',        type:'gummy',   flavor:'', size:'5 g / 2 gummies · 15 servings' }
+];
+/* Adds only SKUs that are missing, so it can be re-run without duplicating. */
+function importCatalogSeed(quiet){
+  const items = colV2.catalog();
+  const have = {};
+  items.forEach(i => { have[String(i.sku).toUpperCase()] = 1; });
+  let added = 0;
+  CATALOG_SEED.forEach(s => {
+    if(have[s.sku.toUpperCase()]) return;
+    items.push({ id: uid(), sku: s.sku, name: s.name, type: s.type, flavor: s.flavor, size: s.size, labelTpl: null });
+    added++;
+  });
+  if(added){ DB.set('catalog', items); }
+  if(!quiet) toast(added ? added + ' product' + (added === 1 ? '' : 's') + ' imported' : 'Catalog already has all seven products');
+  return added;
+}
+
+/* ————— PDF ————— */
+/* A minimal PDF writer. The app is a single self-contained file, so pulling in
+   a PDF library from a CDN would break it offline; text plus one DCTDecode
+   (JPEG) image is all a purchase order needs. */
+const FS_LOGO_JPG = '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J+V0fIH+woypY45rhYI6FwFwdKR1liudu4Gnljpal2hZwnwmPB1G/n3r3zVV6hp2ukp6Nm9rXP2y4bzpqBp31XklFVwz8DJTytk102S06qasu0rrQaK7wPpKh0X5N7ho15A1G/mO5UlhDbZukKrJL69C9F3ZPDaZH19cZQ7sGwRRhoe48g36leuxW59ss0dPK9zpD2TtTqGk8w7y8lETe7sLk8HrSn7Gnaf1n87v4LurGe4gZiutFznIiIrKuIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiLyTXOhg14SfQjmDSfQFz5sSQt3U1DWVDubSIgfeu3oOhF7aWjWF5IOwqJVFwxVXkspKB1Kw/rab/KV4Y8IXerl4WtqI2OO8lzi8qdoroqS3QwALwYQfaN1G6PBlugIdUySVB6D2I+5d+Cmp6WIRU8LImDmaNF9UVp8jn+0V7awN1BERF4XpeS5yiGzVUp/Vid6FVLRtPAA3k6aKycUScHhep05XbLfKQq5ge2Osikf8Fr2uP1HVbKiFmErEqD6wC919lD7y+Fp7Gna2Af8ACAD96kOCaBvBTXF7QXE8Gw9HT/BQ6WR0s75XHVz3Fx8JOqnGE7nQx2UUstRHFK17jo86a679V7qAWxZoXmIgvuVKEXyZVU0hAjqIna/JeCvqtVayzURERF+EAnUgEhfOopoKqndBURNkjdytcF9UQGyL508EVLTMp4GBkbBstaOZfRERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERFzb9QPuNkkp45GsdqHAu5NxUP96db+0wff7ERZlPI5rbArHlaCdKe9Ot/aKf7/YnvTrf2mD7/YiK/wCFfvVrMavVQYaq4qtrJZ4HwvOy9oJ106Ru3EKSWOGupqN9PW1DZ9h2kbwTrp0HVEWPO4uGlXo2gHQuoiIsRX0RERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERF//9k=';
+const FS_LOGO_W = 660, FS_LOGO_H = 214;
+
+function pdfLatin(s){
+  return String(s == null ? '' : s)
+    .replace(/[‘’‛]/g, "'").replace(/[“”]/g, '"')
+    .replace(/[–—]/g, '-').replace(/…/g, '...')
+    .replace(/·/g, '-').replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
+}
+function pdfEsc(s){ return pdfLatin(s).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)'); }
+function pdfStrBytes(s){ const a = new Uint8Array(s.length); for(let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 0xFF; return a; }
+/* Helvetica advance widths (/1000 em) for ASCII 32..126, from AFM metrics. */
+const PDF_W_R = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+const PDF_W_B = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584];
+function pdfWidth(str, size, bold){
+  const t = bold ? PDF_W_B : PDF_W_R, v = pdfLatin(str);
+  let w = 0;
+  for(let i = 0; i < v.length; i++){
+    const c = v.charCodeAt(i);
+    w += (c >= 32 && c <= 126) ? t[c - 32] : 556;
+  }
+  return w * size / 1000;
+}
+function pdfClip(str, size, max, bold){
+  let s = pdfLatin(str);
+  if(pdfWidth(s, size, bold) <= max) return s;
+  while(s.length > 1 && pdfWidth(s + '...', size, bold) > max) s = s.slice(0, -1);
+  return s + '...';
+}
+function pdfWrap(str, size, max, bold){
+  const words = pdfLatin(str).split(/\s+/).filter(Boolean), out = [];
+  let line = '';
+  words.forEach(w => {
+    const t = line ? line + ' ' + w : w;
+    if(pdfWidth(t, size, bold) > max && line){ out.push(line); line = w; } else line = t;
+  });
+  if(line) out.push(line);
+  return out.length ? out : [''];
+}
+
+function poPdfBytes(po){
+  const W = 595.28, H = 841.89, M = 48, RIGHT = W - M;
+  const ORANGE = '0.961 0.365 0.184', DARK = '0.05 0.05 0.04', GREY = '0.42 0.42 0.42';
+  const eg = (col.settings().eagle) || {};
+  const pages = []; let cur = null, y = 0;
+
+  function newPage(){ cur = []; pages.push(cur); y = H - M; }
+  function txt(x, yy, size, font, str, colour){
+    cur.push('q ' + (colour || DARK) + ' rg BT /' + font + ' ' + size + ' Tf 1 0 0 1 ' + x.toFixed(2) + ' ' + yy.toFixed(2) + ' Tm (' + pdfEsc(str) + ') Tj ET Q');
+  }
+  function rtxt(x, yy, size, font, str, colour){ txt(x - pdfWidth(str, size, font === 'F2'), yy, size, font, str, colour); }
+  function rule(yy, colour, w){
+    cur.push('q ' + (colour || '0.85 0.85 0.85') + ' RG ' + (w || 0.7) + ' w ' + M + ' ' + yy.toFixed(2) + ' m ' + RIGHT + ' ' + yy.toFixed(2) + ' l S Q');
+  }
+  function band(yy, h, colour){ cur.push('q ' + colour + ' rg ' + M + ' ' + yy.toFixed(2) + ' ' + (RIGHT - M).toFixed(2) + ' ' + h + ' re f Q'); }
+  function need(h){ if(y - h < M + 60){ newPage(); header(true); } }
+
+  function header(cont){
+    const lw = 132, lh = lw * FS_LOGO_H / FS_LOGO_W;
+    cur.push('q ' + lw.toFixed(2) + ' 0 0 ' + lh.toFixed(2) + ' ' + M + ' ' + (H - M - lh).toFixed(2) + ' cm /Im1 Do Q');
+    rtxt(RIGHT, H - M - 14, 20, 'F2', 'PURCHASE ORDER', DARK);
+    rtxt(RIGHT, H - M - 30, 10, 'F1', po.number + (cont ? ' (continued)' : ''), GREY);
+    y = H - M - lh - 24;
+    rule(y, ORANGE, 1.6); y -= 22;
+  }
+
+  newPage(); header(false);
+
+  /* meta block: two columns */
+  const midX = M + (RIGHT - M) / 2;
+  const rows = [
+    ['PO number', po.number, 'Supplier', 'Eagle Labs' + (eg.contact ? ' - ' + eg.contact : '')],
+    ['Date', fmtDY(po.sig2 ? po.sig2.ts : po.created), 'Supplier email', eg.email || '-'],
+    ['Required by', po.requiredBy ? fmtDY(po.requiredBy) : '-', 'Supplier phone', eg.phone || '-'],
+    ['Deliver to', 'Unit 6, 83 Burnside Rd', 'Buyer', 'Fullstack Fulfilment Australia'],
+    ['', 'Stapylton QLD 4207', 'Buyer contact', '07 2111 6366']
+  ];
+  rows.forEach(r => {
+    if(r[0]){ txt(M, y, 7.5, 'F2', String(r[0]).toUpperCase(), GREY); }
+    txt(M + 78, y, 9.5, 'F1', r[1], DARK);
+    if(r[2]){ txt(midX, y, 7.5, 'F2', String(r[2]).toUpperCase(), GREY); }
+    txt(midX + 78, y, 9.5, 'F1', r[3], DARK);
+    y -= 15;
+  });
+  y -= 10;
+
+  /* products table */
+  const cQty = RIGHT, cSku = M + 250;
+  band(y - 4, 17, '0.96 0.96 0.95');
+  txt(M + 4, y + 1, 8, 'F2', 'PRODUCT', GREY);
+  txt(cSku, y + 1, 8, 'F2', 'SKU', GREY);
+  rtxt(cQty - 4, y + 1, 8, 'F2', 'UNITS', GREY);
+  y -= 20;
+
+  let totalUnits = 0;
+  po.lines.forEach(l => {
+    const it = catById(l.catId) || { name: '(removed product)', sku: '-', type: '', size: '' };
+    totalUnits += Number(l.qty) || 0;
+    need(30);
+    txt(M + 4, y, 10, 'F1', pdfClip(it.name, 10, cSku - M - 12, false), DARK);
+    txt(cSku, y, 8.5, 'F1', it.sku, GREY);
+    rtxt(cQty - 4, y, 10, 'F2', nf(l.qty), DARK);
+    y -= 12;
+    const sub = [lbl(CAT_TYPES, it.type), it.size].filter(Boolean).join(' - ');
+    if(sub){ txt(M + 4, y, 8, 'F1', pdfClip(sub, 8, cSku - M - 12, false), GREY); y -= 11; }
+    rule(y + 3); y -= 9;
+  });
+  y -= 2;
+  rtxt(cQty - 4, y, 10, 'F2', 'Total units: ' + nf(totalUnits), DARK);
+  y -= 24;
+
+  if(po.notes){
+    need(60);
+    txt(M, y, 8, 'F2', 'NOTES', GREY); y -= 14;
+    pdfWrap(po.notes, 9.5, RIGHT - M, false).forEach(ln => { need(16); txt(M, y, 9.5, 'F1', ln, DARK); y -= 13; });
+    y -= 12;
+  }
+
+  /* signatures */
+  need(96);
+  rule(y, ORANGE, 1.2); y -= 18;
+  txt(M, y, 8, 'F2', 'AUTHORISATION', GREY); y -= 18;
+  const halfW = (RIGHT - M) / 2 - 8;
+  [['1  Prepared & authorised', po.sig1], ['2  Countersigned', po.sig2]].forEach((pair, i) => {
+    const x = i ? midX + 8 : M;
+    txt(x, y, 8, 'F1', pair[0], GREY);
+    txt(x, y - 16, 11, 'F2', pair[1] ? pair[1].name : 'Not signed', pair[1] ? DARK : GREY);
+    txt(x, y - 29, 8.5, 'F1', pair[1] ? fmtDY(pair[1].ts) : '-', GREY);
+    cur.push('q 0.8 0.8 0.8 RG 0.7 w ' + x + ' ' + (y - 36).toFixed(2) + ' m ' + (x + halfW).toFixed(2) + ' ' + (y - 36).toFixed(2) + ' l S Q');
+  });
+  y -= 52;
+
+  /* footer on every page */
+  pages.forEach(pg => {
+    pg.push('q ' + GREY + ' rg BT /F1 7.5 Tf 1 0 0 1 ' + M + ' ' + (M - 12) + ' Tm (' +
+      pdfEsc('Fullstack Fulfilment Australia Pty Ltd  -  07 2111 6366  -  info@fullstackfs.com.au  -  generated from the FS Database') + ') Tj ET Q');
+  });
+
+  /* ——— assemble ——— */
+  const chunks = []; let len = 0;
+  function put(u8){ chunks.push(u8); len += u8.length; }
+  function putStr(s){ put(pdfStrBytes(s)); }
+  const offsets = [0];
+  const nPages = pages.length;
+  const idPage = i => 3 + i;                 /* page objects   */
+  const idCont = i => 3 + nPages + i;        /* content streams */
+  const idF1 = 3 + nPages * 2, idF2 = idF1 + 1, idIm = idF1 + 2;
+  const total = idIm;
+
+  putStr('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  function obj(id, body, binary){
+    offsets[id] = len;
+    putStr(id + ' 0 obj\n');
+    putStr(body);
+    if(binary){ put(binary); putStr('\nendstream'); }
+    putStr('\nendobj\n');
+  }
+  obj(1, '<</Type/Catalog/Pages 2 0 R>>');
+  obj(2, '<</Type/Pages/Count ' + nPages + '/Kids[' + pages.map((_, i) => idPage(i) + ' 0 R').join(' ') + ']>>');
+  pages.forEach((_, i) => {
+    obj(idPage(i), '<</Type/Page/Parent 2 0 R/MediaBox[0 0 ' + W.toFixed(2) + ' ' + H.toFixed(2) + ']' +
+      '/Resources<</Font<</F1 ' + idF1 + ' 0 R/F2 ' + idF2 + ' 0 R>>/XObject<</Im1 ' + idIm + ' 0 R>>>>' +
+      '/Contents ' + idCont(i) + ' 0 R>>');
+  });
+  pages.forEach((pg, i) => {
+    const s = pg.join('\n');
+    obj(idCont(i), '<</Length ' + pdfStrBytes(s).length + '>>\nstream\n' + s + '\nendstream');
+  });
+  obj(idF1, '<</Type/Font/Subtype/Type1/BaseFont/Helvetica/Encoding/WinAnsiEncoding>>');
+  obj(idF2, '<</Type/Font/Subtype/Type1/BaseFont/Helvetica-Bold/Encoding/WinAnsiEncoding>>');
+  const jpg = pdfStrBytes(atob(FS_LOGO_JPG));
+  obj(idIm, '<</Type/XObject/Subtype/Image/Width ' + FS_LOGO_W + '/Height ' + FS_LOGO_H +
+    '/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ' + jpg.length + '>>\nstream\n', jpg);
+
+  const xref = len;
+  let x = 'xref\n0 ' + (total + 1) + '\n0000000000 65535 f \n';
+  for(let i = 1; i <= total; i++) x += String(offsets[i] || 0).padStart(10, '0') + ' 00000 n \n';
+  putStr(x);
+  putStr('trailer\n<</Size ' + (total + 1) + '/Root 1 0 R>>\nstartxref\n' + xref + '\n%%EOF\n');
+
+  const outArr = new Uint8Array(len); let p = 0;
+  chunks.forEach(c => { outArr.set(c, p); p += c.length; });
+  return outArr;
+}
+function poPdfBlob(po){ return new Blob([poPdfBytes(po)], { type: 'application/pdf' }); }
+function poPdfName(po){ return String(po.number).replace(/[^A-Za-z0-9_-]+/g, '-') + '.pdf'; }
+function poPdfDownload(po){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(poPdfBlob(po));
+  a.download = poPdfName(po);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+function catSeeded(){ try{ return localStorage.getItem('fsdb.catSeeded') === '1'; }catch(e){ return false; } }
+function markCatSeeded(){ try{ localStorage.setItem('fsdb.catSeeded', '1'); }catch(e){} }
+
+/* ————— merged Catalog + PO view ————— */
+function bytesToB64(u8){
+  let s = '';
+  const CH = 0x8000;
+  for(let i = 0; i < u8.length; i += CH) s += String.fromCharCode.apply(null, u8.subarray(i, i + CH));
+  return btoa(s);
+}
+/* Download is now a real PDF rather than the old plain-text stand-in. */
+function poDownload(po){ poPdfDownload(po); }
+
+/* Sends server-side so the PDF is genuinely attached — a mailto: link cannot
+   carry an attachment. The Edge Function holds the mail provider key. */
+async function poSend(po){
+  const eg = col.settings().eagle || {};
+  if(!eg.email){ toast('Set the Eagle Labs email in Settings first'); openSettings(); return; }
+  if(!(typeof SB !== 'undefined' && SB.session)){ toast('Sign in to the shared database first'); return; }
+  const btn = $('[data-po-send="' + po.id + '"]');
+  if(btn){ btn.disabled = true; btn.textContent = 'Sending…'; }
+  try{
+    const pdf = poPdfBytes(po);
+    const r = await fetch(SB.url + '/functions/v1/send-po', {
+      method: 'POST',
+      headers: { apikey: SB.anon, Authorization: 'Bearer ' + SB.session.access_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: eg.email,
+        poNumber: po.number,
+        contact: eg.contact || '',
+        requiredBy: po.requiredBy ? fmtDY(po.requiredBy) : '',
+        totalUnits: po.lines.reduce((s, l) => s + (Number(l.qty) || 0), 0),
+        filename: poPdfName(po),
+        pdfBase64: bytesToB64(pdf)
+      })
+    });
+    const j = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+    po.status = 'sent';
+    po.sentTs = new Date().toISOString();
+    savePos(); updateCounts(); route();
+    toast(po.number + ' emailed to Eagle Labs');
+  }catch(err){
+    if(btn){ btn.disabled = false; btn.textContent = 'Send to Eagle Labs ✉'; }
+    toast('Could not send: ' + err.message + ' — the PDF has been downloaded instead');
+    poPdfDownload(po);
+  }
+}
+
+/* One tab: the catalog on top, the purchase orders built from it underneath.
+   param is a PO id, so #/catalog/<id> opens that purchase order. */
+function renderCatalog(param){
+  const v = $('#view-catalog');
+  if(param){ renderPoDetail(v, param); return; }
+  if(!colV2.catalog().length && !catSeeded()){ importCatalogSeed(true); markCatSeeded(); }
+  const items = colV2.catalog();
+  const pdfRef = DB.get('catalogPdf', null);
+  const pos = colV2.pos();
+  const seeAllPo = tabAllowed('po');
+
+  v.innerHTML =
+  '<div class="view-head"><div class="vh-title"><h1>Catalog &amp; Purchase Orders<em>.</em></h1>' +
+  '<p class="vh-sub">The products Eagle Labs manufactures for Fullstack, and the purchase orders raised against them — pick a product, set the units, get it signed off twice, and the PDF is emailed to Eagle Labs.</p></div>' +
+  '<div class="vh-actions">' + (seeAllPo ? lockChip() : '') +
+  '<button class="btn ghost small" data-act="cat-import">↺ Import catalog products</button>' +
+  '<button class="btn" data-act="cat-additem">+ Add new product</button></div></div>' +
+
+  (seeAllPo ?
+  '<div class="panel" style="margin-bottom:12px"><div class="panel-head"><span class="panel-title">Purchase orders</span>' +
+  '<div class="p-tools"><span class="panel-meta">' + pos.length + ' total</span>' +
+  (isAdmin() ? '<button class="btn small" data-act="po-new">+ New purchase order</button>' : '') + '</div></div>' +
+  (pos.length ?
+  '<div class="doc-table-wrap"><table class="rows">' +
+  '<tr><th>PO</th><th class="num">Products</th><th class="num">Units</th><th>Required by</th><th>Status</th><th>Signatures</th><th></th></tr>' +
+  pos.map(po =>
+    '<tr><td><span class="cell-main">' + esc(po.number) + '</span><span class="cell-sub">' + esc(fmtDY(po.created)) + '</span></td>' +
+    '<td class="num">' + po.lines.length + '</td>' +
+    '<td class="num">' + nf(po.lines.reduce((s, l) => s + (Number(l.qty) || 0), 0)) + '</td>' +
+    '<td style="font-family:var(--mono);font-size:11px;color:var(--dim);white-space:nowrap">' + (po.requiredBy ? esc(fmtDY(po.requiredBy)) : '—') + '</td>' +
+    '<td>' + poPill(po.status) + '</td>' +
+    '<td style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">' + (po.sig1 ? '① ' + esc(po.sig1.name) : '—') + (po.sig2 ? ' · ② ' + esc(po.sig2.name) : '') + '</td>' +
+    '<td><div class="rowbtns"><button class="tbtn" data-open-po="' + po.id + '">Open →</button></div></td></tr>'
+  ).join('') + '</table></div>'
+  : '<p style="color:var(--faint);font-size:13px;padding:6px 0">No purchase orders yet' + (isAdmin() ? ' — start one with “New purchase order”.' : '.') + '</p>') +
+  '</div>' : '') +
+
+  '<div class="panel" style="margin-bottom:12px"><div class="panel-head"><span class="panel-title">Eagle Labs catalog PDF</span>' +
+  '<span class="panel-meta">the master product catalog</span></div>' +
+  '<div class="fileslot">' + (pdfRef ? fileChip(pdfRef, 'catpdf') : uploadBtn('catpdf', 'Upload catalog PDF')) + '</div></div>' +
+
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Products</span>' +
+  '<div class="p-tools"><span class="panel-meta">' + items.length + ' in catalog</span>' +
+  '<div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
+  '<input id="catSearch" type="text" placeholder="Search products…" value="' + esc(catQ) + '"></div></div></div>' +
+  (items.length ?
+  '<div class="doc-table-wrap"><table class="rows" id="catTable">' +
+  '<tr><th>Product</th><th>SKU</th><th>Type</th><th>Flavour</th><th>Serving / size</th><th>Label template</th><th></th></tr>' +
+  items.map(it =>
+    '<tr data-search="' + esc((it.sku + ' ' + it.name + ' ' + (it.flavor || '') + ' ' + it.type).toLowerCase()) + '">' +
+    '<td><span class="cell-main">' + esc(it.name) + '</span></td>' +
+    '<td style="font-family:var(--mono);font-size:11px;color:var(--faint);white-space:nowrap">' + esc(it.sku) + '</td>' +
+    '<td><span class="chip">' + esc(lbl(CAT_TYPES, it.type)) + '</span></td>' +
+    '<td style="color:var(--dim);font-size:12px">' + esc(it.flavor || '—') + '</td>' +
+    '<td style="color:var(--dim);font-size:12px">' + esc(it.size || '—') + '</td>' +
+    '<td><div class="fileslot">' + (it.labelTpl ? fileChip(it.labelTpl, 'cat:' + it.id + ':labelTpl') : uploadBtn('cat:' + it.id + ':labelTpl', 'Upload')) + '</div></td>' +
+    '<td><button class="iconbtn" data-cat-del="' + it.id + '" title="Remove product">✕</button></td></tr>'
+  ).join('') + '</table></div>'
+  : '<div class="empty" style="border:0"><img src="assets/roo-white.png" alt=""><p>No products yet — “Import catalog products” loads the seven Fullstack products, or add one manually.</p></div>') +
+  '</div>';
+  filterCat();
+}
+/* Legacy #/po and #/po/<id> links still work. */
+function renderPO(param){ location.hash = param ? '#/catalog/' + param : '#/catalog'; }
+Object.assign(RENDER, { catalog: renderCatalog, po: renderPO });
+
 </script>
 </body>
 </html>
