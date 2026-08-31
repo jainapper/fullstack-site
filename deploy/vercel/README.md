@@ -28,17 +28,25 @@ an `age` equal to the deployment's own age means a file is baked in again.
 
 ## Edge caching
 
-Vercel's edge held the rewrite far longer than GitHub Pages' `max-age=600` — ages of
-1339 s and 870 s were observed against a 600 s origin TTL, so a push could take 20+
-minutes to appear.
+Vercel's edge caches the rewritten response and, for an **external** rewrite like
+this one, does not honour cache headers to expire it. All of these were tried and
+none caused revalidation:
 
-`s-maxage` on `Cache-Control` did **not** fix this; Vercel's CDN ignored it for
-external rewrites. What works is the dedicated `Vercel-CDN-Cache-Control` (and the
-vendor-neutral `CDN-Cache-Control`), now set to `max-age=30`.
+- `Cache-Control: s-maxage=60, stale-while-revalidate=120`
+- `CDN-Cache-Control: max-age=30`
+- `Vercel-CDN-Cache-Control: max-age=30`
 
-Note that a production deployment also purges the edge cache, which can make a broken
-cache setting look like it is working. Test propagation by pushing to git alone,
-without redeploying.
+Observed ages of 870 s, 1339 s and 4323 s against a 600 s origin TTL, with the
+headers present on the response. The headers are emitted; the edge ignores them.
+
+**What actually clears the cache is a deployment.** So the publishing loop is:
+
+1. `git push` (updates GitHub Pages, ~20 s)
+2. redeploy the Vercel project (purges the edge; live within ~15 s)
+
+This is easy to misdiagnose, because deploying to test a cache header purges the
+cache as a side effect and makes the header look effective. Test propagation with a
+push **alone**, never straight after a deploy.
 
 ## Redeploying
 
