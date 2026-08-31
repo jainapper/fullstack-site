@@ -571,9 +571,9 @@ table.rows td.num{font-size:12px}
       <span class="side-tag">HQ · Database</span>
     </div>
     <nav class="side-nav" id="sideNav" aria-label="Sections">
-      <a href="#/dashboard" data-route="dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-        Dashboard
+      <a href="#/starshipit" data-route="starshipit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-7 4 14 2-7h6"/></svg>
+        Starshipit
       </a>
       <a href="#/leads" data-route="leads">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3.5 20c.6-3.6 2.8-5.5 5.5-5.5s4.9 1.9 5.5 5.5"/><path d="M18 8v6M15 11h6"/></svg>
@@ -628,7 +628,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:26 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:48 UTC</b></div>
     </div>
   </aside>
 
@@ -639,7 +639,7 @@ table.rows td.num{font-size:12px}
       <img src="assets/logo-white.png" alt="Fullstack Fulfillment">
     </div>
 
-    <section class="view" id="view-dashboard" data-view="dashboard"></section>
+    <section class="view" id="view-starshipit" data-view="starshipit"></section>
     <section class="view" id="view-leads" data-view="leads"></section>
     <section class="view" id="view-onboarding" data-view="onboarding"></section>
     <section class="view" id="view-documents" data-view="documents"></section>
@@ -801,7 +801,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:26 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:48 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -1871,7 +1871,9 @@ function ssUserBusy(){
 }
 /* ————— 60-second auto sync ————— */
 let ssAutoTimer = null;
-function ssAutoEnabled(){ const ss = col.settings().ss; return ss.auto !== false; }
+/* Reporting moved to Starshipit itself, so nothing reads the synced orders.
+   The background poll is off unless explicitly re-enabled. */
+function ssAutoEnabled(){ const ss = col.settings().ss; return ss.auto === true; }
 function ssAutoTick(){
   if(!ssAutoEnabled() || ssSyncing) return;
   if(document.hidden) return;                         /* don't poll a background tab */
@@ -2982,7 +2984,7 @@ async function refreshStorageNote(){
  * ================================================================== */
 const RENDER = { dashboard: renderDashboard, leads: renderLeads, onboarding: renderOnboarding, documents: renderDocs, carriers: renderCarriers };
 function route(){
-  const h = location.hash.replace(/^#\/?/, '') || 'dashboard';
+  const h = location.hash.replace(/^#\/?/, '') || 'starshipit';
   const parts = h.split('/');
   const name = RENDER[parts[0]] ? parts[0] : 'dashboard';
   $$('.view').forEach(x => x.classList.toggle('on', x.dataset.view === name));
@@ -4182,7 +4184,7 @@ function currentUser(){
 function tabAllowed(name){
   const u = currentUser();
   if(!u) return true;
-  if(name === 'dashboard') return true;
+  if(name === 'starshipit') return true;
   if(name === 'team' && u.role === 'admin') return true;
   return !!(u.tabs && u.tabs[name]);
 }
@@ -4205,7 +4207,7 @@ function fillUserSwitcher(){
 
 /* route — same flow, now access-guarded */
 function route(){
-  const h = location.hash.replace(/^#\/?/, '') || 'dashboard';
+  const h = location.hash.replace(/^#\/?/, '') || 'starshipit';
   const parts = h.split('/');
   let name = RENDER[parts[0]] ? parts[0] : 'dashboard';
   if(!tabAllowed(name)){
@@ -4425,7 +4427,7 @@ function commitUser(u){
   fillUserSwitcher();
   applyTabAccess();
   $('#lockScreen').classList.remove('on');
-  const name = (location.hash.replace(/^#\/?/, '') || 'dashboard').split('/')[0];
+  const name = (location.hash.replace(/^#\/?/, '') || 'starshipit').split('/')[0];
   if(!tabAllowed(name)) location.hash = '#/dashboard'; else route();
 }
 function lockSelUser(){
@@ -4486,7 +4488,7 @@ async function sbApplyMyProfile(u){
     if(String(col.settings().currentUserId) === String(u.id)){
       if(u.role === 'admin' && !adminUser) adminUser = { name: u.name };
       fillUserSwitcher(); applyTabAccess();
-      const name = (location.hash.replace(/^#\/?/, '') || 'dashboard').split('/')[0];
+      const name = (location.hash.replace(/^#\/?/, '') || 'starshipit').split('/')[0];
       if(!tabAllowed(name)) location.hash = '#/dashboard'; else route();
     }
   }catch(e){}
@@ -5653,6 +5655,44 @@ function obDelete(id){
 
 if($('#obSave')) $('#obSave').addEventListener('click', saveObFromDrawer);
 Object.assign(RENDER, { onboarding: renderOnboarding });
+
+/* ══════════ Starshipit launcher (replaces the built-in dashboard) ══════════
+   The dashboard duplicated Starshipit's own reporting and kept disagreeing with
+   it. Rather than maintain a second source of truth, this opens Starshipit. */
+const SS_PORTAL = 'https://app.starshipit.com';
+function renderStarshipit(){
+  const v = $('#view-starshipit');
+  const ss = col.settings().ss || {};
+  const accounts = (ss.accounts || []).filter(a => (a.label || a.apiKey));
+  v.innerHTML =
+  '<div class="view-head"><div class="vh-title"><h1>Starshipit<em>.</em></h1>' +
+  '<p class="vh-sub">Orders, shipments, tracking and freight costs all live in Starshipit. ' +
+  'This opens it directly, so what you see is always the real number rather than a copy of it.</p></div>' +
+  '<div class="vh-actions"><a class="btn" href="' + SS_PORTAL + '" target="_blank" rel="noopener">Open Starshipit ↗</a></div></div>' +
+
+  '<div class="panel" style="margin-bottom:12px">' +
+  '<div class="panel-head"><span class="panel-title">Open the Starshipit dashboard</span>' +
+  '<span class="panel-meta">sign in with your Starshipit account</span></div>' +
+  '<div style="padding:10px 0 4px">' +
+  '<a class="btn" href="' + SS_PORTAL + '" target="_blank" rel="noopener" style="font-size:15px;padding:14px 22px">Open Starshipit ↗</a>' +
+  '<p class="set-note" style="margin-top:16px">Your browser keeps you signed in to Starshipit, the same as visiting it directly. ' +
+  'FS Database never stores your Starshipit username or password — only the API keys listed below, which are used for integrations.</p>' +
+  '</div></div>' +
+
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Connected accounts</span>' +
+  '<span class="panel-meta">' + accounts.length + ' child account' + (accounts.length === 1 ? '' : 's') + '</span></div>' +
+  (accounts.length ?
+  '<div class="doc-table-wrap"><table class="rows"><tr><th>Account</th><th>API key</th></tr>' +
+  accounts.map(a => '<tr><td><span class="cell-main">' + esc(a.label || '(unnamed)') + '</span></td>' +
+    '<td>' + (a.apiKey ? '<span class="pill ok">Stored</span>' : '<span class="pill warn">Missing</span>') + '</td></tr>').join('') +
+  '</table></div>'
+  : '<p style="color:var(--faint);font-size:13px;padding:6px 0">No accounts configured yet — add them in Settings.</p>') +
+  '<p class="set-note" style="margin-top:14px">These keys stay for integrations. Reporting is no longer duplicated in this app.</p>' +
+  '</div>';
+}
+/* old bookmarks */
+function renderDashboard(){ location.hash = '#/starshipit'; }
+Object.assign(RENDER, { starshipit: renderStarshipit, dashboard: renderDashboard });
 </script>
 </body>
 </html>
