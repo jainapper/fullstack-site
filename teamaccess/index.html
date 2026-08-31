@@ -628,7 +628,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:48 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 02:57 UTC</b></div>
     </div>
   </aside>
 
@@ -801,7 +801,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:48 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 02:57 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -4092,9 +4092,9 @@ function openSettings(){
  *  v3 — Team, per-user tab visibility, transit backfill              *
  * ================================================================== */
 const TABS = [
-  ['dashboard', 'Dashboard'], ['leads', 'New Client Leads'], ['onboarding', 'New Client Onboarding'],
+  ['starshipit', 'Starshipit'], ['leads', 'New Client Leads'], ['onboarding', 'New Client Onboarding'],
   ['golive', 'Client Go Live'], ['documents', 'Client Documents'], ['carriers', 'Carriers'],
-  ['catalog', 'Fullstack Catalog'], ['po', 'Fullstack PO'], ['team', 'Team']
+  ['catalog', 'Catalog & PO'], ['po', '— Purchase orders'], ['team', 'Team']
 ];
 function colUsers(){ return DB.get('users', []); }
 function saveUsers(){ DB.set('users', colUsers()); }
@@ -4340,8 +4340,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = $('#tmName').value.trim();
       if(!name){ toast('Type a name first'); return; }
       const users = colUsers();
-      const tabs = {}; TABS.forEach(x => tabs[x[0]] = x[0] === 'dashboard');
-      users.push({ id: 'u-' + uid(), name, mobile: $('#tmMobile').value.trim(), email: $('#tmEmail').value.trim(), role: 'member', tabs, added: new Date().toISOString() });
+      const email = $('#tmEmail').value.trim();
+      const mobile = $('#tmMobile').value.trim();
+      /* one person = one account: adding someone who already exists updates them
+         rather than creating a second record on this device. */
+      const existing = findUserByEmail(email);
+      if(existing){
+        existing.name = name || existing.name;
+        if(mobile) existing.mobile = mobile;
+        saveUsers(); fillUserSwitcher(); renderTeam();
+        toast(name + ' already had an account — details updated');
+        return;
+      }
+      const tabs = {}; TABS.forEach(x => tabs[x[0]] = x[0] === 'starshipit');
+      users.push({ id: 'u-' + uid(), name, mobile, email, role: 'member', tabs, added: new Date().toISOString() });
       saveUsers(); fillUserSwitcher(); renderTeam();
       toast(name + ' added — now flick their tabs on');
     }
@@ -5693,6 +5705,82 @@ function renderStarshipit(){
 /* old bookmarks */
 function renderDashboard(){ location.hash = '#/starshipit'; }
 Object.assign(RENDER, { starshipit: renderStarshipit, dashboard: renderDashboard });
+
+/* ══════════ one person = one account ══════════
+   "Add user" minted a fresh random id every time, so adding the same person on
+   a phone and on a PC produced two records with the same email. The sync keys on
+   id, so both survived and the Team tab showed everyone twice. */
+
+function userKey(u){
+  const e = String((u && u.email) || '').trim().toLowerCase();
+  if(e) return 'email:' + e;
+  const n = String((u && u.name) || '').trim().toLowerCase();
+  return n ? 'name:' + n : '';
+}
+function findUserByEmail(email){
+  const e = String(email || '').trim().toLowerCase();
+  if(!e) return null;
+  return colUsers().find(u => String(u.email || '').trim().toLowerCase() === e) || null;
+}
+/* Collapses duplicates onto the earliest record, so the surviving id is the one
+   other devices already point at. Enabled tabs are unioned rather than taken from
+   the newest: a freshly added duplicate starts with almost everything off, and
+   silently removing someone's access is far worse than leaving a tab on. */
+function mergeDuplicateUsers(){
+  const users = colUsers();
+  const survivors = {};
+  const remap = {};
+  users.forEach(u => {
+    const k = userKey(u);
+    if(!k) return;
+    const prev = survivors[k];
+    if(!prev){ survivors[k] = u; return; }
+    const keep = new Date(prev.added || 0) <= new Date(u.added || 0) ? prev : u;
+    const drop = (keep === prev) ? u : prev;
+    keep.name   = keep.name   || drop.name;
+    keep.email  = keep.email  || drop.email;
+    keep.mobile = keep.mobile || drop.mobile;
+    if(drop.role === 'admin') keep.role = 'admin';
+    if(!keep.pwHash && drop.pwHash) keep.pwHash = drop.pwHash;
+    keep.tabs = keep.tabs || {};
+    Object.keys(drop.tabs || {}).forEach(t => { if(drop.tabs[t]) keep.tabs[t] = true; });
+    remap[drop.id] = keep.id;
+    survivors[k] = keep;
+  });
+  const dropped = Object.keys(remap).length;
+  if(!dropped) return 0;
+  const resolve = id => { let n = 0; while(remap[id] && n++ < 20) id = remap[id]; return id; };
+  DB.set('users', users.filter(u => !remap[u.id]));
+  const s = col.settings();
+  if(s.currentUserId && remap[s.currentUserId]){ s.currentUserId = resolve(s.currentUserId); DB.set('settings', s); }
+  return dropped;
+}
+
+/* merge before anything reads the list */
+const _renderTeamBase = renderTeam;
+function renderTeam(){
+  const n = mergeDuplicateUsers();
+  if(n){ fillUserSwitcher(); toast(n === 1 ? 'Merged 1 duplicate account' : 'Merged ' + n + ' duplicate accounts'); }
+  return _renderTeamBase.apply(this, arguments);
+}
+Object.assign(RENDER, { team: renderTeam });
+/* A dangling currentUserId used to fall through to users[0], which silently signs
+   someone in as whoever happens to be first. Re-resolve by email instead, and keep
+   the email fresh so the fallback has something to work with. */
+const _currentUserById = currentUser;
+function currentUser(){
+  const users = colUsers();
+  const s = col.settings();
+  let u = users.find(x => x.id === s.currentUserId) || null;
+  if(!u && s.currentUserEmail){
+    const e = String(s.currentUserEmail).trim().toLowerCase();
+    u = users.find(x => String(x.email || '').trim().toLowerCase() === e) || null;
+    if(u){ s.currentUserId = u.id; DB.set('settings', s); }
+  }
+  if(u && u.email && s.currentUserEmail !== u.email){ s.currentUserEmail = u.email; DB.set('settings', s); }
+  return u || users[0] || null;
+}
+try{ currentUser(); if(mergeDuplicateUsers()) fillUserSwitcher(); }catch(e){}
 </script>
 </body>
 </html>
