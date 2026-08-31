@@ -26,6 +26,13 @@ redeploy re-uploads the same files.
 check `age` and `last-modified` on `https://www.fullstackfs.com.au/teamaccess/`:
 an `age` equal to the deployment's own age means a file is baked in again.
 
+## Edge caching
+
+`vercel.json` sets `s-maxage=60, stale-while-revalidate=120` on every rewritten
+response. Without it Vercel held the rewrite far longer than GitHub Pages'
+`max-age=600` — an `age` of 1339 s was observed against a 600 s origin TTL, so a push
+could take 20+ minutes to appear. With it, a push is live in about a minute.
+
 ## Redeploying
 
 Upload only `vercel.json` and `api/ss.js` (preserving the `api/` folder), targeting
