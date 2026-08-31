@@ -633,7 +633,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 03:16 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 04:28 UTC</b></div>
     </div>
   </aside>
 
@@ -682,6 +682,15 @@ table.rows td.num{font-size:12px}
   <div class="drawer-body" id="catDrawerBody"></div>
   <div class="drawer-foot">
     <button class="btn" id="catSave">Save item</button>
+    <button class="btn ghost" data-close>Cancel</button>
+  </div>
+</aside>
+
+<aside class="drawer" id="ordDrawer" aria-label="Order a product">
+  <div class="drawer-head"><h2>Order product</h2><button class="x" data-close>✕</button></div>
+  <div class="drawer-body" id="ordDrawerBody"></div>
+  <div class="drawer-foot">
+    <button class="btn" id="ordSave">Add to purchase order</button>
     <button class="btn ghost" data-close>Cancel</button>
   </div>
 </aside>
@@ -806,7 +815,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 03:16 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 04:28 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -3226,8 +3235,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* carriers */
   $('#view-carriers').addEventListener('click', e => {
+    const openCar = e.target.closest('[data-open-car]');
+    if(openCar && !e.target.closest('a,input,select,textarea')){ location.hash = '#/carriers/' + openCar.dataset.openCar; return; }
     const t = e.target.closest('[data-act],[data-portal],[data-up],[data-dl],[data-rm]');
     if(!t) return;
+    if(t.dataset.act === 'car-back'){ location.hash = '#/carriers'; return; }
     if(t.dataset.act === 'car-add'){
       const name = $('#carNewName').value.trim();
       if(!name){ toast('Type the carrier name first'); return; }
@@ -3696,7 +3708,7 @@ function createDraftPO(lines, note){
   const po = { id: uid(), number: poNumberNext(), status: 'draft', created: new Date().toISOString(),
     notes: note || '', sig1: null, sig2: null, sentTs: null, lines: lines || [] };
   pos.unshift(po); savePos(); updateCounts();
-  location.hash = '#/po/' + po.id;
+  location.hash = '#/catalog/' + po.id;
   return po;
 }
 function renderPO(param){
@@ -3947,8 +3959,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* catalog */
   $('#view-catalog').addEventListener('click', e => {
-    const t = e.target.closest('[data-act],[data-cat-del],[data-up],[data-dl],[data-rm]');
+    const t = e.target.closest('[data-act],[data-cat-del],[data-up],[data-dl],[data-rm],[data-cat-order]');
     if(!t) return;
+    if(t.dataset.catOrder){ requireAdmin(() => { orderProductForm(t.dataset.catOrder); openOverlay('#ordDrawer'); }); return; }
     if(t.dataset.act === 'cat-additem'){ catDrawerForm(); openOverlay('#catDrawer'); }
     else if(t.dataset.act === 'cat-import'){ importCatalogSeed(); renderCatalog(); }
     else if(t.dataset.catDel){
@@ -5534,7 +5547,8 @@ function renderCatalog(param){
     '<td style="color:var(--dim);font-size:12px">' + esc(it.flavor || '—') + '</td>' +
     '<td style="color:var(--dim);font-size:12px">' + esc(it.size || '—') + '</td>' +
     '<td><div class="fileslot">' + (it.labelTpl ? fileChip(it.labelTpl, 'cat:' + it.id + ':labelTpl') : uploadBtn('cat:' + it.id + ':labelTpl', 'Upload')) + '</div></td>' +
-    '<td><button class="iconbtn" data-cat-del="' + it.id + '" title="Remove product">✕</button></td></tr>'
+    '<td><div class="rowbtns"><button class="tbtn" data-cat-order="' + it.id + '">+ Order</button>' +
+    '<button class="iconbtn" data-cat-del="' + it.id + '" title="Remove product">✕</button></div></td></tr>'
   ).join('') + '</table></div>'
   : '<div class="empty" style="border:0"><img src="assets/roo-white.png" alt=""><p>No products yet — “Import catalog products” loads the seven Fullstack products, or add one manually.</p></div>') +
   '</div>';
@@ -5792,6 +5806,179 @@ function currentUser(){
   return u || users[0] || null;
 }
 try{ currentUser(); if(mergeDuplicateUsers()) fillUserSwitcher(); }catch(e){}
+
+/* ══════════ Carriers: a table you click into ══════════
+   Every carrier used to render as a fully expanded card, so the page was a wall
+   of inputs. The list is now a table; the detail opens at #/carriers/<id> with
+   exactly the same field names, so the existing edit handlers still apply. */
+
+const CAR_DOCS = [['agreement','Carrier agreement'],['ratecard','Rate card'],['surcharges','Freight charges / surcharges']];
+
+function carPlate(c){
+  const meta = CARRIER_META[c.key];
+  return meta
+    ? '<span class="car-plate"><img src="' + meta.logo + '" alt="' + esc(c.name) + '"></span>'
+    : '<span class="car-plate" style="background:rgba(255,255,255,.09)"><span style="font-family:var(--mono);font-weight:700;font-size:12px;color:var(--dim)">' +
+      esc(String(c.name || '').split(/\s+/).map(w => w[0] || '').join('').slice(0, 3).toUpperCase()) + '</span></span>';
+}
+function carDot(c){
+  return CARRIER_META[c.key] ? '<i style="width:9px;height:9px;border-radius:3px;background:' + carrierColor(c.key) + ';display:inline-block;margin-right:8px;vertical-align:middle"></i>' : '';
+}
+/* soonest expiry across the three documents, so the table can warn at a glance */
+function carSoonestExp(c){
+  const dates = CAR_DOCS.map(d => (c.expiry || {})[d[0]]).filter(Boolean);
+  if(!dates.length) return '';
+  return dates.sort((a, b) => new Date(a) - new Date(b))[0];
+}
+function carDocCount(c){ return CAR_DOCS.filter(d => c[d[0]]).length; }
+
+function carRow(c, isPlat){
+  const exp = isPlat ? '' : carSoonestExp(c);
+  const docs = carDocCount(c);
+  return '<tr data-open-car="' + c.id + '" style="cursor:pointer">' +
+  '<td><span style="display:flex;align-items:center;gap:10px">' + carPlate(c) +
+    '<span><span class="cell-main">' + carDot(c) + esc(c.name) + '</span>' +
+    (c.sub ? '<span class="cell-sub">' + esc(c.sub) + '</span>' : '') + '</span></span></td>' +
+  '<td style="font-family:var(--mono);font-size:11px;color:' + (c.acct ? 'var(--dim)' : 'var(--faint)') + '">' + esc(c.acct || 'not set') + '</td>' +
+  '<td style="font-size:12.5px;color:var(--dim)">' + esc(c.rep || '—') + '</td>' +
+  '<td style="font-family:var(--mono);font-size:11px;color:var(--dim);white-space:nowrap">' + esc(c.phone || '—') + '</td>' +
+  (isPlat ? '' :
+   '<td class="num"><span class="chip">' + docs + '/3</span></td>' +
+   '<td style="white-space:nowrap">' + (exp ? expPill(exp) : '<span style="color:var(--faint);font-size:12px">—</span>') + '</td>') +
+  '<td><div class="rowbtns"><button class="tbtn" data-open-car="' + c.id + '">Open →</button></div></td></tr>';
+}
+
+function renderCarriers(param){
+  const v = $('#view-carriers');
+  if(param){ renderCarDetail(v, param); return; }
+  const cars = col.carriers();
+  const carriers = cars.filter(c => !c.isPlatform);
+  const platforms = cars.filter(c => c.isPlatform);
+  const expiring = carriers.filter(c => { const e = carSoonestExp(c); if(!e) return false;
+    const d = Math.ceil((new Date(e).getTime() - Date.now()) / 86400e3); return d <= 30; }).length;
+
+  v.innerHTML =
+  '<div class="view-head"><div class="vh-title"><h1>Carriers<em>.</em></h1>' +
+  '<p class="vh-sub">Accounts, reps, portals, rates and agreements for the whole delivery network. Click a carrier to open its details.</p></div>' +
+  '<div class="vh-actions"><input class="f-in" id="carNewName" placeholder="Carrier name…" style="width:190px">' +
+  '<button class="btn" data-act="car-add">+ Add carrier</button></div></div>' +
+
+  '<div class="panel" style="margin-bottom:12px"><div class="panel-head"><span class="panel-title">Delivery network</span>' +
+  '<span class="panel-meta">' + carriers.length + ' carrier' + (carriers.length === 1 ? '' : 's') +
+  (expiring ? ' · ' + expiring + ' with a document expiring soon' : '') + '</span></div>' +
+  (carriers.length ?
+  '<div class="doc-table-wrap"><table class="rows">' +
+  '<tr><th>Carrier</th><th>Account #</th><th>Rep</th><th>Phone</th><th class="num">Docs</th><th>Soonest expiry</th><th></th></tr>' +
+  carriers.map(c => carRow(c, false)).join('') + '</table></div>'
+  : '<p style="color:var(--faint);font-size:13px;padding:6px 0">No carriers yet.</p>') + '</div>' +
+
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Platforms</span>' +
+  '<span class="panel-meta">the systems that run the network</span></div>' +
+  (platforms.length ?
+  '<div class="doc-table-wrap"><table class="rows">' +
+  '<tr><th>Platform</th><th>Account #</th><th>Rep</th><th>Phone</th><th></th></tr>' +
+  platforms.map(c => carRow(c, true)).join('') + '</table></div>'
+  : '<p style="color:var(--faint);font-size:13px;padding:6px 0">No platforms yet.</p>') + '</div>';
+}
+
+function renderCarDetail(v, id){
+  const c = carById(id);
+  if(!c){ location.hash = '#/carriers'; return; }
+  v.innerHTML =
+  '<button class="ob-back" data-act="car-back">← All carriers</button>' +
+  '<div class="ob-det-head"><div style="display:flex;align-items:center;gap:14px">' + carPlate(c) +
+  '<div><h1 style="font-size:24px;font-weight:800">' + carDot(c) + esc(c.name) + '<em style="font-style:normal;color:var(--accent)">.</em></h1>' +
+  (c.sub ? '<div class="car-sub" style="margin-top:4px">' + esc(c.sub) + '</div>' : '') + '</div></div>' +
+  '<div class="car-links">' +
+  '<button class="btn ghost small" data-portal="' + c.id + '">Open portal ↗</button>' +
+  (c.phone ? '<a class="btn ghost small" href="tel:' + esc(String(c.phone).replace(/\s/g, '')) + '">Call</a>' : '') +
+  (c.email ? '<a class="btn ghost small" href="mailto:' + esc(c.email) + '">Email</a>' : '') +
+  '</div></div>' +
+
+  (c.services ? '<p style="font-size:12.5px;color:var(--dim);margin:0 0 14px">' + esc(c.services) + '</p>' : '') +
+
+  '<div class="panel" style="margin-bottom:12px"><div class="panel-head"><span class="panel-title">Account</span></div>' +
+  '<div class="car-fields">' +
+    '<div class="cf"><div class="cf-k">Account #</div><input value="' + esc(c.acct || '') + '" data-car="' + c.id + ':acct" placeholder="Account number"></div>' +
+    '<div class="cf"><div class="cf-k">Account rep</div><input value="' + esc(c.rep || '') + '" data-car="' + c.id + ':rep" placeholder="Rep name"></div>' +
+    '<div class="cf"><div class="cf-k">Phone</div><input value="' + esc(c.phone || '') + '" data-car="' + c.id + ':phone" placeholder="Support / rep phone"></div>' +
+    '<div class="cf"><div class="cf-k">Email</div><input value="' + esc(c.email || '') + '" data-car="' + c.id + ':email" placeholder="rep@carrier.com"></div>' +
+    '<div class="cf"><div class="cf-k">Portal URL</div><input value="' + esc(c.portal || '') + '" data-car="' + c.id + ':portal"></div>' +
+    (c.isPlatform ? '' : '<div class="cf"><div class="cf-k">Tracking URL — {t} = tracking #</div><input value="' + esc(c.trackingTpl || '') + '" data-car="' + c.id + ':trackingTpl"></div>') +
+  '</div></div>' +
+
+  (c.isPlatform ? '' :
+  '<div class="panel" style="margin-bottom:12px"><div class="panel-head"><span class="panel-title">Documents</span>' +
+  '<span class="panel-meta">agreement, rates and surcharges</span></div>' +
+  '<div class="car-attach">' +
+  CAR_DOCS.map(pair => {
+    const ref = c[pair[0]];
+    const path = 'car:' + c.id + ':' + pair[0];
+    const exp = (c.expiry || {})[pair[0]] || '';
+    return '<div class="car-attach-row"><span class="lab">' + pair[1] + '</span>' +
+      (ref ? fileChip(ref, path) : uploadBtn(path, 'Attach')) +
+      '<label class="chip" style="gap:6px">Expires <input type="date" value="' + esc(exp) + '" data-car-exp="' + c.id + ':' + pair[0] + '" style="background:none;border:0;color:var(--text);font-family:var(--mono);font-size:10px;outline:none;color-scheme:dark;width:112px"></label>' +
+      expPill(exp) + '</div>';
+  }).join('') + '</div></div>') +
+
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Notes</span>' +
+  '<span class="panel-meta">corrections, surcharges, quirks</span></div>' +
+  '<div class="car-notes"><textarea data-car-notes="' + c.id + '" rows="3" placeholder="Add a note…">' + esc(c.notes || '') + '</textarea></div></div>';
+}
+Object.assign(RENDER, { carriers: renderCarriers });
+
+/* ══════════ Order a catalog product straight into a purchase order ══════════
+   Previously you had to create a PO first and then find the catalog dropdown
+   inside it, which is why POs kept ending up empty. Now each product row has an
+   Order button: pick the units, pick a draft PO (or start a new one), done. */
+
+let ordCatId = null;
+function orderProductForm(catId){
+  const it = catById(catId);
+  if(!it) return;
+  ordCatId = catId;
+  const drafts = colV2.pos().filter(p => p.status === 'draft');
+  $('#ordDrawerBody').innerHTML =
+  '<div class="panel" style="margin:0 0 14px"><div style="padding:2px 0">' +
+  '<div class="cell-main" style="font-size:15px">' + esc(it.name) + '</div>' +
+  '<div style="font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:4px">' + esc(it.sku) + '</div>' +
+  (it.size ? '<div style="font-size:12px;color:var(--dim);margin-top:6px">' + esc(lbl(CAT_TYPES, it.type)) + ' · ' + esc(it.size) + '</div>' : '') +
+  '</div></div>' +
+  '<div><label class="f-lab" for="ord-qty">How many units? <span>*</span></label>' +
+  '<input class="f-in" id="ord-qty" type="number" min="1" step="1" value="1000" inputmode="numeric"></div>' +
+  '<div style="margin-top:14px"><label class="f-lab" for="ord-po">Add to</label>' +
+  '<select class="sel f-in" id="ord-po"><option value="">Start a new purchase order</option>' +
+  drafts.map(p => '<option value="' + p.id + '">' + esc(p.number) + ' — ' + p.lines.length + ' product' + (p.lines.length === 1 ? '' : 's') + '</option>').join('') +
+  '</select></div>' +
+  '<p class="set-note" style="margin-top:14px">The purchase order still needs a required-by date and two signatures before it can be sent to Eagle Labs.</p>';
+  setTimeout(() => { const q = $('#ord-qty'); if(q){ q.focus(); q.select(); } }, 60);
+}
+function saveOrderFromDrawer(){
+  const it = catById(ordCatId);
+  if(!it){ closeOverlays(); return; }
+  const qty = Math.floor(Number($('#ord-qty').value) || 0);
+  if(qty < 1){ toast('Enter how many units you want'); $('#ord-qty').focus(); return; }
+  const targetId = $('#ord-po').value;
+  closeOverlays();
+  if(!targetId){
+    createDraftPO([{ catId: it.id, qty: qty }], '');
+    toast(nf(qty) + ' × ' + it.name + ' added to a new purchase order');
+    return;
+  }
+  const po = poById(targetId);
+  if(!po || po.status !== 'draft'){ toast('That purchase order can no longer be edited'); return; }
+  const line = po.lines.find(l => l.catId === it.id);
+  /* ordering the same product twice tops up the existing line rather than
+     adding a second row for it */
+  if(line) line.qty = (Number(line.qty) || 0) + qty;
+  else po.lines.push({ catId: it.id, qty: qty });
+  savePos(); updateCounts();
+  location.hash = '#/catalog/' + po.id;
+  route();
+  toast(nf(qty) + ' × ' + it.name + ' added to ' + po.number);
+}
+
+if($('#ordSave')) $('#ordSave').addEventListener('click', saveOrderFromDrawer);
 </script>
 </body>
 </html>
