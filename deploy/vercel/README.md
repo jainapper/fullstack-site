@@ -28,10 +28,17 @@ an `age` equal to the deployment's own age means a file is baked in again.
 
 ## Edge caching
 
-`vercel.json` sets `s-maxage=60, stale-while-revalidate=120` on every rewritten
-response. Without it Vercel held the rewrite far longer than GitHub Pages'
-`max-age=600` — an `age` of 1339 s was observed against a 600 s origin TTL, so a push
-could take 20+ minutes to appear. With it, a push is live in about a minute.
+Vercel's edge held the rewrite far longer than GitHub Pages' `max-age=600` — ages of
+1339 s and 870 s were observed against a 600 s origin TTL, so a push could take 20+
+minutes to appear.
+
+`s-maxage` on `Cache-Control` did **not** fix this; Vercel's CDN ignored it for
+external rewrites. What works is the dedicated `Vercel-CDN-Cache-Control` (and the
+vendor-neutral `CDN-Cache-Control`), now set to `max-age=30`.
+
+Note that a production deployment also purges the edge cache, which can make a broken
+cache setting look like it is working. Test propagation by pushing to git alone,
+without redeploying.
 
 ## Redeploying
 
