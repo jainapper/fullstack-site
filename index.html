@@ -260,6 +260,8 @@ footer img{height:42px;width:auto}
 .f-field{display:flex;flex-direction:column;gap:8px}
 .f-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
 .f-label span{color:var(--accent)}
+.f-row,.f-field,.f-group,.check-grid,.check-grid label,.ack{box-sizing:border-box}
+.f-input,.f-select,textarea{box-sizing:border-box}
 .f-input,.f-select{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);font-size:14px;font-family:var(--sans);padding:13px 16px;width:100%;transition:border-color .2s,background .2s;outline:none;-webkit-appearance:none;appearance:none}
 .f-input::placeholder{color:var(--faint)}
 .f-input:focus,.f-select:focus{border-color:rgba(245,93,47,.55);background:rgba(245,93,47,.05)}
@@ -881,6 +883,9 @@ table.stock{width:100%;border-collapse:collapse;font-size:13px}
         <div class="f-row">
           <div class="f-field"><label class="f-label" for="web">Website</label><input class="f-input" id="web" name="website" type="text" placeholder="https://" maxlength="255"></div>
         </div>
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+          <label>Do not fill this in<input id="hp" name="company_website_confirm" type="text" tabindex="-1" autocomplete="off"></label>
+        </div>
         <div class="f-section">Current / Preferred Integrations <span>*</span></div>
         <div class="check-grid" id="intGroup">
           <label class="chk"><input type="checkbox" name="integrations[]" value="shopify"><span>Shopify</span></label>
@@ -949,6 +954,7 @@ table.stock{width:100%;border-collapse:collapse;font-size:13px}
           </div>
         </div>
         <label class="ack"><input type="checkbox" id="ackBox" required><span>I understand pricing is ex GST and subject to eligibility. <b>*</b></span></label>
+        <div class="group-err" id="sendErr">Sorry — we could not send that just now. Please try again, or email info@fullstackfs.com.au.</div>
         <button class="f-submit" type="submit">Submit Quote Request →</button>
       </form>
       <div class="q-success" id="qSuccess">
@@ -1470,6 +1476,15 @@ document.getElementById('itemsPlus').addEventListener('click', function(){ cs.it
 recalc();
 
 var form = document.getElementById('quoteForm');
+var LEAD_ENDPOINT = 'https://fofghcaqgwgixjshmubt.supabase.co/functions/v1/submit-lead';
+function fv(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+/* the visible label reads better in the database than the raw checkbox value */
+function checkedLabels(groupId){
+  return [].slice.call(document.querySelectorAll('#' + groupId + ' input:checked')).map(function(i){
+    var lab = i.closest('label');
+    return lab ? lab.textContent.trim() : i.value;
+  });
+}
 form.addEventListener('submit', function(e){
   e.preventDefault();
   var ok = true;
@@ -1480,9 +1495,43 @@ form.addEventListener('submit', function(e){
   if(!form.checkValidity()){ form.reportValidity(); ok = false; }
   if(!intOk || !needOk) ok = false;
   if(!ok) return;
-  form.style.display = 'none';
-  document.getElementById('qSuccess').classList.add('show');
-  window.scrollTo(0,0);
+
+  var btn = form.querySelector('.f-submit');
+  var err = document.getElementById('sendErr');
+  var was = btn.textContent;
+  err.classList.remove('show');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  /* the field sits behind a +61 prefix, so drop the trunk 0: 0400 111 222 -> +61 400 111 222 */
+  var digits = fv('ph').replace(/[^0-9]/g, '').replace(/^0+/, '');
+  fetch(LEAD_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      first: fv('fn'), last: fv('ln'), email: fv('em'),
+      phone: digits ? '+61 ' + digits : '',
+      company: fv('co'), abn: fv('abn'), website: fv('web'),
+      integrations: checkedLabels('intGroup'),
+      volume: fv('vol'), skus: fv('sku'), dims: fv('dims'),
+      needs: checkedLabels('needGroup'),
+      timeline: fv('tl'),
+      company_website_confirm: fv('hp')
+    })
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(){
+    /* only celebrate once it is actually saved */
+    form.style.display = 'none';
+    document.getElementById('qSuccess').classList.add('show');
+    window.scrollTo(0, 0);
+  }).catch(function(){
+    btn.disabled = false;
+    btn.textContent = was;
+    err.classList.add('show');
+    err.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
 });
 
 /* ————— onboarding flow ————— */
