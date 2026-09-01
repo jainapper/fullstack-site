@@ -5869,18 +5869,25 @@ function mergeDuplicateUsers(){
   return dropped;
 }
 
-/* merge before anything reads the list */
+/* merge before anything reads the list.
+
+   Assigned, not declared. A `function renderTeam(){}` here is hoisted to the top
+   of the scope, so it replaced the earlier definition before the line above ever
+   ran — the wrapper captured itself, called itself, and the Team tab died with
+   "Maximum call stack size exceeded" and rendered nothing at all. */
 const _renderTeamBase = renderTeam;
-function renderTeam(){
+renderTeam = function renderTeamMergingDuplicates(){
   const n = mergeDuplicateUsers();
   if(n){ fillUserSwitcher(); toast(n === 1 ? 'Merged 1 duplicate account' : 'Merged ' + n + ' duplicate accounts'); }
   return _renderTeamBase.apply(this, arguments);
-}
+};
 Object.assign(RENDER, { team: renderTeam });
 /* A dangling currentUserId used to fall through to users[0], which silently signs
    someone in as whoever happens to be first. Re-resolve by email instead, and keep
    the email fresh so the fallback has something to work with. */
-const _currentUserById = currentUser;
+/* No capture of the previous currentUser here: the declaration below is hoisted,
+   so any such reference would be to this function rather than the old one — the
+   same trap that broke renderTeam. Nothing needs the old one. */
 function currentUser(){
   const users = colUsers();
   const s = col.settings();
