@@ -3706,7 +3706,8 @@ function lockChip(){
 function createDraftPO(lines, note){
   const pos = colV2.pos();
   const po = { id: uid(), number: poNumberNext(), status: 'draft', created: new Date().toISOString(),
-    notes: note || '', sig1: null, sig2: null, sentTs: null, lines: lines || [] };
+    notes: note || '', client: '', clientEmail: '', expectedArrival: '', production: '',
+    sig1: null, sig2: null, sentTs: null, lines: lines || [] };
   pos.unshift(po); savePos(); updateCounts();
   location.hash = '#/catalog/' + po.id;
   return po;
@@ -3746,6 +3747,10 @@ function renderPoDetail(v, id){
   '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center"><span class="chip">Supplier · Eagle Labs</span>' +
   '<span class="chip">Created ' + esc(fmtDY(po.created)) + '</span>' +
   '<label class="chip" style="gap:7px">Required by <input type="date" value="' + esc(po.requiredBy || '') + '" data-po-req="' + po.id + '"' + (canDate ? '' : ' disabled') + ' style="background:none;border:0;color:var(--text);font-family:var(--mono);font-size:10.5px;outline:none;color-scheme:dark"></label>' +
+  /* Required-by is what we ask of Eagle Labs; expected arrival is what they have
+     come back with. Keeping them apart means a slipped date is visible instead of
+     quietly overwriting the commitment. */
+  '<label class="chip" style="gap:7px">Expected arrival <input type="date" value="' + esc(po.expectedArrival || '') + '" data-po-eta="' + po.id + '"' + (canDate ? '' : ' disabled') + ' style="background:none;border:0;color:var(--text);font-family:var(--mono);font-size:10.5px;outline:none;color-scheme:dark"></label>' +
   poPill(po.status) + '</div></div>' +
   '<div>' + lockChip() + '</div></div>' +
 
@@ -3767,7 +3772,23 @@ function renderPoDetail(v, id){
   : '<p style="color:var(--faint);font-size:13px;padding:6px 0">No products yet — add them from the catalog dropdown above.</p>') +
   '</div>' +
 
-  '<div class="panel"><div class="panel-head"><span class="panel-title">Notes</span></div>' +
+  /* Eagle Labs manufactures against a client's brand, so the PO has to name that
+     client — the same run for two different brands is two different jobs. */
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Purchasing for</span>' +
+  '<span class="panel-meta">the client this stock is being made for</span></div>' +
+  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:4px 0">' +
+  '<div><label class="f-lab">Company</label><input class="f-in" list="poClientList" value="' + esc(po.client || '') + '" data-po-client="' + po.id + '" placeholder="e.g. Health Icons"' + (po.status === 'sent' ? ' readonly' : '') + '></div>' +
+  '<div><label class="f-lab">Their email — copied on the order</label><input class="f-in" type="email" value="' + esc(po.clientEmail || '') + '" data-po-cemail="' + po.id + '" placeholder="orders@…"' + (po.status === 'sent' ? ' readonly' : '') + '></div>' +
+  '</div>' +
+  '<datalist id="poClientList">' + col.clients().map(c => '<option value="' + esc(c.name) + '">').join('') + '</datalist>' +
+  '</div>' +
+
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Production brief</span>' +
+  '<span class="panel-meta">anything Eagle Labs needs in order to make it</span></div>' +
+  '<div class="lead-notes"><textarea data-po-prod="' + po.id + '" rows="1" placeholder="Flavour changes, mold or capsule size, label revision, packaging, batch or expiry requirements, compliance notes…"' + (po.status === 'sent' ? ' readonly' : '') + '>' + esc(po.production || '') + '</textarea></div>' +
+  '<p class="set-note">Each product\u2019s type, flavour and size come through from the catalog automatically — this is for anything specific to this run.</p></div>' +
+
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Notes</span><span class="panel-meta">internal — also printed on the order</span></div>' +
   '<div class="lead-notes"><textarea data-po-notes="' + po.id + '" rows="1" placeholder="Context for the approver…"' + (po.status === 'sent' ? ' readonly' : '') + '>' + esc(po.notes || '') + '</textarea></div></div>' +
 
   '<div class="panel"><div class="panel-head"><span class="panel-title">Signatures</span><span class="panel-meta">two different people, both with the admin PIN</span></div>' +
@@ -3981,7 +4002,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* PO */
-  $('#view-po').addEventListener('click', e => {
+  /* Bound to <main>, not to #view-po.
+     The purchase order detail is rendered into #view-catalog now that Catalog and
+     PO share a page, and those two sections are siblings — so a listener on
+     #view-po never saw any of these clicks and every PO control on that screen
+     was dead: sign, countersign, delete, send, download, add product, the
+     required-by date and the quantity boxes. Listening on the common ancestor
+     means it keeps working wherever the markup is rendered next. */
+  $('main.main').addEventListener('click', e => {
     const t = e.target.closest('[data-act],[data-open-po],[data-po-sign1],[data-po-sign2],[data-po-del],[data-po-redraft],[data-po-send],[data-po-dl],[data-po-dup],[data-po-rmline]');
     if(!t) return;
     if(t.dataset.act === 'po-back'){ location.hash = '#/catalog'; }
@@ -4016,7 +4044,7 @@ document.addEventListener('DOMContentLoaded', () => {
     else if(t.dataset.poDup) requireAdmin(() => { const src = poById(t.dataset.poDup); if(src) createDraftPO(src.lines.map(l => ({ ...l })), 'Repeat of ' + src.number); });
     else if(t.dataset.poRmline) requireAdmin(() => { const p = t.dataset.poRmline.split(':'); const po = poById(p[0]); if(po && po.status === 'draft'){ po.lines.splice(+p[1], 1); savePos(); route(); } });
   });
-  $('#view-po').addEventListener('change', e => {
+  $('main.main').addEventListener('change', e => {
     const add = e.target.closest('#poAddLine');
     if(add && add.value){
       const parts = location.hash.split('/');
@@ -4028,12 +4056,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const q = e.target.closest('[data-po-qty]');
     if(q){ const p = q.dataset.poQty.split(':'); const po = poById(p[0]); if(po){ po.lines[+p[1]].qty = Math.max(0, +q.value || 0); savePos(); route(); } return; }
     const rq = e.target.closest('[data-po-req]');
-    if(rq){ const po = poById(rq.dataset.poReq); if(po && po.status !== 'sent'){ po.requiredBy = rq.value; savePos(); } }
+    if(rq){ const po = poById(rq.dataset.poReq); if(po && po.status !== 'sent'){ po.requiredBy = rq.value; savePos(); } return; }
+    const et = e.target.closest('[data-po-eta]');
+    if(et){ const po = poById(et.dataset.poEta); if(po && po.status !== 'sent'){ po.expectedArrival = et.value; savePos(); } }
   });
-  $('#view-po').addEventListener('input', debounce(e => {
-    const n = e.target.closest('[data-po-notes]');
-    if(n){ const po = poById(n.dataset.poNotes); if(po && po.status !== 'sent'){ po.notes = n.value; savePos(); } }
-  }, 250));
+  /* The value is taken on every keystroke and only the write to storage is
+     debounced. Debouncing the whole handler loses fields: one timer shared across
+     four inputs means typing in one and moving to the next throws the first away,
+     and the record ends up with whichever field happened to be typed last. */
+  const savePosSoon = debounce(savePos, 250);
+  $('main.main').addEventListener('input', e => {
+    const t = e.target, F = [
+      ['poNotes',  'notes',       v => v],
+      ['poClient', 'client',      v => v],
+      ['poCemail', 'clientEmail', v => v.trim()],
+      ['poProd',   'production',  v => v]
+    ];
+    for(const [attr, field, clean] of F){
+      if(t.dataset && t.dataset[attr] !== undefined){
+        const po = poById(t.dataset[attr]);
+        if(po && po.status !== 'sent'){ po[field] = clean(t.value); savePosSoon(); }
+        return;
+      }
+    }
+  });
 
   /* admin modal + drawers + settings extras */
   $('#adminGo').addEventListener('click', adminSubmit);
@@ -5323,14 +5369,18 @@ function poPdfBytes(po){
     ['PO number', po.number, 'Supplier', 'Eagle Labs' + (eg.contact ? ' - ' + eg.contact : '')],
     ['Date', fmtDY(po.sig2 ? po.sig2.ts : po.created), 'Supplier email', eg.email || '-'],
     ['Required by', po.requiredBy ? fmtDY(po.requiredBy) : '-', 'Supplier phone', eg.phone || '-'],
+    ['Expected arrival', po.expectedArrival ? fmtDY(po.expectedArrival) : '-', 'For (client)', po.client || '-'],
     ['Deliver to', 'Unit 6, 83 Burnside Rd', 'Buyer', 'Fullstack Fulfilment Australia'],
     ['', 'Stapylton QLD 4207', 'Buyer contact', '07 2111 6366']
   ];
+  /* 78 was as wide as the longest label then in use; EXPECTED ARRIVAL is longer
+     and ran straight into its own value. */
+  const LABW = 90;
   rows.forEach(r => {
     if(r[0]){ txt(M, y, 7.5, 'F2', String(r[0]).toUpperCase(), GREY); }
-    txt(M + 78, y, 9.5, 'F1', r[1], DARK);
+    txt(M + LABW, y, 9.5, 'F1', r[1], DARK);
     if(r[2]){ txt(midX, y, 7.5, 'F2', String(r[2]).toUpperCase(), GREY); }
-    txt(midX + 78, y, 9.5, 'F1', r[3], DARK);
+    txt(midX + LABW, y, 9.5, 'F1', r[3], DARK);
     y -= 15;
   });
   y -= 10;
@@ -5352,13 +5402,23 @@ function poPdfBytes(po){
     txt(cSku, y, 8.5, 'F1', it.sku, GREY);
     rtxt(cQty - 4, y, 10, 'F2', nf(l.qty), DARK);
     y -= 12;
-    const sub = [lbl(CAT_TYPES, it.type), it.size].filter(Boolean).join(' - ');
+    /* Type, flavour and size are what Eagle Labs actually makes to, so they go on
+       the order rather than being looked up separately. */
+    const sub = [lbl(CAT_TYPES, it.type), it.flavor, it.size].filter(Boolean)
+                  .filter(x => String(x).trim() && String(x).trim() !== '-').join(' - ');
     if(sub){ txt(M + 4, y, 8, 'F1', pdfClip(sub, 8, cSku - M - 12, false), GREY); y -= 11; }
     rule(y + 3); y -= 9;
   });
   y -= 2;
   rtxt(cQty - 4, y, 10, 'F2', 'Total units: ' + nf(totalUnits), DARK);
   y -= 24;
+
+  if(po.production){
+    need(60);
+    txt(M, y, 8, 'F2', 'PRODUCTION BRIEF', GREY); y -= 14;
+    pdfWrap(po.production, 9.5, RIGHT - M, false).forEach(ln => { need(16); txt(M, y, 9.5, 'F1', ln, DARK); y -= 13; });
+    y -= 12;
+  }
 
   if(po.notes){
     need(60);
@@ -5472,7 +5532,10 @@ async function poSend(po){
         to: eg.email,
         poNumber: po.number,
         contact: eg.contact || '',
+        cc: po.clientEmail || '',
+        client: po.client || '',
         requiredBy: po.requiredBy ? fmtDY(po.requiredBy) : '',
+        expectedArrival: po.expectedArrival ? fmtDY(po.expectedArrival) : '',
         totalUnits: po.lines.reduce((s, l) => s + (Number(l.qty) || 0), 0),
         filename: poPdfName(po),
         pdfBase64: bytesToB64(pdf)
