@@ -1493,8 +1493,23 @@ function ssFreight(o){
   }
   return null;
 }
+/* Which field a date came from decides how much it can be trusted: shipped_date
+   is the real thing, order_date is a different event wearing its clothes, and
+   nothing at all has to stay nothing at all. Falling back to now() — which this
+   used to do — silently drops every undated order into today's count, and moves
+   it forward again on the next sync. */
+function ssWhen(o){
+  for(const f of ['shipped_date', 'shipped_at', 'order_date', 'date']){
+    const v = o[f];
+    if(!v) continue;
+    const t = new Date(v);
+    if(!isNaN(t.getTime())) return { date: t.toISOString(), dateSource: f };
+  }
+  return { date: null, dateSource: null };
+}
 function mapSsOrder(o, shipped, accountLabel, acctId){
   const items = ssItems(o);
+  const when = ssWhen(o);
   const skuPrefix = items[0] && String(items[0].sku).split('-')[0];
   const client = skuPrefix ? col.clients().find(c => (c.skus || []).some(x => x.sku.indexOf(skuPrefix + '-') === 0)) : null;
   const carrierRaw = String(o.carrier_name || o.carrier || o.shipping_method || o.carrier_service || '').toLowerCase();
@@ -1502,7 +1517,12 @@ function mapSsOrder(o, shipped, accountLabel, acctId){
   const deliveredTs = ssDelivered(o);
   const dest = o.destination || o.shipping_address || o.address || null;
   return {
-    id: 'ss-' + (o.order_id || o.order_number || uid()),
+    /* Every child account numbers its own orders from its own sequence, so two
+       accounts routinely both have an order 1052. Without the account in the key
+       one silently overwrites the other and the totals come out short — and this
+       browser writes into the same shared ss_orders table as the scheduled sync,
+       so a second key scheme also doubles every row it does not overwrite. */
+    id: 'ss-' + (acctId ? acctId + '-' : '') + (o.order_id || o.order_number || uid()),
     ssId: o.order_id != null ? String(o.order_id) : '',
     acctId: acctId || '',
     orderNo: String(o.order_number || o.name || o.reference || o.order_id || '—'),
@@ -1514,7 +1534,8 @@ function mapSsOrder(o, shipped, accountLabel, acctId){
     tracking: o.tracking_number || o.tracking_code || '',
     trackingUrl: o.tracking_url || '',
     status: !shipped ? 'unshipped' : (deliveredTs || ssIsDelivered(o)) ? 'delivered' : 'transit',
-    date: o.shipped_date || o.shipped_at || o.order_date || o.date || new Date().toISOString(),
+    date: when.date,
+    dateSource: when.dateSource,
     deliveredTs,
     items,
     value: o.declared_value || o.total_price || o.order_value || null,
@@ -1806,7 +1827,7 @@ async function ssConnect(auto){
     s2.ss.connected = true;
     s2.ss.lastSync = new Date().toISOString();
     saveSettings(s2);
-    all.forEach(o => { delete o.acctId; });
+    /* acctId is part of the key now, so it has to be kept rather than stripped. */
     /* A sync that returns nothing must never wipe orders we already hold. */
     if(all.length){
       DB.set('ssOrders', ssTrim(all));
@@ -2191,7 +2212,11 @@ function clientOf(o){
   return c ? c.name : '—';
 }
 function shippedBetween(fromMs, toMs){
-  return currentOrders().filter(o => o.status !== 'unshipped' && (() => { const t = new Date(o.date).getTime(); return t >= fromMs && t < toMs; })());
+  return currentOrders().filter(o => {
+    if(o.status === 'unshipped') return false;
+    const t = o.date ? new Date(o.date).getTime() : NaN;
+    return !isNaN(t) && t >= fromMs && t < toMs;   /* undated is not "today" */
+  });
 }
 function dashStats(N){
   const nowMs = Date.now();
