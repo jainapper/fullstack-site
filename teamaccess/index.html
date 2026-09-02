@@ -849,8 +849,7 @@ table.rows td.num{font-size:12px}
     <div id="lockPwWrap"><label class="f-lab" for="lockPw">Password</label><input class="f-in" id="lockPw" type="password" autocomplete="current-password" placeholder="••••••••"></div>
     <div class="conn-msg" id="lockMsg"></div>
     <button class="btn" id="lockGo" style="justify-content:center">Enter →</button>
-    <button type="button" id="lockForgot" style="background:none;border:0;color:var(--dim);font-size:12.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-family:inherit;padding:10px 0 0;align-self:center">Forgot your password?</button>
-    <p class="lock-note">Sign in with your Fullstack email and password. Access, and which tabs you see, come from your account on the Fullstack server; admin accounts also unlock purchase-order controls.</p>
+    <p class="lock-note">Sign in with your Fullstack email and password. Access, and which tabs you see, come from your account on the Fullstack server; admin accounts also unlock purchase-order controls. There is no self-service reset: if you need a new password, ask an administrator to set one.</p>
   </div>
 </div>
 
@@ -3771,11 +3770,6 @@ function renderPoDetail(v, id){
   '<div class="ob-det-head"><div><h1 style="font-size:24px;font-weight:800">' + esc(po.number) + '<em style="font-style:normal;color:var(--accent)">.</em></h1>' +
   '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center"><span class="chip">Supplier · Eagle Labs</span>' +
   '<span class="chip">Created ' + esc(fmtDY(po.created)) + '</span>' +
-  '<label class="chip" style="gap:7px">Required by <input type="date" value="' + esc(po.requiredBy || '') + '" data-po-req="' + po.id + '"' + (canDate ? '' : ' disabled') + ' style="background:none;border:0;color:var(--text);font-family:var(--mono);font-size:10.5px;outline:none;color-scheme:dark"></label>' +
-  /* Required-by is what we ask of Eagle Labs; expected arrival is what they have
-     come back with. Keeping them apart means a slipped date is visible instead of
-     quietly overwriting the commitment. */
-  '<label class="chip" style="gap:7px">Expected arrival <input type="date" value="' + esc(po.expectedArrival || '') + '" data-po-eta="' + po.id + '"' + (canDate ? '' : ' disabled') + ' style="background:none;border:0;color:var(--text);font-family:var(--mono);font-size:10.5px;outline:none;color-scheme:dark"></label>' +
   poPill(po.status) + '</div></div>' +
   '<div>' + lockChip() + '</div></div>' +
 
@@ -3799,13 +3793,22 @@ function renderPoDetail(v, id){
 
   /* Eagle Labs manufactures against a client's brand, so the PO has to name that
      client — the same run for two different brands is two different jobs. */
-  '<div class="panel"><div class="panel-head"><span class="panel-title">Purchasing for</span>' +
-  '<span class="panel-meta">the client this stock is being made for</span></div>' +
-  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;padding:4px 0">' +
-  '<div><label class="f-lab">Company</label><input class="f-in" list="poClientList" value="' + esc(po.client || '') + '" data-po-client="' + po.id + '" placeholder="e.g. Health Icons"' + (po.status === 'sent' ? ' readonly' : '') + '></div>' +
+  /* The dates live here, on the order, rather than as chips in the header. They
+     are terms of the order — required-by gates signing — so they belong beside
+     the client and the products, not tucked into the title bar where they read
+     as metadata and get missed. */
+  '<div class="panel"><div class="panel-head"><span class="panel-title">Order details</span>' +
+  '<span class="panel-meta">who it is for, and when it is needed</span></div>' +
+  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:4px 0">' +
+  '<div><label class="f-lab">Company this stock is for</label><input class="f-in" list="poClientList" value="' + esc(po.client || '') + '" data-po-client="' + po.id + '" placeholder="e.g. Health Icons"' + (po.status === 'sent' ? ' readonly' : '') + '></div>' +
   '<div><label class="f-lab">Their email — copied on the order</label><input class="f-in" type="email" value="' + esc(po.clientEmail || '') + '" data-po-cemail="' + po.id + '" placeholder="orders@…"' + (po.status === 'sent' ? ' readonly' : '') + '></div>' +
+  '<div><label class="f-lab">Required by' + (draft && !po.requiredBy ? ' <span style="color:var(--accent)">— needed to sign</span>' : '') + '</label>' +
+    '<input class="f-in" type="date" style="color-scheme:dark" value="' + esc(po.requiredBy || '') + '" data-po-req="' + po.id + '"' + (canDate ? '' : ' disabled') + '></div>' +
+  '<div><label class="f-lab">Expected arrival</label>' +
+    '<input class="f-in" type="date" style="color-scheme:dark" value="' + esc(po.expectedArrival || '') + '" data-po-eta="' + po.id + '"' + (canDate ? '' : ' disabled') + '></div>' +
   '</div>' +
   '<datalist id="poClientList">' + col.clients().map(c => '<option value="' + esc(c.name) + '">').join('') + '</datalist>' +
+  '<p class="set-note">Required by is the date we are asking Eagle Labs to hit. Expected arrival is what they come back with — keeping them apart means a slipped date shows rather than quietly replacing the commitment.</p>' +
   '</div>' +
 
   '<div class="panel"><div class="panel-head"><span class="panel-title">Production brief</span>' +
@@ -3826,7 +3829,14 @@ function renderPoDetail(v, id){
              : '<div style="color:var(--faint);font-size:12.5px">A second person signs before anything can be sent.</div>') + '</div>' +
   '</div>' +
   '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">' +
-  (po.status === 'draft' ? '<button class="btn" data-po-sign1="' + po.id + '">Sign &amp; request countersign</button><button class="btn danger small" data-po-del="' + po.id + '">Delete draft</button>' : '') +
+  (po.status === 'draft' ? '<button class="btn" data-po-sign1="' + po.id + '">Sign &amp; request countersign</button><button class="btn danger small" data-po-del="' + po.id + '">Delete draft</button>' +
+    /* Said here, in place, rather than as a toast that has gone by the time you
+       look for it — the button refusing silently is what made it read as broken. */
+    ((!po.lines.length || po.lines.some(l => !l.qty))
+      ? '<span class="set-note" style="margin:0;color:var(--warn)">Add a product with an amount before signing.</span>'
+      : !po.requiredBy
+        ? '<span class="set-note" style="margin:0;color:var(--warn)">Set the required-by date in Order details before signing.</span>'
+        : '') : '') +
   (po.status === 'pending' ? '<button class="btn" data-po-sign2="' + po.id + '">Countersign as second person…</button><button class="btn ghost small" data-po-redraft="' + po.id + '">Back to draft</button>' : '') +
   (po.status === 'approved' ? '<button class="btn" data-po-send="' + po.id + '">Send to Eagle Labs ✉</button><button class="btn ghost small" data-po-dl="' + po.id + '">↓ Download PDF</button>' : '') +
   (po.status === 'sent' ? '<span class="gl-live-stamp">✓ Sent ' + esc(fmtDY(po.sentTs)) + '</span><button class="btn ghost small" data-po-dl="' + po.id + '">↓ Download PDF</button><button class="btn ghost small" data-po-dup="' + po.id + '">Duplicate as draft</button>' : '') +
@@ -4320,6 +4330,11 @@ function renderTeam(){
   const users = colUsers();
   const cur = currentUser();
   const canEdit = !cur || tabAllowed('team');
+  /* Seeing the Team tab and administering accounts are different things. Creating
+     a sign-in, setting someone's password and deleting them are admin-only —
+     the edge function enforces that too, this just stops offering what would be
+     refused. */
+  const canAdmin = !cur || cur.role === 'admin';
   const admins = users.filter(u => u.role === 'admin').length;
   v.innerHTML =
   '<div class="view-head"><div class="vh-title"><h1>Team<em>.</em></h1>' +
@@ -4327,7 +4342,9 @@ function renderTeam(){
   '<div class="vh-actions"><input class="f-in" id="tmName" placeholder="Full name…" style="width:150px">' +
   '<input class="f-in" id="tmMobile" type="tel" placeholder="Mobile…" style="width:128px">' +
   '<input class="f-in" id="tmEmail" type="email" placeholder="Email…" style="width:185px">' +
+  '<input class="f-in" id="tmPw" type="password" autocomplete="new-password" placeholder="Password…" style="width:140px">' +
   '<button class="btn" data-act="team-add">+ Add user</button></div></div>' +
+  (canAdmin ? '' : '<p class="set-note">Only an administrator can add someone, set a password or remove an account.</p>') +
   '<div class="car-grid">' + users.map(u => {
     const isCur = cur && u.id === cur.id;
     const lastAdmin = u.role === 'admin' && admins <= 1;
@@ -4335,7 +4352,7 @@ function renderTeam(){
     '<div class="car-top"><span class="u-avatar big">' + esc(initials(u.name)) + '</span>' +
     '<div style="min-width:0"><h3 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' + esc(u.name) +
       (isCur ? '<span class="team-you">You · this device</span>' : '') +
-      (u.pw ? '<span class="chip" style="font-size:8px;padding:2px 8px">🔒</span>' : '') + '</h3>' +
+      (u.hasLogin ? '<span class="chip" style="font-size:9px;padding:2px 8px" title="Has a sign-in">🔒 sign-in</span>' : '') + '</h3>' +
     '<div class="car-sub" style="text-transform:none;letter-spacing:0">' + esc(u.email || 'no email') + (u.mobile ? ' · ' + esc(u.mobile) : '') + '</div></div></div>' +
     '<div><div class="cf-k" style="margin-bottom:6px;display:flex;align-items:center;gap:8px">Tabs this user can see' +
       (canEdit ? '<span style="margin-left:auto;display:inline-flex;gap:5px"><button class="tbtn" data-uall="' + u.id + '">All</button><button class="tbtn" data-unone="' + u.id + '">None</button></span>' : '') + '</div>' +
@@ -4347,12 +4364,28 @@ function renderTeam(){
     }).join('') + '</div></div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
     (isCur ? '' : '<button class="btn ghost small" data-uswitch="' + u.id + '">Switch to this user</button>') +
-    (canEdit ? '<button class="btn ghost small" data-usetpw="' + u.id + '" title="Locks this browser only — it does not create a sign-in">' + (u.pw ? 'Reset device lock' : 'Set device lock') + '</button>' : '') +
+    (canAdmin ? '<button class="btn ghost small" data-usetpw="' + u.id + '" title="Sets the password on their account, creating the sign-in if they do not have one. Nothing is emailed — tell them yourself.">Set password</button>' : '') +
     '<span class="spacer" style="flex:1"></span>' +
-    (canEdit && !isCur && !lastAdmin ? '<button class="iconbtn" data-udel="' + u.id + '">Delete</button>' : '') +
+    (canAdmin && !isCur && !lastAdmin ? '<button class="btn danger small" data-udel="' + u.id + '">Delete user</button>' : '') +
     '</div></div>';
   }).join('') + '</div>' +
-  '<p class="set-note" style="margin-top:14px">Each person picks themselves in the sidebar and their menu shows only their toggled-on tabs — Dashboard is always on. Passwords are optional; set one to protect an account.</p>';
+  '<p class="set-note" style="margin-top:14px">Each person picks themselves in the sidebar and their menu shows only their toggled-on tabs. <strong>Set password</strong> creates their sign-in if they do not have one and changes it if they do — nothing is emailed, so tell them the password yourself. There is no self-service reset anywhere in the portal; an administrator sets every password from here.</p>';
+}
+
+/* Account administration runs server-side, because creating a sign-in, setting a
+   password without the old one, and deleting an account all need the service key
+   — which the browser must never hold. The function checks, on its own side, that
+   the caller is signed in and that their profile really is an admin. */
+async function teamAdmin(payload){
+  if(typeof SB === 'undefined' || !SB.session) throw new Error('Sign in with your email password first');
+  const r = await fetch(SB.url + '/functions/v1/team-admin', {
+    method: 'POST',
+    headers: { apikey: SB.anon, Authorization: 'Bearer ' + SB.session.access_token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const j = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
 }
 
 /* ————— backup covers every collection (v3 override) ————— */
@@ -4435,6 +4468,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const users = colUsers();
       const email = $('#tmEmail').value.trim();
       const mobile = $('#tmMobile').value.trim();
+      /* Read before anything re-renders: renderTeam() rebuilds this form, so a
+         value read afterwards comes from the fresh empty input and the sign-in
+         was silently never created. */
+      const pw = $('#tmPw') ? $('#tmPw').value.trim() : '';
       /* one person = one account: adding someone who already exists updates them
          rather than creating a second record on this device. */
       const existing = findUserByEmail(email);
@@ -4446,9 +4483,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const tabs = {}; TABS.forEach(x => tabs[x[0]] = x[0] === 'starshipit');
-      users.push({ id: 'u-' + uid(), name, mobile, email, role: 'member', tabs, added: new Date().toISOString() });
+      const nu = { id: 'u-' + uid(), name, mobile, email, role: 'member', tabs, added: new Date().toISOString() };
+      users.push(nu);
       saveUsers(); fillUserSwitcher(); renderTeam();
-      toast(name + ' added — now flick their tabs on');
+
+      if(!pw){ toast(name + ' added — now flick their tabs on, then Set password'); return; }
+      if(pw.length < 10){ toast(name + ' added, but a password needs 10 characters — use Set password'); return; }
+      if(!email){ toast(name + ' added, but a sign-in needs an email address'); return; }
+      teamAdmin({ action: 'set', email, password: pw, name, role: 'member', tabs })
+        .then(() => { nu.hasLogin = true; return pwHash(nu.id, pw).then(h => { nu.pw = h; saveUsers(); }); })
+        .then(() => { renderTeam(); toast(name + ' added and can sign in now — tell them the password'); })
+        .catch(err => { toast(name + ' added, but the sign-in failed: ' + err.message); });
     }
     else if(t.dataset.uall || t.dataset.unone){
       if(!tabAllowed('team')) return;
@@ -4464,18 +4509,40 @@ document.addEventListener('DOMContentLoaded', () => {
     else if(t.dataset.usetpw){
       const u = colUsers().find(x => x.id === t.dataset.usetpw);
       if(!u) return;
-      const pw = prompt('New password for ' + u.name + ' — leave empty to remove the password:');
+      if(!u.email){ toast('Add an email address for ' + u.name + ' first — it is their sign-in'); return; }
+      const pw = prompt('Password for ' + u.name + '\n\nCreates their sign-in if they do not have one.\n' +
+                        'Nothing is emailed — tell them yourself.\nAt least 10 characters:');
       if(pw === null) return;
-      if(!pw){ delete u.pw; saveUsers(); renderTeam(); toast('Password removed'); return; }
-      if(pw.length < 8){ toast('Use at least 8 characters'); return; }
-      pwHash(u.id, pw).then(h => { u.pw = h; saveUsers(); renderTeam(); toast('Password set for ' + u.name); });
+      if(pw.trim().length < 10){ toast('Use at least 10 characters'); return; }
+      t.disabled = true; t.textContent = 'Setting…';
+      teamAdmin({ action: 'set', email: u.email, password: pw.trim(),
+                  name: u.name, role: u.role, tabs: u.tabs || {} })
+        .then(r => {
+          u.hasLogin = true;
+          u.loginMade = !!(r && r.created);
+          /* Kept in step so the offline fallback accepts the same password. */
+          return pwHash(u.id, pw.trim()).then(h => { u.pw = h; saveUsers(); });
+        })
+        .then(() => { renderTeam(); toast((u.loginMade ? 'Sign-in created for ' : 'Password set for ') + u.name + ' — tell them the password'); })
+        .catch(err => { renderTeam(); toast('Could not do that: ' + err.message); });
     }
     else if(t.dataset.udel){
       const u = colUsers().find(x => x.id === t.dataset.udel);
-      if(u && confirm('Remove ' + u.name + ' from the team?')){
+      if(!u) return;
+      if(!confirm('Delete ' + u.name + '?\n\nThis removes them from the team and deletes their sign-in. It cannot be undone.')) return;
+      t.disabled = true; t.textContent = 'Deleting…';
+      const dropLocal = () => {
         DB.set('users', colUsers().filter(x => x.id !== u.id));
         fillUserSwitcher(); renderTeam();
-      }
+      };
+      if(!u.email){ dropLocal(); toast(u.name + ' removed'); return; }
+      teamAdmin({ action: 'delete', email: u.email })
+        .then(() => { dropLocal(); toast(u.name + ' deleted'); })
+        .catch(err => {
+          /* No account to delete is not a failure — the roster entry still goes. */
+          if(/no account for that email/i.test(err.message)){ dropLocal(); toast(u.name + ' removed'); return; }
+          renderTeam(); toast('Could not delete: ' + err.message);
+        });
     }
   });
   $('#view-team').addEventListener('change', e => {
@@ -4670,27 +4737,8 @@ async function finishMagicLink(){
   if(u) commitUser(u); else location.reload();
   toast('Signed in');
 }
-async function lockForgot(){
-  const m = $('#lockMsg');
-  const email = String($('#lockUser').value || '').trim().toLowerCase();
-  if(!email){ m.textContent = 'Enter your work email first, then tap Forgot your password.'; m.className = 'conn-msg err'; $('#lockUser').focus(); return; }
-  const btn = $('#lockForgot');
-  btn.textContent = 'Sending…';
-  try{
-    const r = await fetch(SB.url + '/auth/v1/recover?redirect_to=' + encodeURIComponent(location.origin + location.pathname), {
-      method: 'POST',
-      headers: { apikey: SB.anon, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email })
-    });
-    if(!r.ok){ const j = await r.json().catch(() => ({})); throw new Error(j.msg || j.message || ('HTTP ' + r.status)); }
-    m.textContent = 'Check your email — the reset link opens right here.';
-    m.className = 'conn-msg ok';
-  }catch(e){
-    m.textContent = 'Could not send the reset email — ' + e.message;
-    m.className = 'conn-msg err';
-  }
-  btn.textContent = 'Forgot your password?';
-}
+/* There is no self-service password reset by design: an administrator sets
+   passwords from the Team tab, and nothing is ever emailed. */
 async function pwResetSubmit(){
   const m = $('#pwResetMsg'), go = $('#pwResetGo');
   const a = $('#pwNew').value, b = $('#pwNew2').value;
@@ -4841,7 +4889,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#lockUser').addEventListener('change', lockSync);
   $('#lockGo').addEventListener('click', lockSubmit);
   $('#pwResetGo').addEventListener('click', pwResetSubmit);
-  $('#lockForgot').addEventListener('click', lockForgot);
   { const r = $('#ssRestore'); if(r) r.addEventListener('click', ssRestoreLast); }
   { const h = $('#ssHistBtn'); if(h) h.addEventListener('click', () => {
       const hist = ssHistory();
