@@ -633,7 +633,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-08-31 04:28 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-09-04 01:47 UTC</b></div>
     </div>
   </aside>
 
@@ -669,7 +669,7 @@ table.rows td.num{font-size:12px}
 </aside>
 
 <aside class="drawer" id="docDrawer" aria-label="Add document">
-  <div class="drawer-head"><h2>Add a document</h2><button class="x" data-close>✕</button></div>
+  <div class="drawer-head"><h2 id="docDrawerHead">Add a document</h2><button class="x" data-close>✕</button></div>
   <div class="drawer-body" id="docDrawerBody"></div>
   <div class="drawer-foot">
     <button class="btn" id="docSave">Save document</button>
@@ -815,7 +815,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-08-31 04:28 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-09-04 01:47 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -2768,7 +2768,7 @@ function renderDocs(){
     '<td style="color:var(--dim);font-size:12.5px">' + (d.clientId ? esc(clientName(d.clientId)) : '<span style="color:var(--faint)">General</span>') + '</td>' +
     '<td class="num">' + fmtSize(d.size) + '</td>' +
     '<td style="font-family:var(--mono);font-size:11px;color:var(--faint);white-space:nowrap">' + esc(fmtDY(d.ts)) + '</td>' +
-    '<td><div class="rowbtns"><button class="tbtn" data-dl="doc:' + d.id + '">↓ Download</button><button class="tbtn" data-mail="' + d.id + '">✉ Share</button><button class="tbtn" data-del-doc="' + d.id + '" style="color:var(--bad)">✕</button></div></td></tr>'
+    '<td><div class="rowbtns"><button class="tbtn" data-doc-edit="' + d.id + '">✎ Edit</button><button class="tbtn" data-dl="doc:' + d.id + '">↓ Download</button><button class="tbtn" data-mail="' + d.id + '">✉ Share</button><button class="tbtn" data-del-doc="' + d.id + '" style="color:var(--bad)">✕</button></div></td></tr>'
   ).join('') + '</table>' +
   (docs.length ? '' : '<div class="empty" style="border:0"><img src="assets/roo-white.png" alt=""><p>No documents yet — add your first NDA, agreement or rate card.</p></div>') +
   '</div></div>';
@@ -2794,6 +2794,8 @@ function docDrawerForm(){
   }, ''));
 }
 async function saveDocFromDrawer(){
+  /* the same drawer is used to edit an existing document */
+  if(typeof docEditingId !== 'undefined' && docEditingId) return saveDocEdit();
   if(!pendingDocFile){ toast('Choose a file first'); return; }
   if(pendingDocFile.size > 15 * 1048576){ toast('Keep files under 15 MB'); return; }
   const ref = await fput(pendingDocFile);
@@ -3238,9 +3240,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* documents */
   $('#view-documents').addEventListener('click', e => {
-    const t = e.target.closest('[data-cat],[data-act],[data-dl],[data-mail],[data-del-doc]');
+    const t = e.target.closest('.pipe-chip[data-cat],[data-act],[data-dl],[data-mail],[data-del-doc],[data-doc-edit]');
     if(!t) return;
-    if(t.dataset.cat){ docCat = t.dataset.cat; $$('#view-documents .pipe-chip').forEach(c => c.classList.toggle('on', c.dataset.cat === docCat)); filterDocs(); }
+    if(t.dataset.docEdit){ docEditForm(t.dataset.docEdit); openOverlay('#docDrawer'); return; }
+    if(t.classList.contains('pipe-chip') && t.dataset.cat){ docCat = t.dataset.cat; $$('#view-documents .pipe-chip').forEach(c => c.classList.toggle('on', c.dataset.cat === docCat)); filterDocs(); }
     else if(t.dataset.act === 'add-doc'){ docDrawerForm(); openOverlay('#docDrawer'); }
     else if(t.dataset.dl) handleDownload(t.dataset.dl);
     else if(t.dataset.mail) mailDoc(t.dataset.mail);
@@ -6121,6 +6124,77 @@ function saveOrderFromDrawer(){
 }
 
 if($('#ordSave')) $('#ordSave').addEventListener('click', saveOrderFromDrawer);
+
+/* ══════════ Editing documents ══════════
+   Adding a document set clientId and notes to '' and offered no way back in, so
+   every row read "General" for ever and the title was stuck as the file name. */
+
+let docEditingId = null;
+let pendingDocReplace = null;
+
+/* Assigned, not declared. A `function docDrawerForm(){}` here would be hoisted to
+   the top of this script, so the const would capture this wrapper instead of the
+   original and recurse until the stack blew. */
+const _docDrawerFormAdd = docDrawerForm;
+docDrawerForm = function docDrawerFormForAdding(){
+  docEditingId = null;
+  pendingDocReplace = null;
+  const h = $('#docDrawerHead');
+  if(h) h.textContent = 'Add a document';
+  return _docDrawerFormAdd.apply(this, arguments);
+};
+
+function docById(id){ return col.docs().find(d => d.id === id); }
+
+function docEditForm(id){
+  const d = docById(id);
+  if(!d) return;
+  docEditingId = id;
+  pendingDocReplace = null;
+  $('#docDrawerHead').textContent = 'Edit document';
+  const clients = col.clients();
+  $('#docDrawerBody').innerHTML =
+  '<div><label class="f-lab">Title <span>*</span></label><input class="f-in" id="de-title" value="' + esc(d.title || '') + '"></div>' +
+  '<div class="f-row2"><div><label class="f-lab">Document type</label><select class="sel f-in" id="de-cat">' +
+    DOC_CATS.map(c => '<option value="' + c[0] + '"' + (d.category === c[0] ? ' selected' : '') + '>' + c[1] + '</option>').join('') + '</select></div>' +
+  '<div><label class="f-lab">Client</label><select class="sel f-in" id="de-client">' +
+    '<option value=""' + (d.clientId ? '' : ' selected') + '>General — all clients</option>' +
+    clients.map(c => '<option value="' + esc(c.id) + '"' + (d.clientId === c.id ? ' selected' : '') + '>' + esc(c.name) + '</option>').join('') +
+    '</select></div></div>' +
+  (clients.length ? '' : '<p class="set-note">No clients on file yet, so only “General” is available. Add clients and they will appear here.</p>') +
+  '<div><label class="f-lab">Notes</label><textarea class="f-in" id="de-notes" rows="2" placeholder="What this is for, who it was sent to…">' + esc(d.notes || '') + '</textarea></div>' +
+  '<div><label class="f-lab">File</label><div class="fileslot">' +
+    '<span style="font-family:var(--mono);font-size:11px;color:var(--dim)">' + esc(d.name) + ' · ' + fmtSize(d.size) + '</span>' +
+    '<button class="fbtn" id="de-file">⇧ Replace file…</button>' +
+    '<span id="de-filename" style="font-family:var(--mono);font-size:11px;color:var(--ok)"></span></div></div>' +
+  '<p class="set-note">Replacing the file keeps the title, type, client and notes — only the attachment changes.</p>';
+  $('#de-file').addEventListener('click', () => askFile(file => {
+    pendingDocReplace = file;
+    $('#de-filename').textContent = file.name + ' · ' + fmtSize(file.size);
+  }, ''));
+}
+
+async function saveDocEdit(){
+  const d = docById(docEditingId);
+  if(!d){ closeOverlays(); return; }
+  const title = $('#de-title').value.trim();
+  if(!title){ toast('Give the document a title'); $('#de-title').focus(); return; }
+  if(pendingDocReplace){
+    if(pendingDocReplace.size > 15 * 1048576){ toast('Keep files under 15 MB'); return; }
+    const ref = await fput(pendingDocReplace);
+    d.name = ref.name; d.size = ref.size; d.fid = ref.fid;
+  }
+  d.title = title;
+  d.category = $('#de-cat').value;
+  d.clientId = $('#de-client').value;
+  d.notes = $('#de-notes').value.trim();
+  d.ts = new Date().toISOString();
+  delete d.demo;                      /* an edited demo row is now real content */
+  DB.set('docs', col.docs());
+  docEditingId = null; pendingDocReplace = null;
+  closeOverlays(); updateCounts(); renderDocs();
+  toast('Saved ' + title);
+}
 </script>
 </body>
 </html>
