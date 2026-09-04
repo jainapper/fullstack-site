@@ -633,7 +633,7 @@ table.rows td.num{font-size:12px}
         <button id="btnSettings">Settings</button>
         <button id="btnExport">Export</button>
       </div>
-      <div class="side-ver">FS Database · build <b id="sideBuild">2026-09-04 01:47 UTC</b></div>
+      <div class="side-ver">FS Database · build <b id="sideBuild">2026-09-04 01:56 UTC</b></div>
     </div>
   </aside>
 
@@ -658,6 +658,15 @@ table.rows td.num{font-size:12px}
 
 <!-- ======================================================= overlays -->
 <div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="glDrawer" aria-label="Edit go-live">
+  <div class="drawer-head"><h2>Edit go-live</h2><button class="x" data-close>✕</button></div>
+  <div class="drawer-body" id="glDrawerBody"></div>
+  <div class="drawer-foot">
+    <button class="btn" id="glSave">Save changes</button>
+    <button class="btn ghost" data-close>Cancel</button>
+  </div>
+</aside>
 
 <aside class="drawer" id="leadDrawer" aria-label="Add lead">
   <div class="drawer-head"><h2 id="leadDrawerTitle">Add a lead</h2><button class="x" data-close>✕</button></div>
@@ -815,7 +824,7 @@ table.rows td.num{font-size:12px}
           <button class="btn ghost small" id="ssHistBtn" title="Show what changed the keys">Key history</button>
         </div>
       </div>
-      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-09-04 01:47 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
+      <p class="set-note" style="margin-top:14px;opacity:.75">Build <b id="buildStamp">2026-09-04 01:56 UTC</b> — quote this if something looks wrong, so we know which version you are on.</p>
       <p class="set-note">Signing in with your email password puts records and uploaded documents on the Fullstack server, so the same data appears on your phone, your laptop and everyone else’s. Purchase orders stay admin-only, and the Starshipit keys are readable by admins alone.</p>
     </div>
 
@@ -2527,6 +2536,7 @@ function leadCard(l){
     '<select class="sel" data-status-for="' + l.id + '">' + LEAD_STATUSES.map(s => '<option value="' + s[0] + '"' + (l.status === s[0] ? ' selected' : '') + '>' + s[1] + '</option>').join('') + '</select>' +
     '<button class="btn ghost small" data-convert="' + l.id + '">Convert to onboarding →</button>' +
     '<span class="spacer"></span>' +
+    '<button class="btn ghost small" data-lead-edit="' + l.id + '">✎ Edit</button>' +
     '<button class="iconbtn" data-del-lead="' + l.id + '" title="Delete lead">Delete</button>' +
   '</div></div>';
 }
@@ -2564,6 +2574,8 @@ function leadDrawerForm(){
   '<div><label class="f-lab">Notes</label><textarea class="f-in" id="lf-notes" rows="2"></textarea></div>';
 }
 function saveLeadFromDrawer(){
+  /* the same drawer is used to edit an existing lead */
+  if(typeof leadEditingId !== 'undefined' && leadEditingId) return saveLeadEdit();
   const first = $('#lf-first').value.trim(), last = $('#lf-last').value.trim(),
         email = $('#lf-email').value.trim(), company = $('#lf-company').value.trim();
   if(!first || !email || !company){ toast('First name, email and company are required'); return; }
@@ -3137,10 +3149,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* leads */
   $('#view-leads').addEventListener('click', e => {
-    const t = e.target.closest('[data-filter],[data-act],[data-convert],[data-del-lead]');
+    const t = e.target.closest('[data-filter],[data-act],[data-convert],[data-del-lead],[data-lead-edit]');
     if(!t) return;
+    if(t.dataset.leadEdit){ leadEditForm(t.dataset.leadEdit); openOverlay('#leadDrawer'); return; }
     if(t.dataset.filter){ leadFilter = t.dataset.filter; $$('#view-leads .pipe-chip').forEach(c => c.classList.toggle('on', c.dataset.filter === leadFilter)); filterLeads(); }
-    else if(t.dataset.act === 'add-lead'){ leadDrawerForm(); openOverlay('#leadDrawer'); }
+    else if(t.dataset.act === 'add-lead'){
+      leadEditingId = null;
+      const lt = $('#leadDrawerTitle'); if(lt) lt.textContent = 'Add a lead';
+      leadDrawerForm(); openOverlay('#leadDrawer');
+    }
     else if(t.dataset.convert) convertLead(t.dataset.convert);
     else if(t.dataset.delLead){ if(confirm('Delete this lead?')){ DB.set('leads', col.leads().filter(l => l.id !== t.dataset.delLead)); updateCounts(); renderLeads(); } }
   });
@@ -3513,7 +3530,11 @@ function renderGoLive(param){
     (live ? '<span class="pill ok">Live</span>' : p.ready ? '<span class="pill ok">Ready</span>' : '<span class="pill warn">Preparing</span>') + '</div>' +
     '<div class="prog"><i style="width:' + p.pct + '%"></i></div>' +
     '<div class="prog-lab"><span>' + p.pct + '% ready</span><span>' + p.done + '/' + p.total + ' checks</span></div>' +
-    '<span class="ob-open">Open checklist →</span></div>';
+    '<div class="ob-foot"><span class="ob-open">Open checklist →</span>' +
+    '<div class="ob-acts">' +
+    '<button class="tbtn" data-glr-edit="' + gl.id + '">✎ Edit</button>' +
+    '<button class="tbtn danger" data-glr-del="' + gl.id + '">✕ Delete</button>' +
+    '</div></div></div>';
   }).join('') + '</div>'
   : '<div class="empty"><img src="assets/roo-white.png" alt=""><p>No go-lives in flight. Start one for a client finishing onboarding.</p></div>');
 }
@@ -3933,7 +3954,9 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#view-golive').addEventListener('click', e => {
     const open = e.target.closest('[data-open-gl]');
     if(open && !e.target.closest('a,button,select,input,textarea')){ location.hash = '#/golive/' + open.dataset.openGl; return; }
-    const t = e.target.closest('[data-act],[data-gl],[data-glc],[data-gl-edit],[data-gl-del],[data-glc-edit],[data-glc-del]');
+    const t = e.target.closest('[data-act],[data-gl],[data-glc],[data-gl-edit],[data-gl-del],[data-glc-edit],[data-glc-del],[data-glr-edit],[data-glr-del]');
+    if(t && t.dataset.glrEdit){ glEditForm(t.dataset.glrEdit); openOverlay('#glDrawer'); return; }
+    if(t && t.dataset.glrDel){ glDelete(t.dataset.glrDel); return; }
     if(!t) return;
     if(t.dataset.act === 'gl-back'){ location.hash = '#/golive'; }
     else if(t.dataset.act === 'gl-add'){
@@ -6195,6 +6218,109 @@ async function saveDocEdit(){
   closeOverlays(); updateCounts(); renderDocs();
   toast('Saved ' + title);
 }
+
+/* ══════════ Editing leads and go-lives ══════════
+   Leads could only have their status and notes changed, so a typo in a website
+   enquiry — a wrong email or company — was permanent. Go-lives could not be
+   edited or removed at all. */
+
+/* ————— leads ————— */
+let leadEditingId = null;
+function leadById(id){ return col.leads().find(l => l.id === id); }
+
+function leadEditForm(id){
+  const l = leadById(id);
+  if(!l) return;
+  leadEditingId = id;
+  const t = $('#leadDrawerTitle');
+  if(t) t.textContent = 'Edit lead';
+  leadDrawerForm();                      /* build the same form, then fill it */
+  const set = (sel, val) => { const e = $(sel); if(e) e.value = val == null ? '' : val; };
+  set('#lf-first', l.first); set('#lf-last', l.last); set('#lf-email', l.email);
+  set('#lf-phone', l.phone); set('#lf-company', l.company); set('#lf-abn', l.abn);
+  set('#lf-web', l.website); set('#lf-dims', l.dims); set('#lf-notes', l.notes);
+  set('#lf-vol', l.volume); set('#lf-sku', l.skus); set('#lf-tl', l.timeline);
+  const ints = (l.integrations || []).map(String);
+  const needs = (l.needs || []).map(String);
+  $$('input[name="lf-int"]').forEach(i => { i.checked = ints.indexOf(i.value) >= 0; });
+  $$('input[name="lf-need"]').forEach(i => { i.checked = needs.indexOf(i.value) >= 0; });
+}
+function saveLeadEdit(){
+  const l = leadById(leadEditingId);
+  if(!l){ closeOverlays(); return; }
+  const first = $('#lf-first').value.trim(), email = $('#lf-email').value.trim(), company = $('#lf-company').value.trim();
+  if(!first || !email || !company){ toast('First name, email and company are required'); return; }
+  l.first = first;
+  l.last = $('#lf-last').value.trim();
+  l.email = email;
+  l.phone = $('#lf-phone').value.trim();
+  l.company = company;
+  l.abn = $('#lf-abn').value.trim();
+  l.website = $('#lf-web').value.trim();
+  l.integrations = $$('input[name="lf-int"]:checked').map(i => i.value);
+  l.volume = $('#lf-vol').value;
+  l.skus = $('#lf-sku').value;
+  l.dims = $('#lf-dims').value.trim();
+  l.needs = $$('input[name="lf-need"]:checked').map(i => i.value);
+  l.timeline = $('#lf-tl').value;
+  l.notes = $('#lf-notes').value.trim();
+  DB.set('leads', col.leads());
+  leadEditingId = null;
+  closeOverlays(); updateCounts(); renderLeads();
+  toast('Saved ' + first + ' ' + l.last);
+}
+
+/* ————— go-lives ————— */
+let glEditingId = null;
+function glEditForm(id){
+  const gl = glById(id);
+  if(!gl) return;
+  glEditingId = id;
+  const obs = col.onboarding();
+  $('#glDrawerBody').innerHTML =
+  '<div><label class="f-lab">Client name <span>*</span></label><input class="f-in" id="gf-name" value="' + esc(gl.clientName || '') + '"></div>' +
+  '<div class="f-row2"><div><label class="f-lab">Account number</label><input class="f-in" id="gf-acct" value="' + esc(gl.acct || '') + '" placeholder="FS-1055"></div>' +
+  '<div><label class="f-lab">Target go-live</label><input class="f-in" id="gf-target" type="date" value="' + esc(gl.target || '') + '"></div></div>' +
+  '<div><label class="f-lab">Status</label><select class="sel f-in" id="gf-status">' +
+    '<option value="preparing"' + (gl.status === 'live' ? '' : ' selected') + '>Preparing</option>' +
+    '<option value="live"' + (gl.status === 'live' ? ' selected' : '') + '>Live</option></select></div>' +
+  '<div><label class="f-lab">Linked onboarding</label><select class="sel f-in" id="gf-ob">' +
+    '<option value="">Not linked</option>' +
+    obs.map(o => '<option value="' + o.id + '"' + (gl.onboardingId === o.id ? ' selected' : '') + '>' + esc(o.clientName) + '</option>').join('') +
+    '</select></div>' +
+  '<p class="set-note">Marking a go-live as Live stamps today as the first dispatch day. Switching it back to Preparing clears that stamp.</p>';
+}
+function saveGlFromDrawer(){
+  const gl = glById(glEditingId);
+  if(!gl){ closeOverlays(); return; }
+  const name = $('#gf-name').value.trim();
+  if(!name){ toast('Client name is required'); return; }
+  const status = $('#gf-status').value;
+  gl.clientName = name;
+  gl.acct = $('#gf-acct').value.trim();
+  gl.target = $('#gf-target').value;
+  gl.onboardingId = $('#gf-ob').value || null;
+  if(status === 'live' && gl.status !== 'live'){ gl.status = 'live'; gl.liveTs = new Date().toISOString(); }
+  else if(status !== 'live'){ gl.status = 'preparing'; gl.liveTs = null; }
+  saveGl(); updateCounts();
+  glEditingId = null;
+  closeOverlays(); route();
+  toast('Saved ' + name);
+}
+function glDelete(id){
+  const gl = glById(id);
+  if(!gl) return;
+  const p = glProgress(gl);
+  if(!confirm('Delete the go-live for "' + gl.clientName + '"?\n\n' + p.done + ' of ' + p.total +
+              ' checks will be removed. This cannot be undone.')) return;
+  DB.set('goLive', colV2.goLive().filter(g => g.id !== id));
+  updateCounts();
+  if(location.hash.indexOf('#/golive/') === 0) location.hash = '#/golive';
+  else route();
+  toast(gl.clientName + ' deleted');
+}
+
+if($('#glSave')) $('#glSave').addEventListener('click', saveGlFromDrawer);
 </script>
 </body>
 </html>
